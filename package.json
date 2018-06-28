@@ -1,0 +1,37 @@
+{
+  "name": "electron-webpack-quick-start",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-webpack dev",
+    "compile": "electron-webpack",
+    "dist": "yarn compile && electron-builder",
+    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+  },
+  "dependencies": {
+    "agora-electron-sdk": "^2.2.1-alpha",
+    "bulma": "^0.7.1",
+    "immutable": "^3.8.2",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "source-map-support": "^0.5.5"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.49",
+    "@babel/preset-react": "^7.0.0-beta.49",
+    "electron": "2.0.0",
+    "electron-builder": "^20.11.1",
+    "electron-webpack": "^2.0.1",
+    "node-sass": "^4.9.0",
+    "sass-loader": "^7.0.1",
+    "webpack": "^4.8.1"
+  },
+  "resolutions": {
+    "webpack-sources": "1.0.1"
+  },
+  "electronWebpack": {
+    "renderer": {
+      "webpackConfig": "webpack.renderer.additions.js"
+    }
+  }
+}
