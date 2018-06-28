@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
 import { List } from 'immutable';
 
-import {videoProfileList, audioProfileList, audioScenarioList} from '../utils/settings'
+import {videoProfileList, audioProfileList, audioScenarioList, APP_ID } from '../utils/settings'
 
 export default class App extends Component {
   constructor(props) {
     super(props)
     this.rtcEngine = new AgoraRtcEngine()
-    this.rtcEngine.initialize('aab8b8f5a8cd4469a63042fcfafe7063')
+    this.rtcEngine.initialize(APP_ID)
     this.state = {
       local: '',
       users: new List(),

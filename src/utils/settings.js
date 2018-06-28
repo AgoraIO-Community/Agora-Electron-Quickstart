@@ -1,3 +1,5 @@
+export const APP_ID = ''
+
 export const videoProfileList = [
   {
     value: 0,
