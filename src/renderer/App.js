@@ -8,19 +8,23 @@ export default class App extends Component {
   constructor(props) {
     super(props)
     this.rtcEngine = new AgoraRtcEngine()
-    this.rtcEngine.initialize(APP_ID)
-    this.state = {
-      local: '',
-      users: new List(),
-      channel: '',
-      role: 1,
-      videoDevices: this.rtcEngine.getVideoDevices(),
-      audioDevices: this.rtcEngine.getAudioRecordingDevices(),
-      audioPlaybackDevices: this.rtcEngine.getAudioPlaybackDevices(),
-      camera: 0,
-      mic: 0,
-      speaker: 0,
-      videoProfile: 43
+    if (!APP_ID) {
+      alert('APP_ID cannot be empty!')
+    } else {
+      this.rtcEngine.initialize(APP_ID)
+      this.state = {
+        local: '',
+        users: new List(),
+        channel: '',
+        role: 1,
+        videoDevices: this.rtcEngine.getVideoDevices(),
+        audioDevices: this.rtcEngine.getAudioRecordingDevices(),
+        audioPlaybackDevices: this.rtcEngine.getAudioPlaybackDevices(),
+        camera: 0,
+        mic: 0,
+        speaker: 0,
+        videoProfile: 43
+      }
     }
   }
 

@@ -6,6 +6,9 @@ A **very** simple quickstart boilerplate for using [Agora-RTC-SDK-for-Electron](
 
 ## How to build
 
+First, create a developer account at [Agora.io](https://dashboard.agora.io/), and obtain an App ID.
+Update 'settings.js' under './src/utils'.
+
 ``` bash
 # install dependencies
 npm install 
@@ -14,3 +17,6 @@ npm run dev
 # build for release
 npm run dist
 ```
+
+## Tips
+When you run `npm install`, node-gyp building for `agora-electron-sdk` will be triggered. So you must provide a node-gyp build env. visit [node-gyp](https://github.com/nodejs/node-gyp/blob/master/README.md) for help.
