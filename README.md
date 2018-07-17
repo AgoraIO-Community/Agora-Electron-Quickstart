@@ -19,4 +19,4 @@ npm run dist
 ```
 
 ## Tips
-When you run `npm install`, node-gyp building for `agora-electron-sdk` will be triggered. So you must provide a node-gyp build env. visit [node-gyp](https://github.com/nodejs/node-gyp/blob/master/README.md) for help.
+<del>When you run `npm install`, node-gyp building for `agora-electron-sdk` will be triggered. So you must provide a node-gyp build env. visit [node-gyp](https://github.com/nodejs/node-gyp/blob/master/README.md) for help.</del> C++ addon will be download instead of being built.
