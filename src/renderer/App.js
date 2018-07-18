@@ -74,7 +74,7 @@ export default class App extends Component {
     rtcEngine.enableVideo()
     rtcEngine.enableLocalVideo(true)
     rtcEngine.enableWebSdkInteroperability(true)
-    rtcEngine.setVideoProfile(43, false)
+    rtcEngine.setVideoProfile(this.state.videoProfile, false)
     rtcEngine.enableAudioVolumeIndication(1000, 3)
     rtcEngine.joinChannel(null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }
@@ -96,7 +96,7 @@ export default class App extends Component {
 
   handleVideoProfile = e => {
     this.setState({
-      videoProfile: e.currentTarget.value
+      videoProfile: Number(e.currentTarget.value)
     })
   }
 
