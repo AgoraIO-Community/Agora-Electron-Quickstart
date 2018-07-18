@@ -3,23 +3,27 @@ export const APP_ID = ''
 export const videoProfileList = [
   {
     value: 0,
-    label: '160x120	15fps	65bit'
+    label: '160x120	15fps	65kbps'
   },
   {
     value: 20,
-    label: '320x240	15fps	200bit'
+    label: '320x240	15fps	200kbps'
   },
   {
     value: 30,
-    label: '640x360	15fps	400bit'
+    label: '640x360	15fps	400kbps'
   },
   {
     value: 43,
-    label: '640x480	30fps	750bit'
+    label: '640x480	30fps	750kbps'
   },
   {
     value: 50,
-    label: '1280x720 15fps 1130bit'
+    label: '1280x720 15fps 1130kbps'
+  },
+  {
+    value: 60,
+    label: '1920x1080 15fps 2080kbps'
   }
 ]
 
@@ -42,7 +46,7 @@ export const audioProfileList = [
   },
   {
     value: 4,
-   label: 'AUDIO_PROFILE_MUSIC_HIGH_QUALITY'
+    label: 'AUDIO_PROFILE_MUSIC_HIGH_QUALITY'
   },
   {
     value: 5,
