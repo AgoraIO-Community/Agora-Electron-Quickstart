@@ -42,20 +42,20 @@ The `<MY_APP_ID>` is App ID from your Agora Dashboard
   npm install 
 ```
 
-	**Note:** During install, the C++ add-on will be downloaded instead of being built.
+**Note:** During install, the C++ add-on will be downloaded instead of being built.
 
 3. Use the `run dev` or `run dist` command to build the Agora Electron wrapper.
 
 	To enable dynamic compiling and HMR development, use `run dev`.
 	
-	``` bash
+```bash
 # enable dynamic compiling and HMR developing enviroment
 npm run dev
 ```
 
 	To build for release, use `run dist`.
 
-	``` bash
+```bash
 # build for release
 npm run dist
 ```
