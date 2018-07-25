@@ -24,12 +24,12 @@ In order to build and run the sample application you must obtain an App ID:
 
     **Before**
 
-```
+```javascript
   export const APP_ID = ''
 ```
 
 
-    **After**
+    <b>After</b>
 	
   The `<MY_APP_ID>` is App ID from your Agora Dashboard
 
