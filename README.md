@@ -67,7 +67,7 @@ Once the build is complete, you can use the resulting Agora Electron wrapper to 
 
 ## Steps to Create the Sample
 
-The key code for the sample application is in the [`src/renderer/App.js`](src/renderer/App.js) file:
+The key code for the sample application is in the [`App.js`](src/renderer/App.js) file:
 
 - [Create the Default Class](#create-the-default-class)
 - [Create the Window Class](#create-the-window-class)
@@ -737,7 +737,7 @@ Add a secondary `<div>` element with the `id` value of `'video-' + this.props.ui
 ## Resources
 * Complete API documentation is available at the [Document Center](https://docs.agora.io/en/).
 * You can file bugs about this sample [here](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/issues).
-* **Very** basic boilerplate quickstart for the [Agora RTC SDK for Electron](https://github.com/AgoraIO-Community/Agora-RTC-SDK-for-Electron).
+* Basic boilerplate quickstart for the [Agora RTC SDK for Electron](https://github.com/AgoraIO-Community/Agora-RTC-SDK-for-Electron).
 * General information about building apps with [React](https://github.com/facebook/react) and the [Electron Webpack](https://github.com/electron-userland/electron-webpack).
 
 
