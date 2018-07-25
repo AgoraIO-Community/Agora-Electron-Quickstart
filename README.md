@@ -26,10 +26,11 @@ In order to build and run the sample application you must obtain an App ID:
 
 ```javascript
   export const APP_ID = ''
+
 ```
 
 
-    <b>After</b>
+  **After**
 	
   The `<MY_APP_ID>` is App ID from your Agora Dashboard
 
