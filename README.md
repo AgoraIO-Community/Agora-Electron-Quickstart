@@ -22,12 +22,13 @@ In order to build and run the sample application you must obtain an App ID:
 1. Open the [settings.js](src/utils/settings.js) file and add the App ID.
 
 
-    **Before**
+  **Before**
 
-```javascript
+  
+  ```javascript
   export const APP_ID = ''
 
-```
+  ```
 
 
   **After**
