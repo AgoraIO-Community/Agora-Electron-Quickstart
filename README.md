@@ -67,7 +67,7 @@ Once the build is complete, you can use the resulting Agora Electron wrapper to 
 
 ## Steps to Create the Sample
 
-The key code for the sample application is in the [`src/renderer/index.js`](src/renderer/index.js) file:
+The key code for the sample application is in the [`src/renderer/App.js`](src/renderer/App.js) file:
 
 - [Create the Default Class](#create-the-default-class)
 - [Create the Window Class](#create-the-window-class)
