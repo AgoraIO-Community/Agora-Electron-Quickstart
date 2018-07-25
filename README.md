@@ -53,7 +53,7 @@ In order to build and run the sample application you must obtain an App ID:
 npm run dev
 ```
 
-	To build for release, use `run dist`.
+To build for release, use `run dist`.
 
 ```bash
 # build for release
