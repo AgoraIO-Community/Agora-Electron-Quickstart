@@ -27,9 +27,9 @@ In order to build and run the sample application you must obtain an App ID:
   export const APP_ID = ''
 ```
 
-**After**
+  **After**
 	
-The `<MY_APP_ID>` is App ID from your Agora Dashboard
+  The `<MY_APP_ID>` is App ID from your Agora Dashboard
 
 ```javascript
   export const APP_ID = '<MY_APP_ID>'  
