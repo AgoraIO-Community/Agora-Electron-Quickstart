@@ -26,7 +26,9 @@ In order to build and run the sample application you must obtain an App ID:
 
 ```javascript
   export const APP_ID = ''
+
 ```
+
 
     **After**
 	
