@@ -22,13 +22,13 @@ In order to build and run the sample application you must obtain an App ID:
 1. Open the [settings.js](src/utils/settings.js) file and add the App ID.
 
 
-  **Before**
+    **Before**
 
 ```javascript
   export const APP_ID = ''
 ```
 
-  **After**
+    **After**
 	
   The `<MY_APP_ID>` is App ID from your Agora Dashboard
 
@@ -44,7 +44,7 @@ In order to build and run the sample application you must obtain an App ID:
   npm install 
 ```
 
-  **Note:** During install, the C++ add-on will be downloaded instead of being built.
+    **Note:** During install, the C++ add-on will be downloaded instead of being built.
 
 
 3. Use the `run dev` or `run dist` command to build the Agora Electron wrapper.
@@ -56,7 +56,7 @@ In order to build and run the sample application you must obtain an App ID:
 npm run dev
 ```
 
-  To build for release, use `run dist`.
+    To build for release, use `run dist`.
 
 
 ```bash
