@@ -24,7 +24,9 @@ In order to build and run the sample application you must obtain an App ID:
 	**Before**
 
 	```javascript
+
   export const APP_ID = ''
+
   ```
 
 	**After**
@@ -32,14 +34,18 @@ In order to build and run the sample application you must obtain an App ID:
 	The `<MY_APP_ID>` is App ID from your Agora Dashboard
 
 	```javascript
+
   export const APP_ID = '<MY_APP_ID>'
+  
   ```
 
 2. Run the `install` command in your project directory.
 
 	```bash
+  
   # install dependencies
   npm install 
+  
   ```
 
 	**Note:** During install, the C++ add-on will be downloaded instead of being built.
