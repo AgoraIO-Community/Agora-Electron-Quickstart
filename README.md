@@ -142,7 +142,7 @@ If `APP_ID` is defined:
 - Initialize the Agora RTC engine using `this.rtcEngine.initialize()`
 - Set the properties for `state`
 
-	Property|Value|Description
+Property|Value|Description
 ---|---|---
 `local`|Empty string|Local user ID
 `users`|`new List()`|List of joined users
