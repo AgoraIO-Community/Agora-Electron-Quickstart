@@ -1,6 +1,6 @@
 # Agora Electron Quickstart
 
-This tutorial enables you to quickly get started with creating an Agora account and building a sample app with Agora using [Electron](https://electronjs.org/) and [React](https://github.com/facebook/react).
+This tutorial describes how to create an Agora account and build a sample app with Agora using [Electron](https://electronjs.org/) and [React](https://github.com/facebook/react).
 
 ## Prerequisites
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
@@ -11,15 +11,15 @@ This tutorial enables you to quickly get started with creating an Agora account 
 This section shows you how to prepare and build the Agora Electron wrapper.
 
 ### Create an Account and Obtain an App ID
-In order to build and run the sample application you must obtain an App ID: 
+To build and run the sample application, first obtain an app ID: 
 
-1. Create a developer account at [agora.io](https://dashboard.agora.io/signin/). Once you finish the signup process, you will be redirected to the Dashboard.
-2. Navigate in the Dashboard tree on the left to **Projects** > **Project List**.
-3. Copy the App ID that you obtained from the Dashboard into a text file. You will use this when you launch the app.
+1. Create a developer account at [agora.io](https://dashboard.agora.io/signin/). Once you finish the sign-up process, you are redirected to the dashboard.
+2. Navigate in the dashboard tree on the left to **Projects** > **Project List**.
+3. Copy the app ID that you obtain from the dashboard into a text file. You will use this when you launch the app.
 
-### Update and Run the Sample Application 
+### Update and Run the Sample Application
 
-Open the [settings.js](src/utils/settings.js) file and add the App ID.
+Open the [settings.js](src/utils/settings.js) file and add the app ID.
 
 **Before**
 
@@ -29,32 +29,32 @@ Open the [settings.js](src/utils/settings.js) file and add the App ID.
 
 **After**
 	
-The `<MY_APP_ID>` is App ID from your Agora Dashboard
+The `<MY_APP_ID>` is the app ID from your Agora dashboard:
 
 ```javascript
   export const APP_ID = '<MY_APP_ID>'  
 ```
 
 
-Run the `install` command in your project directory.
+Run the `install` command in your project directory:
 
 ```bash  
   # install dependencies
   npm install 
 ```
 
-**Note:** During install, the C++ add-on will be downloaded instead of being built.
+**Note:** During install, the C++ add-on is downloaded instead of being built.
 
 
 Use the `run dev` or `run dist` command to build the Agora Electron wrapper.
-To enable dynamic compiling and HMR development, use `run dev`.
+To enable dynamic compiling and HMR development, use `run dev`:
 	
 ```bash
-# enable dynamic compiling and HMR developing enviroment
+# enable dynamic compiling and HMR developing environment
 npm run dev
 ```
 
-To build for release, use `run dist`.
+To build for release, use `run dist`:
 
 
 ```bash
@@ -62,7 +62,7 @@ To build for release, use `run dist`.
 npm run dist
 ```
 
-Once the build is complete, you can use the resulting Agora Electron wrapper to build your application.
+Once the build is complete, use the resulting Agora Electron wrapper to build your application.
 
 
 ## Steps to Create the Sample
@@ -79,7 +79,7 @@ Import the required libraries and helper files for the sample application:
 Library|Descriptions
 ---|---
 `React, { Component }`|Enables JSX syntax in ES6 modules
-`AgoraRtcEngine`|Agora Engine SDK
+`AgoraRtcEngine`|Agora RTC engine SDK
 `{ List }`|Enables use of the list component
 `{videoProfileList, audioProfileList, audioScenarioList, APP_ID }`|Constants declared in the [settings.js](src/utils/settings.js) file
 
@@ -93,9 +93,9 @@ import {videoProfileList, audioProfileList, audioScenarioList, APP_ID } from '..
 
 ### Create the Default Class
 
-The default class for the application extends `Component` and is named `App`.
+The default class for the application extends the `Component` and is named `App`.
 
-The remaining code in this section are contained within the `class` declaration.
+The remaining code in this section is contained within the `class` declaration.
 
 ``` JavaScript
 export default class App extends Component {
@@ -105,7 +105,7 @@ export default class App extends Component {
 }
 ```
 
-- [Build the Constructor](#build-the-constructor)
+- [Build the Constructor Method](#build-the-constructor-method)
 - [Add Functionality to componentDidMount](#add-functionality-to-componentdidmount)
 - [Create the subscribeEvents Method](#create-the-subscribeevents-method)
 - [Create the handleJoin Method](#create-the-handlejoin-method)
@@ -116,11 +116,11 @@ export default class App extends Component {
 - [Render the View](#render-the-view)
 
 
-#### Build the Constructor
+#### Build the Constructor Method
 
-The `constructor()` method passes in the properties parameter `props`. This method called before the view is mounted. Invoke `super(props)` first, to ensure `this.props` is defined for the class.
+The `constructor()` method passes in the properties parameter `props`. This method is called before the view is mounted. Invoke `super(props)` first, to ensure `this.props` is defined for the class.
 
-Initialize the Agora engine `this.rtcEngine` using `new AgoraRtcEngine()`.
+Initialize the Agora RTC engine `this.rtcEngine` using `new AgoraRtcEngine()`.
 
 The remaining code in this section is contained within the `constructor()` method.
 
@@ -135,12 +135,12 @@ The remaining code in this section is contained within the `constructor()` metho
   }
 ```
 
-If `APP_ID` is not defined, alert the user that the App ID is missing using `alert()`.
+Do one of the following:
+- If the `APP_ID` is not defined, alert the user that the app ID is missing using `alert()`.
 
-If `APP_ID` is defined:
-
-- Initialize the Agora RTC engine using `this.rtcEngine.initialize()`
-- Set the properties for `state`
+- If the `APP_ID` is defined:
+  - Initialize the Agora RTC engine using `this.rtcEngine.initialize()`.
+  - Set the properties for `state`.
 
 Property|Value|Description
 ---|---|---
@@ -191,7 +191,7 @@ Subscribe to the application event listeners using `this.subscribeEvents()`.
 
 #### Create the subscribeEvents Method
 
-The `subscribeEvents` method adds event listeners to the Agora engine using `this.rtcEngine.on()`.
+The `subscribeEvents` method adds event listeners to the Agora RTC engine using `this.rtcEngine.on()`:
 
 ``` JavaScript
   subscribeEvents = () => {
@@ -201,7 +201,7 @@ The `subscribeEvents` method adds event listeners to the Agora engine using `thi
   }
 ```
 
-The remaining code in this section are contained within the `subscribeEvents` method.
+The remaining code in this section is contained within the `subscribeEvents` method.
 
 - [The `joinedchannel` Event Listener and Callback](#the-joinedchannel-event-listener-and-callback)
 - [The `userjoined` Event Listener and Callback](#the-userjoined-event-listener-and-callback)
@@ -212,7 +212,7 @@ The remaining code in this section are contained within the `subscribeEvents` me
 
 ##### The `joinedchannel` Event Listener and Callback
 
-The `joinedchannel` event listener triggers when a user joins the `channel`.
+The `joinedchannel` event listener is triggered when a user joins the `channel`.
 
 Set the state's `local` property to `uid`.
 
@@ -226,7 +226,7 @@ Set the state's `local` property to `uid`.
 
 ##### The `userjoined` Event Listener and Callback
 
-The `userjoined` event listener triggers when a new user joins the current channel.
+The `userjoined` event listener is triggered when a new user joins the current channel.
 
 Add `uid` to the users list with `this.state.users.push()` and set its value to the state's `users` property.
 
@@ -240,7 +240,7 @@ Add `uid` to the users list with `this.state.users.push()` and set its value to 
 
 ##### The `removestream` Event Listener and Callback
 
-The `removestream` event listener triggers when a user's stream is removed.
+The `removestream` event listener is triggered when a user's stream is removed.
 
 Remove `uid` from the users list with `this.state.users.delete()` and set its value to the state's `users` property.
 
@@ -254,7 +254,7 @@ Remove `uid` from the users list with `this.state.users.delete()` and set its va
 
 ##### The `leavechannel` Event Listener and Callback
 
-The `leavechannel` event listener triggers when a user leaves the current channel.
+The `leavechannel` event listener is triggered when a user leaves the current channel.
 
 Set the state's `local` property to an empty string.
 
@@ -268,7 +268,7 @@ Set the state's `local` property to an empty string.
 
 ##### The `audiovolumeindication` Event Listener and Callback
 
-The `audiovolumeindication` event listener triggers when the volume levels change.
+The `audiovolumeindication` event listener is triggered when the volume levels change.
 
 Log the following information using `console.log()`:
 
@@ -292,7 +292,7 @@ Variable|Description
 
 ##### The `error` Event Listener and Callback
 
-The `error` event listener triggers when an error occurs in the Agora RTC Engine.
+The `error` event listener is triggered when an error occurs in the Agora RTC engine.
 
 Log the error information using `console.error()`:
 
@@ -318,7 +318,7 @@ Method|Description
 `enableLocalVideo(true)`|Enables local video
 `enableWebSdkInteroperability(true)`|Enables interoperability between the Agora Native SDK and the Agora Web SDK
 `setVideoProfile()`|Sets the video profile
-`enableAudioVolumeIndication()`|Enable regular volume indication reports to the application
+`enableAudioVolumeIndication()`|Enables regular volume indication reports to the application
 
 Join the channel using `rtcEngine.joinChannel()`.
 
@@ -379,7 +379,7 @@ Retrieve the current audio playback device using `this.state.audioPlaybackDevice
 
 #### Create the handleVideoProfile Method
 
-The `handleVideoProfile` method updates the state's `videoProfile` property using `this.setState()`.
+The `handleVideoProfile` method updates the state's `videoProfile` property using `this.setState()`:
 
 ``` JavaScript
   handleVideoProfile = e => {
@@ -418,7 +418,7 @@ The remaining code is contained with the `<div>` element.
 
 #### Build the Form Interface
 
-Add a child `<div>` element with the class name `column` and `is-one-quarter` and an `overflowY` value of `auto`.
+Add a child `<div>` element with the class names `column` and `is-one-quarter` and an `overflowY` value of `auto`.
 
 ``` JavaScript
         <div className="column is-one-quarter" style={{overflowY: 'auto'}}>
@@ -443,12 +443,12 @@ Add a `<div>` element with the class name `field`.
 
 Within the `<div>` element:
 
-1. Add a `Channel` text wrapped in a `<label>` element with the class name `label`
-2. Add a text `<input>` element wrapped in a `<div>` element with the class name `control`
-	- Apply an `onChange` event listener to update the state's `channel` property
-	- Set the `value` property to the state's `channel` property
-	- Apply the class `input`
-	- Set the `placeholder` property to `Input a channel name`
+1. Add the text `Channel` in a `<label>` element with the class name `label`.
+2. Add a text `<input>` element wrapped in a `<div>` element with the class name `control`.
+	- Apply an `onChange` event listener to update the state's `channel` property.
+	- Set the `value` property to the state's `channel` property.
+	- Apply the class `input`.
+	- Set the `placeholder` property to `Input a channel name`.
 
 ``` JavaScript
           <div className="field">
@@ -465,12 +465,12 @@ Add a `<div>` element with the class name `field`.
 
 Within the `<div>` element:
 
-1. Add a `Role` text wrapped in a `<label>` element with the class name `label`
-2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class name `control` and `select`
-	- Apply an `onChange` event listener to update the state's `role` property
-	- Set the `value` property to the state's `role` property
-	- Set the `width` to `100%`
-	- Add two role options `Anchor` and `Audience` with the values `1` and `2`
+1. Add the text `Role` wrapped in a `<label>` element with the class name `label`.
+2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class names `control` and `select`.
+	- Apply an `onChange` event listener to update the state's `role` property.
+	- Set the `value` property to the state's `role` property.
+	- Set the `width` to `100%`.
+	- Add two role options `Anchor` and `Audience` with the values `1` and `2`, respectively.
 
 ``` JavaScript
           <div className="field">
@@ -492,12 +492,12 @@ Add a `<div>` element with the class name `field`.
 
 Within the `<div>` element:
 
-1. Add a `VideoProfile` text wrapped in a `<label>` element with the class name `label`
-2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class name `control` and `select`
-	- Apply an `onChange` event listener to invoke the `this.handleVideoProfile` method
-	- Set the `value` property to the state's `videoProfile` property
-	- Set the `width` to `100%`
-	- Loop through the video profile list using `videoProfileList.map`, setting the key and value properties to `item.value` and the label to `item.label`
+1. Add the text `VideoProfile` wrapped in a `<label>` element with the class name `label`.
+2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class names `control` and `select`.
+	- Apply an `onChange` event listener to invoke the `this.handleVideoProfile` method.
+	- Set the `value` property to the state's `videoProfile` property.
+	- Set the `width` to `100%`.
+	- Loop through the video profile list using `videoProfileList.map`, setting the key and value properties to `item.value` and the label to `item.label`.
 
 ``` JavaScript
           <div className="field">
@@ -518,23 +518,23 @@ Add a `<div>` element with the class name `field`.
 
 Within the `<div>` element:
 
-1. Add a `AudioProfile` text wrapped in a `<label>` element with the class name `label`
-2. Add two `<select>` menu elements wrapped in a set of nested `<div>` elements with the class name `control` and `select`
+1. Add the text `AudioProfile` wrapped in a `<label>` element with the class name `label`.
+2. Add two `<select>` menu elements wrapped in a set of nested `<div>` elements with the class names `control` and `select`.
 
 The first `<select>` menu element controls the audio profiles:
 
-- Apply an `onChange` event listener to invoke the `this.handleAudioProfile` method
-- Set the `value` property to the state's `audioProfile` property
-- Set the `width` to `100%`
-- Loop through the audio profile list using `audioProfileList.map`, setting the key and value properties to `item.value` and the label to `item.label`
+- Apply an `onChange` event listener to invoke the `this.handleAudioProfile` method.
+- Set the `value` property to the state's `audioProfile` property.
+- Set the `width` to `100%`.
+- Loop through the audio profile list using `audioProfileList.map`, setting the key and value properties to `item.value` and the label to `item.label`.
 
 
 The second `<select>` menu element controls the audio scenarios:
 
-- Apply an `onChange` event listener to invoke the `this.handleAudioScenario` method
-- Set the `value` property to the state's `audioScenario` property
-- Set the `width` to `100%`
-- Loop through the audio scenario list using `audioScenarioList.map`, setting the key and value properties to `item.value` and the label to `item.label`
+- Apply an `onChange` event listener to invoke the `this.handleAudioScenario` method.
+- Set the `value` property to the state's `audioScenario` property.
+- Set the `width` to `100%`.
+- Loop through the audio scenario list using `audioScenarioList.map`, setting the key and value properties to `item.value` and the label to `item.label`.
 
 ``` JavaScript
           <div className="field">
@@ -560,12 +560,12 @@ Add a `<div>` element with the class name `field`.
 
 Within the `<div>` element:
 
-1. Add a `Camera` text wrapped in a `<label>` element with the class name `label`
-2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class name `control` and `select`
-	- Apply an `onChange` event listener to invoke the `this.handleCameraChange` method
-	- Set the `value` property to the state's `videoProfile` property
-	- Set the `width` to `100%`
-	- Loop through the video devices list using `this.state.videoDevices.map`, setting the key and value properties to `index` and the label to `item.devicename`
+1. Add the text `Camera` wrapped in a `<label>` element with the class name `label`.
+2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class names `control` and `select`.
+	- Apply an `onChange` event listener to invoke the `this.handleCameraChange` method.
+	- Set the `value` property to the state's `videoProfile` property.
+	- Set the `width` to `100%`.
+	- Loop through the video devices list using `this.state.videoDevices.map`, setting the key and value properties to `index` and the label to `item.devicename`.
 
 ``` JavaScript
           <div className="field">
@@ -586,12 +586,12 @@ Add a `<div>` element with the class name `field`.
 
 Within the `<div>` element:
 
-1. Add a `Microphone` text wrapped in a `<label>` element with the class name `label`
-2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class name `control` and `select`
-	- Apply an `onChange` event listener to invoke the `this.handleMicChange` method
-	- Set the `value` property to the state's `mic` property
-	- Set the `width` to `100%`
-	- Loop through the audio devices list using `this.state.audioDevices.map`, setting the key and value properties to `index` and the label to `item.devicename`
+1. Add the text `Microphone` wrapped in a `<label>` element with the class name `label`.
+2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class names `control` and `select`.
+	- Apply an `onChange` event listener to invoke the `this.handleMicChange` method.
+	- Set the `value` property to the state's `mic` property.
+	- Set the `width` to `100%`.
+	- Loop through the audio devices list using `this.state.audioDevices.map`, setting the key and value properties to `index` and the label to `item.devicename`.
 
 ``` JavaScript
           <div className="field">
@@ -612,12 +612,12 @@ Add a `<div>` element with the class name `field`.
 
 Within the `<div>` element:
 
-1. Add a `Loudspeaker` text wrapped in a `<label>` element with the class name `label`
-2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class name `control` and `select`
-	- Apply an `onChange` event listener to invoke the `this.handleSpeakerChange` method
-	- Set the `value` property to the state's `speaker` property
-	- Set the `width` to `100%`
-	- Loop through the audio playback devices list using `this.state.audioPlaybackDevices.map`, setting the key and value properties to `index` and the label to `item.devicename`
+1. Add the text `Loudspeaker` wrapped in a `<label>` element with the class name `label`.
+2. Add a `<select>` menu element wrapped in a set of nested `<div>` elements with the class names `control` and `select`.
+	- Apply an `onChange` event listener to invoke the `this.handleSpeakerChange` method.
+	- Set the `value` property to the state's `speaker` property.
+	- Set the `width` to `100%`.
+	- Loop through the audio playback devices list using `this.state.audioPlaybackDevices.map`, setting the key and value properties to `index` and the label to `item.devicename`.
 
 ``` JavaScript
           <div className="field">
@@ -636,7 +636,7 @@ Within the `<div>` element:
 
 Add a `<div>` element with the class names `field`, `is-grouped`, and `is-grouped-right`.
 
-Within the `<div>` element, add another a `<div>` element with the class name `<control>`.
+Within the `<div>` element, add another `<div>` element with the class name `<control>`.
 
 Add a `<button>` element with the class names `button` and `is-link` in the nested `<div>` elements. Add an `onClick` handler to the button to invoke `this.handleJoin`.
 
@@ -652,7 +652,7 @@ Add a `<button>` element with the class names `button` and `is-link` in the nest
 
 #### Build the Form Interface
 
-Add a child `<div>` element with the class name `column`, `is-three-quarters`, and `window-container`.
+Add a child `<div>` element with the class names `column`, `is-three-quarters`, and `window-container`.
 
 Loop through the `users` list using `this.state.users.map()`. For each user, add a `<Window>` element with the following properties:
 
@@ -663,7 +663,7 @@ Property|Description
 `rtcEngine`|Agora RTC engine
 `local`|Indicates if the user is local
 
-Determine if the current user is local using `this.state.local`. If the current user is local, add a `<Window>` element with the same properties as the users list `<Window>` elements, except the `key` property.
+Determine if the current user is local using `this.state.local`. If the current user is local, add a `<Window>` element with the same properties as the users list `<Window>` elements, excluding the `key` property.
 
 ``` JavaScript
         <div className="column is-three-quarters window-container">
@@ -680,9 +680,9 @@ Determine if the current user is local using `this.state.local`. If the current 
 
 The `Window` class extends the `Component` class and manages the contents in the browser window.
 
-The `constructor()` method passes in the properties parameter `props`. This method called before the `Window` view is mounted. Invoke `super(props)` first, to ensure `this.props` is defined for the class.
+The `constructor()` method passes in the properties parameter `props`. This method is called before the `Window` view is mounted. Invoke `super(props)` first, to ensure `this.props` is defined for the class.
 
-The remaining code in this section are contained within the `class` declaration.
+The remaining code in this section is contained within the `class` declaration.
 
 ``` JavaScript
 class Window extends Component {
@@ -702,8 +702,8 @@ The `componentDidMount()` is called after the view is mounted.
 
 Initialize a local variable `dom` with the object with the element ID `video-${this.props.uid}`.
 
-- If the `local` property and `dom` is valid, set up the local video with the `dom` using `this.props.rtcEngine.setupLocalVideo()`
-- If the `local` property is invald and `dom` is valid, subscribe the user to the Agora RTC engine using `this.props.rtcEngine.subscribe()`
+- If the `local` property and `dom` are valid, set up the local video with the `dom` using `this.props.rtcEngine.setupLocalVideo()`.
+- If the `local` property is invalid and `dom` is valid, subscribe the user to the Agora RTC engine using `this.props.rtcEngine.subscribe()`.
 
 ``` JavaScript
   componentDidMount() {
@@ -720,7 +720,7 @@ The `render()` method renders the view for the `Window`.
 
 Within the `return()`, a `<div>` element is defined with the class name `window-item`.
 
-Add a secondary `<div>` element with the `id` value of `'video-' + this.props.uid` and class `video-item`.
+Add a secondary `<div>` element with the `id` value of `'video-' + this.props.uid` and class name `video-item`.
 
 ``` JavaScript
   render() {
@@ -735,10 +735,10 @@ Add a secondary `<div>` element with the `id` value of `'video-' + this.props.ui
 
 
 ## Resources
-* Complete API documentation is available at the [Document Center](https://docs.agora.io/en/).
-* You can file bugs about this sample [here](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/issues).
-* Basic boilerplate quickstart for the [Agora RTC SDK for Electron](https://github.com/AgoraIO-Community/Agora-RTC-SDK-for-Electron).
-* General information about building apps with [React](https://github.com/facebook/react) and the [Electron Webpack](https://github.com/electron-userland/electron-webpack).
+* Complete [API documentation](https://docs.agora.io/en/) at the Developer Center
+* [File bugs about this sample](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/issues)
+* Basic boilerplate quickstart for the [Agora RTC SDK for Electron](https://github.com/AgoraIO-Community/Agora-RTC-SDK-for-Electron)
+* General information about building apps with [React](https://github.com/facebook/react) and the [Electron Webpack](https://github.com/electron-userland/electron-webpack)
 
 
 ## License
