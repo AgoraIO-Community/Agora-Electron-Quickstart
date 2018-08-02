@@ -64,6 +64,9 @@ export default class App extends Component {
     this.rtcEngine.on('error', err => {
       console.error(err)
     })
+    this.rtcEngine.on('executefailed', funcName => {
+      console.error(funcName, 'failed to execute')
+    })
   }
 
   handleJoin = () => {
