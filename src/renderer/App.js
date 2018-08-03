@@ -53,6 +53,17 @@ export default class App extends Component {
         local: ''
       })
     })
+    this.rtcEngine.on('audiodevicestatechanged', () => {
+      this.setState({
+        audioDevices: this.rtcEngine.getAudioRecordingDevices(),
+        audioPlaybackDevices: this.rtcEngine.getAudioPlaybackDevices()
+      })
+    })
+    this.rtcEngine.on('videodevicestatechanged', () => {
+      this.setState({
+        videoDevices: this.rtcEngine.getVideoDevices()
+      })
+    })
     this.rtcEngine.on('audiovolumeindication', (
       uid,
       volume,
