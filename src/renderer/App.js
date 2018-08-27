@@ -140,7 +140,7 @@ export default class App extends Component {
             <label className="label">Role</label>
             <div className="control">
               <div className="select"  style={{width: '100%'}}>
-                <select onChange={e => this.setState({role: e.currentTarget.value})} value={this.state.role} style={{width: '100%'}}>
+                <select onChange={e => this.setState({role: Number(e.currentTarget.value)})} value={this.state.role} style={{width: '100%'}}>
                   <option value={1}>Anchor</option>
                   <option value={2}>Audience</option>
                 </select>
