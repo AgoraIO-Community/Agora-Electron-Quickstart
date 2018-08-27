@@ -26,6 +26,7 @@ export default class App extends Component {
         videoProfile: 43
       }
     }
+    this.enableAudioMixing = false;
   }
 
   componentDidMount() {
@@ -36,7 +37,7 @@ export default class App extends Component {
     this.rtcEngine.on('joinedchannel', (channel, uid, elapsed) => {
       this.setState({
         local: uid
-      })
+      });
     });
     this.rtcEngine.on('userjoined', (uid, elapsed) => {
       this.setState({
@@ -114,6 +115,17 @@ export default class App extends Component {
     })
   }
 
+  // handleAudioMixing = e => {
+  //   const path = require('path')
+  //   let filepath = path.join(__dirname, './music.mp3');
+  //   if (this.enableAudioMixing) {
+  //     this.rtcEngine.stopAudioMixing()
+  //   } else {
+  //     this.rtcEngine.startAudioMixing(filepath, false, false, -1);
+  //   }
+  //   this.enableAudioMixing = !this.enableAudioMixing;
+  // }
+
   render() {
     return (
       <div className="columns" style={{padding: "20px", height: '100%', margin: '0'}}>
@@ -190,7 +202,11 @@ export default class App extends Component {
               </div>
             </div>
           </div>
-          
+          {/* <div className="field is-grouped is-grouped-right">
+            <div className="control">
+              <button onClick={this.handleAudioMixing} className="button is-link">Start/Stop Audio Mixing</button>
+            </div>
+          </div> */}
           <div className="field is-grouped is-grouped-right">
             <div className="control">
               <button onClick={this.handleJoin} className="button is-link">Join</button>
