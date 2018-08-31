@@ -9,22 +9,20 @@
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "dependencies": {
-    "agora-electron-sdk": "^2.0.7-rc.3",
+    "agora-electron-sdk": "^2.0.7-rc.6",
     "bulma": "^0.7.1",
     "immutable": "^3.8.2",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
-    "source-map-support": "^0.5.5"
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
+    "source-map-support": "^0.5.9"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.52",
-    "babel-preset-react": "^6.24.1",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
     "electron": "2.0.0",
-    "electron-builder": "^20.11.1",
-    "electron-webpack": "^2.1.2",
-    "node-sass": "^4.9.0",
-    "sass-loader": "^7.0.1",
-    "webpack": "^4.8.1"
+    "electron-builder": "^20.28.3",
+    "electron-webpack": "^2.3.1",
+    "webpack": "^4.17.1"
   },
   "resolutions": {
     "webpack-sources": "1.0.1"
