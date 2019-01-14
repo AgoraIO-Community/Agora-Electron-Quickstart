@@ -1,19 +1,23 @@
 import React, { Component } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
 import { List } from 'immutable';
+import path from 'path';
 
-import {videoProfileList, audioProfileList, audioScenarioList, APP_ID } from '../utils/settings'
+import {videoProfileList, audioProfileList, audioScenarioList, APP_ID, SHARE_ID } from '../utils/settings'
+import base64Encode from '../utils/base64'
+import WindowPicker from './components/WindowPicker/index.js'
 
 export default class App extends Component {
   constructor(props) {
     super(props)
     this.rtcEngine = new AgoraRtcEngine()
     if (!APP_ID) {
-      alert('APP_ID cannot be empty!')
+      return alert('APP_ID cannot be empty!')
     } else {
       this.rtcEngine.initialize(APP_ID)
       this.state = {
         local: '',
+        localVideoSource: '',
         users: new List(),
         channel: '',
         role: 1,
@@ -23,7 +27,11 @@ export default class App extends Component {
         camera: 0,
         mic: 0,
         speaker: 0,
-        videoProfile: 43
+        videoProfile: 43,
+        showWindowPicker: false,
+        recordingTestOn: false,
+        playbackTestOn: false,
+        windowList: []
       }
     }
     this.enableAudioMixing = false;
@@ -31,6 +39,7 @@ export default class App extends Component {
 
   componentDidMount() {
     this.subscribeEvents()
+    window.rtcEngine = this.rtcEngine;
   }   
 
   subscribeEvents = () => {
@@ -40,6 +49,10 @@ export default class App extends Component {
       });
     });
     this.rtcEngine.on('userjoined', (uid, elapsed) => {
+      if (uid === SHARE_ID && this.state.localVideoSource) {
+        return
+      }
+      this.rtcEngine.setRemoteVideoStreamType(uid, 1)
       this.setState({
         users: this.state.users.push(uid)
       })
@@ -87,9 +100,11 @@ export default class App extends Component {
     rtcEngine.setClientRole(this.state.role)
     rtcEngine.setAudioProfile(0, 1)
     rtcEngine.enableVideo()
+    rtcEngine.setLogFile('~/agoraabc.log')
     rtcEngine.enableLocalVideo(true)
     rtcEngine.enableWebSdkInteroperability(true)
     rtcEngine.setVideoProfile(this.state.videoProfile, false)
+    rtcEngine.enableDualStreamMode(true)
     rtcEngine.enableAudioVolumeIndication(1000, 3)
     rtcEngine.joinChannel(null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }
@@ -115,6 +130,121 @@ export default class App extends Component {
     })
   }
 
+    /**
+   * prepare screen share: initialize and join
+   * @param {string} token 
+   * @param {string} info 
+   * @param {number} timeout 
+   */
+  prepareScreenShare(token = null, info = '', timeout = 30000) {
+    return new Promise((resolve, reject) => {
+      let timer = setTimeout(() => {
+        reject(new Error('Timeout'))
+      }, timeout)
+      this.rtcEngine.once('videosourcejoinedsuccess', uid => {
+        clearTimeout(timer)
+        rtcEngine.videoSourceSetLogFile('~/videosourceabc.log')
+        this.sharingPrepared = true
+        resolve(uid)
+      });
+      try {
+        this.rtcEngine.videoSourceInitialize(APP_ID);
+        this.rtcEngine.videoSourceSetChannelProfile(1);
+        this.rtcEngine.videoSourceEnableWebSdkInteroperability(true)
+        // this.rtcEngine.videoSourceSetVideoProfile(50, false);
+        // to adjust render dimension to optimize performance
+        this.rtcEngine.setVideoRenderDimension(3, SHARE_ID, 1200, 680);
+        this.rtcEngine.videoSourceJoin(token, this.state.channel, info, SHARE_ID);
+      } catch(err) {
+        clearTimeout(timer)
+        reject(err)
+      }
+    })
+  }
+
+    /**
+   * start screen share
+   * @param {*} windowId windows id to capture
+   * @param {*} captureFreq fps of video source screencapture, 1 - 15
+   * @param {*} rect null/if specified, {x: 0, y: 0, width: 0, height: 0}
+   * @param {*} bitrate bitrate of video source screencapture
+   */
+  startScreenShare(windowId=0, captureFreq=15, 
+    rect={
+      top: 0, left: 0, right: 0, bottom: 0
+    }, bitrate=0
+  ) {
+    if(!this.sharingPrepared) {
+      console.error('Sharing not prepared yet.')
+      return false
+    };
+    return new Promise((resolve, reject) => {
+      this.rtcEngine.startScreenCapture2(windowId, captureFreq, rect, bitrate);
+      this.rtcEngine.videoSourceSetVideoProfile(43, false);
+      this.rtcEngine.startScreenCapturePreview();
+    });
+  }
+
+  handleScreenSharing = e => {
+    // getWindowInfo and open Modal
+    let list = this.rtcEngine.getScreenWindowsInfo();
+    let windowList = list.map(item => {
+      return {
+        ownerName: item.ownerName,
+        name: item.name,
+        windowId: item.windowId,
+        image: base64Encode(item.image)
+      }
+    })
+    console.log(windowList)
+
+    this.setState({
+      showWindowPicker: true,
+      windowList: windowList
+    });
+  }
+
+  handleWindowPicker = windowId => {
+    this.setState({
+      showWindowPicker: false
+    })
+    this.prepareScreenShare()
+      .then(uid => {
+        this.startScreenShare(windowId)
+        this.setState({
+          localVideoSource: uid
+        })
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
+  togglePlaybackTest = e => {
+    if (!this.state.playbackTestOn) {
+      let filepath = '/Users/menthays/Projects/Agora-RTC-SDK-for-Electron/example/temp/music.mp3';
+      let result = this.rtcEngine.startAudioPlaybackDeviceTest(filepath);
+      console.log(result);
+    } else {
+      this.rtcEngine.stopAudioPlaybackDeviceTest();
+    }
+    this.setState({
+      playbackTestOn: !this.state.playbackTestOn
+    })
+  }
+
+  toggleRecordingTest = e => {
+    if (!this.state.recordingTestOn) {
+      let result = this.rtcEngine.startAudioRecordingDeviceTest(1000);
+      console.log(result);
+    } else {
+      this.rtcEngine.stopAudioRecordingDeviceTest();
+    }
+    this.setState({
+      recordingTestOn: !this.state.recordingTestOn
+    })
+  }
+
   // handleAudioMixing = e => {
   //   const path = require('path')
   //   let filepath = path.join(__dirname, './music.mp3');
@@ -127,8 +257,19 @@ export default class App extends Component {
   // }
 
   render() {
+    let windowPicker
+    if (this.state.showWindowPicker) {
+      windowPicker = <WindowPicker
+        onSubmit={this.handleWindowPicker}
+        onCancel={e => this.setState({showWindowPicker: false})}
+        windowList={this.state.windowList}
+      />
+    }
+
+
     return (
       <div className="columns" style={{padding: "20px", height: '100%', margin: '0'}}>
+        { this.state.showWindowPicker ? windowPicker : '' }
         <div className="column is-one-quarter" style={{overflowY: 'auto'}}>
           <div className="field">
             <label className="label">Channel</label>
@@ -212,12 +353,35 @@ export default class App extends Component {
               <button onClick={this.handleJoin} className="button is-link">Join</button>
             </div>
           </div>
+          <hr/>
+          <div className="field">
+            <label className="label">Screen Share</label>
+            <div className="control">
+              <button onClick={this.handleScreenSharing} className="button is-link">Screen Share</button>
+            </div>
+          </div>
+
+          <div className="field">
+            <label className="label">Audio Playback Test</label>
+            <div className="control">
+              <button onClick={this.togglePlaybackTest} className="button is-link">{this.state.playbackTestOn ? 'stop' : 'start'}</button>
+            </div>
+          </div>
+          <div className="field">
+            <label className="label">Audio Recording Test</label>
+            <div className="control">
+              <button onClick={this.toggleRecordingTest} className="button is-link">{this.state.recordingTestOn ? 'stop' : 'start'}</button>
+            </div>
+          </div>
         </div>
         <div className="column is-three-quarters window-container">
           {this.state.users.map((item, key) => (
-            <Window key={key} uid={item} rtcEngine={this.rtcEngine} local={false}></Window>
+            <Window key={key} uid={item} rtcEngine={this.rtcEngine} role={item===SHARE_ID?'remoteVideoSource':'remote'}></Window>
           ))}
-          {this.state.local ? (<Window uid={this.state.local} rtcEngine={this.rtcEngine} local={true}>
+          {this.state.local ? (<Window uid={this.state.local} rtcEngine={this.rtcEngine} role="local">
+
+          </Window>) : ''}
+          {this.state.localVideoSource ? (<Window uid={this.state.localVideoSource} rtcEngine={this.rtcEngine} role="localVideoSource">
 
           </Window>) : ''}
         </div>
@@ -237,10 +401,18 @@ class Window extends Component {
 
   componentDidMount() {
     let dom = document.querySelector(`#video-${this.props.uid}`)
-    if (this.props.local) {
+    if (this.props.role === 'local') {
       dom && this.props.rtcEngine.setupLocalVideo(dom)
-    } else {
+    } else if (this.props.role === 'localVideoSource') {
+      dom && this.props.rtcEngine.setupLocalVideoSource(dom)
+      this.props.rtcEngine.setupViewContentMode('videosource', 1);
+      this.props.rtcEngine.setupViewContentMode(String(SHARE_ID), 1);
+    } else if (this.props.role === 'remote') {
       dom && this.props.rtcEngine.subscribe(this.props.uid, dom)
+    } else if (this.props.role === 'remoteVideoSource') {
+      dom && this.props.rtcEngine.subscribe(this.props.uid, dom)
+      this.props.rtcEngine.setupViewContentMode('videosource', 1);
+      this.props.rtcEngine.setupViewContentMode(String(SHARE_ID), 1);
     }
   }
 
