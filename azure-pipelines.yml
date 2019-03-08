@@ -13,6 +13,14 @@ pool:
   vmImage: $(imageName)
 
 steps:
+- powershell: 
+  env: 
+    AGOAR_APP_ID: $(agora.appId)
+
+- bash: 
+  env:
+    AGOAR_APP_ID: $(agora.appId)
+
 - task: NodeTool@0
   inputs:
     versionSpec: '8.x'
