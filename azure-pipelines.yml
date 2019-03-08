@@ -13,13 +13,6 @@ pool:
   vmImage: $(imageName)
 
 steps:
-- powershell: 
-  env: 
-    AGORA_APP_ID: $(agora.appId)
-
-- bash: 
-  env:
-    AGORA_APP_ID: $(agora.appId)
 
 - task: NodeTool@0
   inputs:
@@ -28,6 +21,9 @@ steps:
 - script: npm install
 
 - script: npm run write-config
+  env:
+    AGORA_APP_ID: $(agora.appId)
+    
     
 - script: npm run dist:dir
 
