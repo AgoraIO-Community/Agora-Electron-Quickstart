@@ -10,7 +10,7 @@
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "dependencies": {
-    "agora-electron-sdk": "^2.0.8-rc.5",
+    "agora-electron-sdk": "^2.3.3-alpha.11",
     "bulma": "^0.7.1",
     "immutable": "^3.8.2",
     "react": "^16.4.2",

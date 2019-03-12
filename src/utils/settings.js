@@ -27,6 +27,17 @@ export const videoProfileList = [
   }
 ]
 
+export const channelProfileList = [
+  {
+    value: 0,
+    label: 'CHANNEL_PROFILE_COMM'
+  },
+  {
+    value: 1,
+    label: 'CHANNEL_PROFILE_LIVE'
+  }
+]
+
 export const audioProfileList = [
   {
     value: 0,

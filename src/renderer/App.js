@@ -31,7 +31,10 @@ export default class App extends Component {
         showWindowPicker: false,
         recordingTestOn: false,
         playbackTestOn: false,
-        windowList: []
+        windowList: [],
+        encoderWidth: '',
+        encoderHeight: '',
+        channelProfile: 1
       }
     }
     this.enableAudioMixing = false;
@@ -96,14 +99,33 @@ export default class App extends Component {
 
   handleJoin = () => {
     let rtcEngine = this.rtcEngine
-    rtcEngine.setChannelProfile(1)
-    rtcEngine.setClientRole(this.state.role)
+    rtcEngine.setChannelProfile(this.state.channelProfile)
+    if(this.state.channelProfile === 1) {
+      // set role when channel profile is live
+      rtcEngine.setClientRole(this.state.role)
+    }
     rtcEngine.setAudioProfile(0, 1)
     rtcEngine.enableVideo()
     rtcEngine.setLogFile('~/agoraabc.log')
     rtcEngine.enableLocalVideo(true)
     rtcEngine.enableWebSdkInteroperability(true)
-    rtcEngine.setVideoProfile(this.state.videoProfile, false)
+    if(!this.state.encoderWidth && !this.state.encoderHeight) {
+      // video profile
+      rtcEngine.setVideoProfile(this.state.videoProfile, false)
+    } else {
+      // when we have encoder width/height, we skip using video profile
+      let encoderWidth = parseInt(this.state.encoderWidth)
+      let encoderHeight = parseInt(this.state.encoderHeight)
+      if(isNaN(encoderWidth)) {
+        console.error(`invalid encoder width`)
+        encoderWidth = 640
+      }
+      if(isNaN(encoderHeight)) {
+        console.error(`invalid encoder height`)
+        encoderHeight = 480
+      }
+      rtcEngine.setVideoEncoderConfiguration({width: encoderWidth, height: encoderHeight})
+    }
     rtcEngine.enableDualStreamMode(true)
     rtcEngine.enableAudioVolumeIndication(1000, 3)
     rtcEngine.joinChannel(null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
@@ -127,6 +149,12 @@ export default class App extends Component {
   handleVideoProfile = e => {
     this.setState({
       videoProfile: Number(e.currentTarget.value)
+    })
+  }
+
+  handleChannelProfile = e => {
+    this.setState({
+      channelProfile: Number(e.currentTarget.value)
     })
   }
 
@@ -278,6 +306,17 @@ export default class App extends Component {
             </div>
           </div>
           <div className="field">
+            <label className="label">Channel Profile</label>
+            <div className="control">
+              <div className="select"  style={{width: '100%'}}>
+                <select onChange={e => this.setState({channelProfile: Number(e.currentTarget.value)})} value={this.state.channelProfile} style={{width: '100%'}}>
+                  <option value={0}>Communication</option>
+                  <option value={1}>Live</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div className="field">
             <label className="label">Role</label>
             <div className="control">
               <div className="select"  style={{width: '100%'}}>
@@ -286,6 +325,18 @@ export default class App extends Component {
                   <option value={2}>Audience</option>
                 </select>
               </div>
+            </div>
+          </div>
+          <div className="field">
+            <label className="label">Video Encoder Width</label>
+            <div className="control">
+              <input onChange={e => this.setState({encoderWidth: e.currentTarget.value})} value={this.state.encoderWidth} className="input" type="text" placeholder="Width" />
+            </div>
+          </div>
+          <div className="field">
+            <label className="label">Video Encoder Height</label>
+            <div className="control">
+              <input onChange={e => this.setState({encoderHeight: e.currentTarget.value})} value={this.state.encoderHeight} className="input" type="text" placeholder="Height" />
             </div>
           </div>
           <div className="field">
