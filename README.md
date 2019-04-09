@@ -49,9 +49,10 @@ npm run dist
 Once the build is complete, use the resulting Agora Electron wrapper to build your application.
 
 ## Resources
-* Complete [API documentation](https://docs.agora.io/en/) at the Developer Center
+* Complete [API documentation](https://agoraio.github.io/Electron-SDK/2_3_3/) at the Developer Center
+* Complete Official Agora Native Windows/Mac [API documentation](https://docs.agora.io/en/)
 * [File bugs about this sample](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/issues)
-* Basic boilerplate quickstart for the [Agora RTC SDK for Electron](https://github.com/AgoraIO-Community/Agora-RTC-SDK-for-Electron)
+* Full Electron SDK wrapper addon source can be found at [Agora RTC SDK for Electron](https://github.com/AgoraIO-Community/Agora-RTC-SDK-for-Electron)
 * General information about building apps with [React](https://github.com/facebook/react) and the [Electron Webpack](https://github.com/electron-userland/electron-webpack)
 
 
