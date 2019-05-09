@@ -2,86 +2,112 @@ import React, { Component } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
 import { List } from 'immutable';
 import path from 'path';
+import os from 'os'
 
-import {videoProfileList, audioProfileList, audioScenarioList, APP_ID, SHARE_ID } from '../utils/settings'
-import base64Encode from '../utils/base64'
+import {voiceChangerList, voiceReverbPreset, videoProfileList, audioProfileList, audioScenarioList, APP_ID, SHARE_ID, RTMP_URL, voiceReverbList } from '../utils/settings'
+import {readImage} from '../utils/base64'
 import WindowPicker from './components/WindowPicker/index.js'
+import DisplayPicker from './components/DisplayPicker/index.js'
+import { VoiceChangerPreset } from 'agora-electron-sdk/JS/Api/native_type';
 
 export default class App extends Component {
   constructor(props) {
     super(props)
-    this.rtcEngine = new AgoraRtcEngine()
     if (!APP_ID) {
-      return alert('APP_ID cannot be empty!')
+      alert('APP_ID cannot be empty!')
     } else {
-      this.rtcEngine.initialize(APP_ID)
+      let rtcEngine = this.getRtcEngine()
       this.state = {
         local: '',
         localVideoSource: '',
+        localSharing: false,
         users: new List(),
         channel: '',
         role: 1,
-        videoDevices: this.rtcEngine.getVideoDevices(),
-        audioDevices: this.rtcEngine.getAudioRecordingDevices(),
-        audioPlaybackDevices: this.rtcEngine.getAudioPlaybackDevices(),
+        voiceReverbPreset: 0,
+        voiceChangerPreset: 0,
+        videoDevices: rtcEngine.getVideoDevices(),
+        audioDevices: rtcEngine.getAudioRecordingDevices(),
+        audioPlaybackDevices: rtcEngine.getAudioPlaybackDevices(),
         camera: 0,
         mic: 0,
         speaker: 0,
-        videoProfile: 43,
+        encoderConfiguration: 3,
         showWindowPicker: false,
+        showDisplayPicker: false,
         recordingTestOn: false,
         playbackTestOn: false,
+        lastmileTestOn: false,
+        rtmpTestOn: false,
         windowList: [],
-        encoderWidth: '',
-        encoderHeight: '',
-        channelProfile: 1
+        displayList: [],
       }
     }
     this.enableAudioMixing = false;
   }
 
-  componentDidMount() {
-    this.subscribeEvents()
-    window.rtcEngine = this.rtcEngine;
-  }   
+  getRtcEngine() {
+    if(!this.rtcEngine) {
+      this.rtcEngine = new AgoraRtcEngine()
+      this.rtcEngine.initialize(APP_ID)
+      this.subscribeEvents(this.rtcEngine)
+      window.rtcEngine = this.rtcEngine;
+    }
 
-  subscribeEvents = () => {
-    this.rtcEngine.on('joinedchannel', (channel, uid, elapsed) => {
+    return this.rtcEngine
+  }
+
+  componentDidMount() {
+  }
+
+  subscribeEvents = (rtcEngine) => {
+    rtcEngine.on('joinedchannel', (channel, uid, elapsed) => {
       this.setState({
         local: uid
       });
     });
-    this.rtcEngine.on('userjoined', (uid, elapsed) => {
-      if (uid === SHARE_ID && this.state.localVideoSource) {
+    rtcEngine.on('userjoined', (uid, elapsed) => {
+      if (uid === SHARE_ID && this.state.localSharing) {
         return
       }
-      this.rtcEngine.setRemoteVideoStreamType(uid, 1)
       this.setState({
         users: this.state.users.push(uid)
       })
     })
-    this.rtcEngine.on('removestream', (uid, reason) => {
+    rtcEngine.on('removestream', (uid, reason) => {
       this.setState({
         users: this.state.users.delete(this.state.users.indexOf(uid))
       })
     })
-    this.rtcEngine.on('leavechannel', () => {
+    rtcEngine.on('leavechannel', () => {
       this.setState({
         local: ''
       })
     })
-    this.rtcEngine.on('audiodevicestatechanged', () => {
+    rtcEngine.on('audiodevicestatechanged', () => {
       this.setState({
-        audioDevices: this.rtcEngine.getAudioRecordingDevices(),
-        audioPlaybackDevices: this.rtcEngine.getAudioPlaybackDevices()
+        audioDevices: rtcEngine.getAudioRecordingDevices(),
+        audioPlaybackDevices: rtcEngine.getAudioPlaybackDevices()
       })
     })
-    this.rtcEngine.on('videodevicestatechanged', () => {
+    rtcEngine.on('videodevicestatechanged', () => {
       this.setState({
-        videoDevices: this.rtcEngine.getVideoDevices()
+        videoDevices: rtcEngine.getVideoDevices()
       })
     })
-    this.rtcEngine.on('audiovolumeindication', (
+    rtcEngine.on('streamPublished', (url, error) => {
+      console.log(`url: ${url}, err: ${error}`)
+    })
+    rtcEngine.on('streamUnpublished', (url) => {
+      console.log(`url: ${url}`)
+    })
+    rtcEngine.on('lastmileProbeResult', result => {
+      console.log(`lastmileproberesult: ${JSON.stringify(result)}`)
+    })
+    rtcEngine.on('lastMileQuality', quality => {
+      console.log(`lastmilequality: ${JSON.stringify(quality)}`)
+    })
+    rtcEngine.on('audiovolumeindication', (
       uid,
       volume,
       speakerNumber,
@@ -89,72 +115,73 @@ export default class App extends Component {
     ) => {
       console.log(`uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`)
     })
-    this.rtcEngine.on('error', err => {
+    rtcEngine.on('error', err => {
       console.error(err)
     })
-    this.rtcEngine.on('executefailed', funcName => {
+    rtcEngine.on('executefailed', funcName => {
       console.error(funcName, 'failed to execute')
     })
   }
 
   handleJoin = () => {
-    let rtcEngine = this.rtcEngine
-    rtcEngine.setChannelProfile(this.state.channelProfile)
-    if(this.state.channelProfile === 1) {
-      // set role when channel profile is live
-      rtcEngine.setClientRole(this.state.role)
-    }
+    let rtcEngine = this.getRtcEngine()
+    rtcEngine.setChannelProfile(1)
+    rtcEngine.setClientRole(this.state.role)
     rtcEngine.setAudioProfile(0, 1)
     rtcEngine.enableVideo()
-    rtcEngine.setLogFile('~/agoraabc.log')
+    let logpath = path.resolve(os.homedir(), "./agoramain.sdk")
+    rtcEngine.setLogFile(logpath)
     rtcEngine.enableLocalVideo(true)
     rtcEngine.enableWebSdkInteroperability(true)
-    if(!this.state.encoderWidth && !this.state.encoderHeight) {
-      // video profile
-      rtcEngine.setVideoProfile(this.state.videoProfile, false)
-    } else {
-      // when we have encoder width/height, we skip using video profile
-      let encoderWidth = parseInt(this.state.encoderWidth)
-      let encoderHeight = parseInt(this.state.encoderHeight)
-      if(isNaN(encoderWidth)) {
-        console.error(`invalid encoder width`)
-        encoderWidth = 640
-      }
-      if(isNaN(encoderHeight)) {
-        console.error(`invalid encoder height`)
-        encoderHeight = 480
-      }
-      rtcEngine.setVideoEncoderConfiguration({width: encoderWidth, height: encoderHeight})
-    }
+    let encoderProfile = videoProfileList[this.state.encoderConfiguration]
+    rtcEngine.setVideoEncoderConfiguration({width: encoderProfile.width, height: encoderProfile.height, frameRate: encoderProfile.fps, bitrate: encoderProfile.bitrate})
+    rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
+    rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
+    console.log('loop', rtcEngine.enableLoopbackRecording(true, null))
     rtcEngine.enableDualStreamMode(true)
     rtcEngine.enableAudioVolumeIndication(1000, 3)
+
+    //enable beauty options
+    rtcEngine.setBeautyEffectOptions(true, {
+      lighteningContrastLevel: 2,
+      lighteningLevel: 1,
+      smoothnessLevel: 1,
+      rednessLevel: 0
+    })
+
     rtcEngine.joinChannel(null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }
 
   handleCameraChange = e => {
     this.setState({camera: e.currentTarget.value});
-    this.rtcEngine.setVideoDevice(this.state.videoDevices[e.currentTarget.value].deviceid);
+    this.getRtcEngine().setVideoDevice(this.state.videoDevices[e.currentTarget.value].deviceid);
   }
 
   handleMicChange = e => {
     this.setState({mic: e.currentTarget.value});
-    this.rtcEngine.setAudioRecordingDevice(this.state.audioDevices[e.currentTarget.value].deviceid);
+    this.getRtcEngine().setAudioRecordingDevice(this.state.audioDevices[e.currentTarget.value].deviceid);
   }
 
   handleSpeakerChange = e => {
     this.setState({speaker: e.currentTarget.value});
-    this.rtcEngine.setAudioPlaybackDevice(this.state.audioPlaybackDevices[e.currentTarget.value].deviceid);
+    this.getRtcEngine().setAudioPlaybackDevice(this.state.audioPlaybackDevices[e.currentTarget.value].deviceid);
   }
 
-  handleVideoProfile = e => {
+  handleEncoderConfiguration = e => {
     this.setState({
-      videoProfile: Number(e.currentTarget.value)
+      encoderConfiguration: Number(e.currentTarget.value)
     })
   }
 
-  handleChannelProfile = e => {
+  handleVoiceChanger = e => {
     this.setState({
-      channelProfile: Number(e.currentTarget.value)
+      voiceChangerPreset: Number(e.currentTarget.value)
+    })
+  }
+
+  handleVoiceReverbPreset = e => {
+    this.setState({
+      voiceReverbPreset: Number(e.currentTarget.value)
     })
   }
 
@@ -169,20 +196,21 @@ export default class App extends Component {
       let timer = setTimeout(() => {
         reject(new Error('Timeout'))
       }, timeout)
-      this.rtcEngine.once('videosourcejoinedsuccess', uid => {
+      let rtcEngine = this.getRtcEngine()
+      rtcEngine.once('videosourcejoinedsuccess', uid => {
         clearTimeout(timer)
-        rtcEngine.videoSourceSetLogFile('~/videosourceabc.log')
         this.sharingPrepared = true
         resolve(uid)
       });
       try {
-        this.rtcEngine.videoSourceInitialize(APP_ID);
-        this.rtcEngine.videoSourceSetChannelProfile(1);
-        this.rtcEngine.videoSourceEnableWebSdkInteroperability(true)
-        // this.rtcEngine.videoSourceSetVideoProfile(50, false);
+        rtcEngine.videoSourceInitialize(APP_ID);
+        let logpath = path.resolve(os.homedir(), "./agorascreenshare.log")
+        rtcEngine.videoSourceSetLogFile(logpath)
+        rtcEngine.videoSourceSetChannelProfile(1);
+        rtcEngine.videoSourceEnableWebSdkInteroperability(true)
         // to adjust render dimension to optimize performance
-        this.rtcEngine.setVideoRenderDimension(3, SHARE_ID, 1200, 680);
-        this.rtcEngine.videoSourceJoin(token, this.state.channel, info, SHARE_ID);
+        rtcEngine.setVideoRenderDimension(3, SHARE_ID, 1200, 680);
+        rtcEngine.videoSourceJoin(token, this.state.channel, info, SHARE_ID);
       } catch(err) {
         clearTimeout(timer)
         reject(err)
@@ -207,34 +235,155 @@ export default class App extends Component {
       return false
     };
     return new Promise((resolve, reject) => {
-      this.rtcEngine.startScreenCapture2(windowId, captureFreq, rect, bitrate);
-      this.rtcEngine.videoSourceSetVideoProfile(43, false);
-      this.rtcEngine.startScreenCapturePreview();
+      let rtcEngine = this.getRtcEngine()
+      // rtcEngine.startScreenCapture2(windowId, captureFreq, rect, bitrate);
+      // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
+      // note although it's called, it's not taking any effect, to control the screenshare dimension, use captureParam instead
+      rtcEngine.videoSourceSetVideoProfile(43, false);
+      rtcEngine.videosourceStartScreenCaptureByWindow(windowId, {x: 0, y: 0, width: 0, height: 0}, {width: 0, height: 0, bitrate: 500, frameRate: 15})
+      rtcEngine.startScreenCapturePreview();
     });
   }
 
-  handleScreenSharing = e => {
-    // getWindowInfo and open Modal
-    let list = this.rtcEngine.getScreenWindowsInfo();
-    let windowList = list.map(item => {
-      return {
-        ownerName: item.ownerName,
-        name: item.name,
-        windowId: item.windowId,
-        image: base64Encode(item.image)
-      }
-    })
-    console.log(windowList)
 
-    this.setState({
-      showWindowPicker: true,
-      windowList: windowList
+  startScreenShareByDisplay(displayId) {
+    if(!this.sharingPrepared) {
+      console.error('Sharing not prepared yet.')
+      return false
+    };
+    return new Promise((resolve, reject) => {
+      let rtcEngine = this.getRtcEngine()
+      // rtcEngine.startScreenCapture2(windowId, captureFreq, rect, bitrate);
+      // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
+      // note although it's called, it's not taking any effect, to control the screenshare dimension, use captureParam instead
+      console.log(`start sharing display ${displayId}`)
+      rtcEngine.videoSourceSetVideoProfile(43, false);
+      // rtcEngine.videosourceStartScreenCaptureByWindow(windowId, {x: 0, y: 0, width: 0, height: 0}, {width: 0, height: 0, bitrate: 500, frameRate: 15})
+      rtcEngine.videosourceStartScreenCaptureByScreen(displayId, {x: 0, y: 0, width: 0, height: 0}, {width: 0, height: 0, bitrate: 500, frameRate: 5})
+      rtcEngine.startScreenCapturePreview();
     });
+  }
+
+  handleScreenSharing = (e) => {
+    // getWindowInfo and open Modal
+    let rtcEngine = this.getRtcEngine()
+    let list = rtcEngine.getScreenWindowsInfo();
+    Promise.all(list.map(item => readImage(item.image))).then(imageList => {
+      let windowList = list.map((item, index) => {
+        return {
+          ownerName: item.ownerName,
+          name: item.name,
+          windowId: item.windowId,
+          image: imageList[index],
+        }
+      })
+      this.setState({
+        showWindowPicker: true,
+        windowList: windowList
+      });
+    })
+  }
+
+  handleDisplaySharing = (e) => {
+    // getWindowInfo and open Modal
+    let rtcEngine = this.getRtcEngine()
+    let list = rtcEngine.getScreenDisplaysInfo();
+    Promise.all(list.map(item => readImage(item.image))).then(imageList => {
+      let displayList = list.map((item, index) => {
+        let name = `Display ${index + 1}`
+        return {
+          ownerName: "",
+          name: name,
+          displayId: item.displayId,
+          image: imageList[index],
+        }
+      })
+      this.setState({
+        showDisplayPicker: true,
+        displayList: displayList
+      });
+    })
+  }
+
+  handleRelease = () => {
+    this.setState({
+      localVideoSource: "",
+      localSharing: false
+    })
+    if(this.rtcEngine) {
+      this.rtcEngine.release();
+      this.rtcEngine = null;
+    }
+  }
+
+  handleRtmp = () => {
+    const url = RTMP_URL
+    if(!url) {
+      alert("RTMP URL Empty")
+      return
+    }
+    if(!this.state.rtmpTestOn) {
+      this.rtcEngine.setLiveTranscoding({
+        /** width of canvas */
+        width: 640,
+        /** height of canvas */
+        height: 480,
+        /** kbps value, for 1-1 mapping pls look at https://docs.agora.io/cn/Interactive%20Broadcast/API%20Reference/cpp/structagora_1_1rtc_1_1_video_encoder_configuration.html */
+        videoBitrate: 500,
+        /** fps, default 15 */
+        videoFrameRate: 15,
+        /** true for low latency, no video quality garanteed; false - high latency, video quality garanteed */
+        lowLatency: true,
+        /** Video GOP in frames, default 30 */
+        videoGop: 30,
+        videoCodecProfile: 77,
+        /**
+         * RGB hex value. Value only, do not include a #. For example, 0xC0C0C0.
+         * number color = (A & 0xff) << 24 | (R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff)
+         */
+        backgroundColor: 0xc0c0c0,
+        /** The number of users in the live broadcast */
+        userCount: 1,
+        audioSampleRate: 1,
+        audioChannels: 1,
+        /** transcodingusers array */
+        transcodingUsers: [
+          {
+            uid: this.state.local,
+            x: 0,
+            y: 0,
+            width: 320,
+            height: 240,
+            zOrder: 1,
+            alpha: 1,
+            audioChannel: 1
+          }
+        ],
+        watermark: {
+          url: "",
+          x: 0,
+          y:0,
+          width: 0,
+          height: 0
+        }
+      });
+      this.rtcEngine.addPublishStreamUrl(
+        url,
+        true
+      );
+    } else {
+      this.rtcEngine.removePublishStreamUrl(url)
+    }
+    
+    this.setState({
+      rtmpTestOn: !this.state.rtmpTestOn
+    })
   }
 
   handleWindowPicker = windowId => {
     this.setState({
-      showWindowPicker: false
+      showWindowPicker: false,
+      localSharing: true
     })
     this.prepareScreenShare()
       .then(uid => {
@@ -248,13 +397,31 @@ export default class App extends Component {
       })
   }
 
+  handleDisplayPicker = displayId => {
+    this.setState({
+      showDisplayPicker: false,
+      localSharing: true
+    })
+    this.prepareScreenShare()
+      .then(uid => {
+        this.startScreenShareByDisplay(displayId)
+        this.setState({
+          localVideoSource: uid
+        })
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
   togglePlaybackTest = e => {
+    let rtcEngine = this.getRtcEngine()
     if (!this.state.playbackTestOn) {
       let filepath = '/Users/menthays/Projects/Agora-RTC-SDK-for-Electron/example/temp/music.mp3';
-      let result = this.rtcEngine.startAudioPlaybackDeviceTest(filepath);
+      let result = rtcEngine.startAudioPlaybackDeviceTest(filepath);
       console.log(result);
     } else {
-      this.rtcEngine.stopAudioPlaybackDeviceTest();
+      rtcEngine.stopAudioPlaybackDeviceTest();
     }
     this.setState({
       playbackTestOn: !this.state.playbackTestOn
@@ -262,14 +429,33 @@ export default class App extends Component {
   }
 
   toggleRecordingTest = e => {
+    let rtcEngine = this.getRtcEngine()
     if (!this.state.recordingTestOn) {
-      let result = this.rtcEngine.startAudioRecordingDeviceTest(1000);
+      let result = rtcEngine.startAudioRecordingDeviceTest(1000);
       console.log(result);
     } else {
-      this.rtcEngine.stopAudioRecordingDeviceTest();
+      rtcEngine.stopAudioRecordingDeviceTest();
     }
     this.setState({
       recordingTestOn: !this.state.recordingTestOn
+    })
+  }
+
+  toggleLastmileTest = e => {
+    let rtcEngine = this.getRtcEngine()
+    if (!this.state.lastmileTestOn) {
+      let result = rtcEngine.startLastmileProbeTest({
+        probeUplink: true,
+        probeDownlink: true,
+        expectedDownlinkBitrate: 500,
+        expectedUplinkBitrate: 500,
+      });
+      console.log(result);
+    } else {
+      rtcEngine.stopLastmileProbeTest();
+    }
+    this.setState({
+      lastmileTestOn: !this.state.lastmileTestOn
     })
   }
 
@@ -277,15 +463,15 @@ export default class App extends Component {
   //   const path = require('path')
   //   let filepath = path.join(__dirname, './music.mp3');
   //   if (this.enableAudioMixing) {
-  //     this.rtcEngine.stopAudioMixing()
+  //     rtcEngine.stopAudioMixing()
   //   } else {
-  //     this.rtcEngine.startAudioMixing(filepath, false, false, -1);
+  //     rtcEngine.startAudioMixing(filepath, false, false, -1);
   //   }
   //   this.enableAudioMixing = !this.enableAudioMixing;
   // }
 
   render() {
-    let windowPicker
+    let windowPicker, displayPicker
     if (this.state.showWindowPicker) {
       windowPicker = <WindowPicker
         onSubmit={this.handleWindowPicker}
@@ -294,26 +480,24 @@ export default class App extends Component {
       />
     }
 
+    if (this.state.showDisplayPicker) {
+      displayPicker = <DisplayPicker
+        onSubmit={this.handleDisplayPicker}
+        onCancel={e => this.setState({showWindowPicker: false})}
+        displayList={this.state.displayList}
+      />
+    }
+
 
     return (
       <div className="columns" style={{padding: "20px", height: '100%', margin: '0'}}>
         { this.state.showWindowPicker ? windowPicker : '' }
+        { this.state.showDisplayPicker ? displayPicker : '' }
         <div className="column is-one-quarter" style={{overflowY: 'auto'}}>
           <div className="field">
             <label className="label">Channel</label>
             <div className="control">
               <input onChange={e => this.setState({channel: e.currentTarget.value})} value={this.state.channel} className="input" type="text" placeholder="Input a channel name" />
-            </div>
-          </div>
-          <div className="field">
-            <label className="label">Channel Profile</label>
-            <div className="control">
-              <div className="select"  style={{width: '100%'}}>
-                <select onChange={e => this.setState({channelProfile: Number(e.currentTarget.value)})} value={this.state.channelProfile} style={{width: '100%'}}>
-                  <option value={0}>Communication</option>
-                  <option value={1}>Live</option>
-                </select>
-              </div>
             </div>
           </div>
           <div className="field">
@@ -328,22 +512,30 @@ export default class App extends Component {
             </div>
           </div>
           <div className="field">
-            <label className="label">Video Encoder Width</label>
-            <div className="control">
-              <input onChange={e => this.setState({encoderWidth: e.currentTarget.value})} value={this.state.encoderWidth} className="input" type="text" placeholder="Width" />
-            </div>
-          </div>
-          <div className="field">
-            <label className="label">Video Encoder Height</label>
-            <div className="control">
-              <input onChange={e => this.setState({encoderHeight: e.currentTarget.value})} value={this.state.encoderHeight} className="input" type="text" placeholder="Height" />
-            </div>
-          </div>
-          <div className="field">
-            <label className="label">VideoProfile</label>
+            <label className="label">VoiceChanger</label>
             <div className="control">
               <div className="select"  style={{width: '100%'}}>
-                <select onChange={this.handleVideoProfile} value={this.state.videoProfile} style={{width: '100%'}}>
+                <select onChange={this.handleVoiceChanger} value={this.state.voiceChangerPreset} style={{width: '100%'}}>
+                  {voiceChangerList.map(item => (<option key={item.value} value={item.value}>{item.label}</option>))}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div className="field">
+            <label className="label">VoiceReverbPreset</label>
+            <div className="control">
+              <div className="select"  style={{width: '100%'}}>
+                <select onChange={this.handleVoiceReverbPreset} value={this.state.voiceReverbPreset} style={{width: '100%'}}>
+                  {voiceReverbList.map(item => (<option key={item.value} value={item.value}>{item.label}</option>))}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div className="field">
+            <label className="label">Video Encoder</label>
+            <div className="control">
+              <div className="select"  style={{width: '100%'}}>
+                <select onChange={this.handleEncoderConfiguration} value={this.state.encoderConfiguration} style={{width: '100%'}}>
                   {videoProfileList.map(item => (<option key={item.value} value={item.value}>{item.label}</option>))}
                 </select>
               </div>
@@ -406,12 +598,32 @@ export default class App extends Component {
           </div>
           <hr/>
           <div className="field">
-            <label className="label">Screen Share</label>
+            <label className="label">Network Test</label>
+            <div className="control">
+              <button onClick={this.toggleLastmileTest} className="button is-link">{this.state.lastmileTestOn ? 'stop' : 'start'}</button>
+            </div>
+          </div>
+          <label className="label">Screen Share</label>
+          <div className="field is-grouped">
             <div className="control">
               <button onClick={this.handleScreenSharing} className="button is-link">Screen Share</button>
             </div>
+            <div className="control">
+              <button onClick={this.handleDisplaySharing} className="button is-link">Display Share</button>
+            </div>
           </div>
-
+          <div className="field">
+            <label className="label">RTMP</label>
+            <div className="control">
+              <button onClick={this.handleRtmp} className="button is-link">{this.state.rtmpTestOn ? 'stop' : 'start'}</button>
+            </div>
+          </div>
+          <div className="field">
+            <label className="label">Release</label>
+            <div className="control">
+              <button onClick={this.handleRelease} className="button is-link">Release</button>
+            </div>
+          </div>
           <div className="field">
             <label className="label">Audio Playback Test</label>
             <div className="control">
@@ -460,6 +672,7 @@ class Window extends Component {
       this.props.rtcEngine.setupViewContentMode(String(SHARE_ID), 1);
     } else if (this.props.role === 'remote') {
       dom && this.props.rtcEngine.subscribe(this.props.uid, dom)
+      this.props.rtcEngine.setupViewContentMode(this.props.uid, 1);
     } else if (this.props.role === 'remoteVideoSource') {
       dom && this.props.rtcEngine.subscribe(this.props.uid, dom)
       this.props.rtcEngine.setupViewContentMode('videosource', 1);

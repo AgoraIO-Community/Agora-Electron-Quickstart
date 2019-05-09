@@ -3,7 +3,7 @@ import {chunk, merge} from 'lodash';
 import PropTypes from 'prop-types';
 import './index.css';
 
-class WindowItem extends React.Component {
+class DisplayItem extends React.Component {
   componentDidMount() {
     // let img = document.querySelector(`#window-${this.props.windowId}`);
     // img.src = 'data:image/png;base64,'+this.props.image;
@@ -24,8 +24,8 @@ class WindowItem extends React.Component {
   }
 }
 
-WindowItem.propTypes = {
-  windowId: PropTypes.number,
+DisplayItem.propTypes = {
+  displayId: PropTypes.object,
   name: PropTypes.string,
   ownerName: PropTypes.string,
   active: PropTypes.bool,
@@ -34,19 +34,19 @@ WindowItem.propTypes = {
   image: PropTypes.string
 }
 
-class WindowPicker extends React.Component {
+class DisplayPicker extends React.Component {
   state = {
-    currentWindowId: -1,
+    currentDisplayId: -1,
   }
 
-  handleSelect = windowId => {
+  handleSelect = displayId => {
     this.setState({
-      currentWindowId: windowId
+      currentDisplayId: displayId
     });
   }
 
   handleSubmit = () => {
-    this.props.onSubmit && this.props.onSubmit(this.state.currentWindowId);
+    this.props.onSubmit && this.props.onSubmit(this.state.currentDisplayId);
   }
 
   handleCancel = () => {
@@ -54,7 +54,7 @@ class WindowPicker extends React.Component {
   }
 
   render() {
-    let chunkList = chunk(this.props.windowList, 1);
+    let chunkList = chunk(this.props.displayList, 1);
     const content = chunkList.map((chunk, index) => {
       return (
         chunk.map(item => (
@@ -65,10 +65,10 @@ class WindowPicker extends React.Component {
               alignItems: 'center',
               justifyContent: 'center'
             }}
-            key={item.windowId}
-            onDoubleClick={() => this.handleSubmit(item.windowId)}
-            onClick={() => this.handleSelect(item.windowId)}
-            span={8}><WindowItem active={item.windowId === this.state.currentWindowId} {...item}/>
+            key={item.displayId}
+            onDoubleClick={() => this.handleSubmit(item.displayId)}
+            onClick={() => this.handleSelect(item.displayId)}
+            span={8}><DisplayItem active={item.displayId === this.state.currentDisplayId} {...item}/>
           </div>
         ))
       )
@@ -90,10 +90,10 @@ class WindowPicker extends React.Component {
   }
 }
 
-WindowPicker.propTypes = {
-  windowList: PropTypes.array,
+DisplayPicker.propTypes = {
+  displayList: PropTypes.array,
   onCancel: PropTypes.func,
   onSubmit: PropTypes.func,
 }
 
-export default WindowPicker;
+export default DisplayPicker;
