@@ -137,7 +137,6 @@ export default class App extends Component {
     rtcEngine.setVideoEncoderConfiguration({width: encoderProfile.width, height: encoderProfile.height, frameRate: encoderProfile.fps, bitrate: encoderProfile.bitrate})
     rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
     rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
-    console.log('loop', rtcEngine.enableLoopbackRecording(true, null))
     rtcEngine.enableDualStreamMode(true)
     rtcEngine.enableAudioVolumeIndication(1000, 3)
 
