@@ -8,7 +8,6 @@ import {voiceChangerList, voiceReverbPreset, videoProfileList, audioProfileList,
 import {readImage} from '../utils/base64'
 import WindowPicker from './components/WindowPicker/index.js'
 import DisplayPicker from './components/DisplayPicker/index.js'
-import { VoiceChangerPreset } from 'agora-electron-sdk/JS/Api/native_type';
 
 export default class App extends Component {
   constructor(props) {
@@ -131,22 +130,21 @@ export default class App extends Component {
     rtcEngine.enableVideo()
     let logpath = path.resolve(os.homedir(), "./agoramain.sdk")
     rtcEngine.setLogFile(logpath)
-    rtcEngine.enableLocalVideo(true)
     rtcEngine.enableWebSdkInteroperability(true)
     let encoderProfile = videoProfileList[this.state.encoderConfiguration]
     rtcEngine.setVideoEncoderConfiguration({width: encoderProfile.width, height: encoderProfile.height, frameRate: encoderProfile.fps, bitrate: encoderProfile.bitrate})
-    rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
-    rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
+    // rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
+    // rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
     rtcEngine.enableDualStreamMode(true)
     rtcEngine.enableAudioVolumeIndication(1000, 3)
 
     //enable beauty options
-    rtcEngine.setBeautyEffectOptions(true, {
-      lighteningContrastLevel: 2,
-      lighteningLevel: 1,
-      smoothnessLevel: 1,
-      rednessLevel: 0
-    })
+    // rtcEngine.setBeautyEffectOptions(true, {
+    //   lighteningContrastLevel: 2,
+    //   lighteningLevel: 1,
+    //   smoothnessLevel: 1,
+    //   rednessLevel: 0
+    // })
 
     rtcEngine.joinChannel(null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }

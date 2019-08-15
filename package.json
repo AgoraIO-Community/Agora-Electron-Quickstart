@@ -10,7 +10,7 @@
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "dependencies": {
-    "agora-electron-sdk": "2.4.0-beta.2",
+    "agora-electron-sdk": "2.3.4-hotfix.1",
     "bulma": "^0.7.1",
     "immutable": "^3.8.2",
     "react": "^16.4.2",
@@ -18,12 +18,12 @@
     "source-map-support": "^0.5.9"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
-    "electron": "4.0.3",
-    "electron-builder": "^20.38.5",
-    "electron-webpack": "^2.3.1",
-    "webpack": "^4.17.1"
+    "electron": "5.0.8",
+    "electron-builder": "^20.44.4",
+    "electron-webpack": "^2.7.4",
+    "webpack": "^4.39.2"
   },
   "resolutions": {
     "webpack-sources": "1.0.1"
@@ -32,5 +32,9 @@
     "renderer": {
       "webpackConfig": "webpack.renderer.additions.js"
     }
+  },
+  "agora_electron": {
+    "prebuilt": true,
+    "electron_version": "5.0.8"
   }
 }
