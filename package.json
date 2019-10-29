@@ -9,14 +9,14 @@
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "dependencies": {
-    "agora-electron-sdk": "^2.3.3-alpha.10",
+    "agora-electron-sdk": "2.3.4-hotfix.9",
     "bulma": "^0.7.1",
     "immutable": "^3.8.2",
     "source-map-support": "^0.5.9",
     "vue": "^2.6.6"
   },
   "devDependencies": {
-    "electron": "^4.0.0",
+    "electron": "5.0.8",
     "electron-builder": "^20.28.3",
     "electron-webpack": "^2.3.1",
     "electron-webpack-vue": "^2.2.3",
@@ -29,5 +29,10 @@
     "renderer": {
       "webpackConfig": "webpack.renderer.additions.js"
     }
+  },
+  "agora_electron": {
+    "prebuilt": true,
+    "electron_version": "5.0.8",
+    "platform": "darwin"
   }
 }

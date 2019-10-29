@@ -1,5 +1,17 @@
 <template>
   <div class="columns" :style="{padding: '20px', height: '100%', margin:'0'}">
+    <WindowPicker
+      v-show="showWindowPicker"
+      :windowList="windowList"
+      v-on:cancel="onCancel()"
+      v-on:submit="handleWindowPicker($event)"
+      :style="{
+        width: 'auto',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }"
+    />
     <!-- { this.state.showWindowPicker ? windowPicker : '' } -->
     <div class="column is-one-quarter" :style="{overflowY: 'auto'}">
       <div class="field">
@@ -112,7 +124,7 @@
       <div class="field">
         <label class="label">Screen Share</label>
         <div class="control">
-          <button disabled @click="handleScreenSharing" class="button is-link">Screen Share</button>
+          <button @click="handleScreenSharing" class="button is-link">Screen Share</button>
         </div>
       </div>
 
@@ -146,6 +158,7 @@
 
       <VideoPlayer v-if="local" :uid="local" :rtcEngine="rtcEngine" role="local"/>
       <VideoPlayer
+        class="show-local-share-screen"
         v-if="localVideoSource"
         :uid="localVideoSource"
         :rtcEngine="rtcEngine"
@@ -171,7 +184,8 @@ import base64Encode from "../utils/base64";
 
 export default {
   components: {
-    VideoPlayer: () => import("./components/VideoPlayer/index.vue")
+    VideoPlayer: () => import("./components/VideoPlayer/index.vue"),
+    WindowPicker: () => import("./components/WindowPicker/index.vue")
   },
   data() {
     this.videoProfileList = videoProfileList;
@@ -204,7 +218,7 @@ export default {
         this.local = uid;
       });
       this.rtcEngine.on("userjoined", (uid, elapsed) => {
-        if (uid === SHARE_ID && this.state.localVideoSource) {
+        if (uid === SHARE_ID && this.localVideoSource) {
           return;
         }
         this.rtcEngine.setRemoteVideoStreamType(uid, 1);
@@ -298,13 +312,18 @@ export default {
           resolve(uid);
         });
         try {
-          this.rtcEngine.videoSourceInitialize(APP_ID);
-          this.rtcEngine.videoSourceSetChannelProfile(1);
-          this.rtcEngine.videoSourceEnableWebSdkInteroperability(true);
+          let x = this.rtcEngine.videoSourceInitialize(APP_ID);
+          console.log(x)
+          x = this.rtcEngine.videoSourceSetChannelProfile(1);
+          console.log(x)
+          x = this.rtcEngine.videoSourceEnableWebSdkInteroperability(true);
+          console.log(x);
           // this.rtcEngine.videoSourceSetVideoProfile(50, false);
           // to adjust render dimension to optimize performance
-          this.rtcEngine.setVideoRenderDimension(3, SHARE_ID, 1200, 680);
-          this.rtcEngine.videoSourceJoin(token, this.channel, info, SHARE_ID);
+          x = this.rtcEngine.setVideoRenderDimension(3, SHARE_ID, 1200, 680);
+          console.log(x);
+          x = this.rtcEngine.videoSourceJoin(token, this.channel, info, SHARE_ID);
+          console.log(x);
         } catch (err) {
           clearTimeout(timer);
           reject(err);
@@ -365,12 +384,17 @@ export default {
       this.showWindowPicker = false;
       this.prepareScreenShare()
         .then(uid => {
+          console.log(">>>>>>> prepare");
           this.startScreenShare(windowId);
           this.localVideoSource = uid;
         })
         .catch(err => {
           console.log(err);
         });
+    },
+
+    hideWindowPicker() {
+      this.showWindowPicker = false;
     },
 
     togglePlaybackTest() {
