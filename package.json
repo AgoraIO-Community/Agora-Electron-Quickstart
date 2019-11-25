@@ -21,7 +21,8 @@
     "windows-store": "node ./script/windows-store.js",
     "release": "node ./script/release.js",
     "prepack": "check-for-leaks",
-    "prepush": "check-for-leaks"
+    "prepush": "check-for-leaks",
+    "zip-consumable": "node ./script/zip.js"
   },
   "repository": "https://github.com/electron/electron-api-demos",
   "keywords": [
