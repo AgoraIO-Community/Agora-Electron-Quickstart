@@ -1,0 +1,43 @@
+<template class="task-template">
+  <section id="video-audio-section" class="section js-section u-category-video-audio">
+    <header class="section-header">
+      <div class="section-wrapper">
+        <h1>
+          <svg class="section-icon"><use xlink:href="assets/img/icons.svg#icon-windows"></use></svg>
+          The Fundamentals
+        </h1>
+        <h3>The <code>agora-electron-sdk</code> module from Agora allows you to start a low latency live streaming scenario with minimum effort.</h3>
+
+        <p>Open the <a href="https://docs.agora.io/cn/Interactive%20Broadcast/API%20Reference/electron/index.html">full API documentation<span class="u-visible-to-screen-reader">(opens in new window)</span></a> in your browser.</p>
+      </div>
+    </header>
+
+    <div class="demo">
+      <div class="demo-wrapper">
+        <button id="join-channel-demo-toggle" class="js-container-target demo-toggle-button">Join a Channel
+          <div class="demo-meta u-avoid-clicks">Supports: Win, macOS <span class="demo-meta-divider">|</span> Process: Renderer</div>
+        </button>
+        <div class="demo-box">
+          <div class="demo-controls">
+            <button class="demo-button" id="agora-join-channel">View Demo</button>
+            <span class="demo-response" id="agora-join-channel-console"></span>
+          </div>
+          <div class="video-controls">
+            <div id="join-channel-local-video" class="video-box"></div>
+            <div id="join-channel-remote-video" class="video-box"></div>
+          </div>
+          <p>The <code>AgoraRtcEngine</code> module gives you the ability to build your own RTC app.</p>
+
+          <p>The most straightforward way to start a live streaming is to join a channel using AgoraRtcEngine.</p>
+          <h5>Renderer Process</h5>
+          <pre><code data-path="renderer-process/video-audio/join-channel.js"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      require('./renderer-process/video-audio/join-channel')
+    </script>
+
+  </section>
+</template>

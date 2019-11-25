@@ -1,59 +1,53 @@
-# Agora Electron Quickstart
+# <img src="https://cloud.githubusercontent.com/assets/378023/15172388/b2b81950-1790-11e6-9a7c-ccc39912bb3a.png" width="60px" align="center" alt="Electron API Demos icon"> Electron API Demos
 
-This tutorial describes how to create an Agora account and build a sample app with Agora using [Electron](https://electronjs.org/) and [React](https://github.com/facebook/react).
+[![Build Status](https://travis-ci.org/electron/electron-api-demos.svg?branch=master)](https://travis-ci.org/electron/electron-api-demos)
+[![JavaScript Standard Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](http://standardjs.com)
 
-## Prerequisites
-- Agora.io [Developer Account](https://dashboard.agora.io/signin/)
-- [Node.js](https://nodejs.org/en/download/) 6.9.1+ with C++11 support
-- [Electron](https://electronjs.org) >= 1.8.3
+This is a desktop app that interactively and with sample code demonstrates core features of the [Electron](http://electronjs.org) API. It's built with Electron, too, of course. This app works on Windows, macOS and Linux operating systems.
 
-## Quick Start
-This section shows you how to prepare and build the Agora Electron wrapper.
+Use this app to see what you can do with Electron and use the source code to learn how to create a basic Electron app.
 
-### Create an Account and Obtain an App ID
-To build and run the sample application, first obtain an app ID: 
+![Electron API Demos Screenshots](https://cloud.githubusercontent.com/assets/378023/15016148/ae06cc80-124a-11e6-80dd-076d83e492f6.png)
 
-1. Create a developer account at [agora.io](https://dashboard.agora.io/signin/). Once you finish the sign-up process, you are redirected to the dashboard.
-2. Navigate in the dashboard tree on the left to **Projects** > **Project List**.
-3. Copy the app ID that you obtain from the dashboard into a text file. You will use this when you launch the app.
+---
 
-### Update and Run the Sample Application
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.md).
+By participating, you are expected to uphold this code. Please report unacceptable
+behavior to [coc@electronjs.org](mailto:coc@electronjs.org).
 
-Open the [settings.js](src/utils/settings.js) file and add the app ID.
+Follow [@ElectronJS](https://twitter.com/electronjs) on Twitter for important
+announcements. Visit the [electron website](http://electronjs.org).
 
-Run the `install` command in your project directory:
+## Using
 
-```bash  
-  # install dependencies
-  npm install 
-```
+You can [download the latest release](https://github.com/electron/electron-api-demos/releases) for your operating system or build it yourself (see below).
 
-**Note:** During install, the C++ add-on is downloaded instead of being built.
+## Building
 
-
-Use the `run dev` or `run dist` command to build the Agora Electron wrapper.
-To enable dynamic compiling and HMR development, use `run dev`:
-	
-```bash
-# enable dynamic compiling and HMR developing environment
-npm run dev
-```
-
-To build for release, use `run dist`:
+You'll need [Node.js](https://nodejs.org) installed on your computer in order to build this app.
 
 ```bash
-# build for release
-npm run dist
+$ git clone https://github.com/electron/electron-api-demos
+$ cd electron-api-demos
+$ npm install
+$ npm start
 ```
 
-Once the build is complete, use the resulting Agora Electron wrapper to build your application.
+If you don't wish to clone, you can [download the source code](https://github.com/electron/electron-api-demos/archive/master.zip).
 
-## Resources
-* [Documention](https://docs.agora.io/en/Video/API%20Reference/electron/index.html)
-* [File bugs about this sample](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/issues)
-* Full Electron SDK wrapper addon source can be found at [Agora RTC SDK for Electron](https://github.com/AgoraIO-Community/Agora-RTC-SDK-for-Electron)
-* General information about building apps with [React](https://github.com/facebook/react) and the [Electron Webpack](https://github.com/electron-userland/electron-webpack)
+For easier developing you can launch the app in fullscreen with DevTools open:
 
+```bash
+$ npm run dev
+```
 
-## License
-This software is under the MIT License (MIT). [View the license](LICENSE.md).
+## Extending
+
+ [Read the docs](docs.md) to learn more about how this app is built or how to [add a new demo](docs.md#add-a-section-or-demo).
+
+## Translations
+
+* Simplified Chinese translation of this app is available at [`demopark/electron-api-demos-Zh_CN`](https://github.com/demopark/electron-api-demos-Zh_CN).
+* Traditional Chinese translation of this app is available at [`CalvertYang/electron-api-demos-zh-Hant`](https://github.com/CalvertYang/electron-api-demos-zh-Hant).
+
+Note: these versions are maintained by outside contributors and may not always be in sync with this version.
