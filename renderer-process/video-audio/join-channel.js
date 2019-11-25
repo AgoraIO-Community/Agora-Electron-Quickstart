@@ -7,15 +7,20 @@ const sdkLogPath = path.resolve(os.homedir(), "./agoramainsdk.log")
 const joinChannelBtn = document.getElementById('agora-join-channel')
 const localVideoContainer = document.getElementById('join-channel-local-video')
 const remoteVideoContainer = document.getElementById('join-channel-remote-video')
+const APPID = process.env["AGORA_APPID"] || ""
 
 joinChannelBtn.addEventListener('click', () => {
+  if(!APPID) {
+    alert(`AGORA_APPID not found in environment variables`)
+  }
+
   if(global.rtcEngine) {
     // if rtc engine exists already, you must call release to free it first
     global.rtcEngine.release()
   }
 
   let rtcEngine = new AgoraRtcEngine()
-  rtcEngine.initialize('aab8b8f5a8cd4469a63042fcfafe7063')
+  rtcEngine.initialize(APPID)
 
   // listen to events
   rtcEngine.on('joinedChannel', (channel, uid, elapsed) => {
