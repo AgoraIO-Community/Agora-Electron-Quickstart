@@ -27,7 +27,7 @@ steps:
     AGORA_APPID: $(agora.appId)
     
     
-- script: npm run package:${packtype}
+- script: npm run package:$(packtype)
 
 - task: CopyFiles@2
   inputs:
