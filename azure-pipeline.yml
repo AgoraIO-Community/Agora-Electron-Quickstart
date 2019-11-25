@@ -5,9 +5,11 @@ strategy:
     mac:
       displayName: MacOS-Build
       imageName: 'macos-10.13'
+      packtype: 'mac'
     windows:
       displayName: Windows-Build
       imageName: 'vs2017-win2016'
+      packtype: 'win'
 
 pool:
   vmImage: $(imageName)
@@ -22,10 +24,10 @@ steps:
 
 - script: npm run write-config
   env:
-    AGORA_APP_ID: $(agora.appId)
+    AGORA_APPID: $(agora.appId)
     
     
-- script: npm run dist:dir
+- script: npm run package:${packtype}
 
 - task: CopyFiles@2
   inputs:

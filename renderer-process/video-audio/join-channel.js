@@ -7,7 +7,7 @@ const sdkLogPath = path.resolve(os.homedir(), "./agoramainsdk.log")
 const joinChannelBtn = document.getElementById('agora-join-channel')
 const localVideoContainer = document.getElementById('join-channel-local-video')
 const remoteVideoContainer = document.getElementById('join-channel-remote-video')
-const APPID = process.env["AGORA_APPID"] || ""
+const APPID = global.AGORA_APPID || ""
 
 joinChannelBtn.addEventListener('click', () => {
   if(!APPID) {
