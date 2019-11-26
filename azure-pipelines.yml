@@ -14,6 +14,9 @@ strategy:
 pool:
   vmImage: $(imageName)
 
+variables:
+  - group: AgoraKeys
+
 steps:
 
 - task: NodeTool@0
