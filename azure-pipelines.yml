@@ -15,7 +15,7 @@ pool:
   vmImage: $(imageName)
 
 variables:
-  - group: AgoraKeys
+  - group: ElectronQuickStart
 
 steps:
 
