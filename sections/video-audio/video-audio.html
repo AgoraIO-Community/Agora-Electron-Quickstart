@@ -19,7 +19,7 @@
         </button>
         <div class="demo-box">
           <div class="demo-controls">
-            <button class="demo-button" id="agora-join-channel">View Demo</button>
+            <button class="demo-button" id="agora-join-channel" data-target="join-channel-code">View Demo</button>
             <span class="demo-response" id="agora-join-channel-console"></span>
           </div>
           <div class="video-controls">
@@ -30,13 +30,14 @@
 
           <p>The most straightforward way to start a live streaming is to join a channel using AgoraRtcEngine.</p>
           <h5>Renderer Process</h5>
-          <pre><code data-path="renderer-process/video-audio/join-channel.js"></code></pre>
+          <pre>
+            <div id="join-channel-code" class="editor" style="width: 100%"><code data-path="renderer-process/video-audio/join-channel.js"></code></div>
+          </pre>
         </div>
       </div>
     </div>
 
     <script type="text/javascript">
-      require('./renderer-process/video-audio/join-channel')
     </script>
 
   </section>
