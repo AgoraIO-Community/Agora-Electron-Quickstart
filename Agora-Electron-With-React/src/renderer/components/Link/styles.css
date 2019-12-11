@@ -1,0 +1,13 @@
+/*
+ * Every class name will be hashed so it can be used their own component scoped
+ * Use classes instead of ids
+ */
+
+.tone {
+    color: var(--primary-color);    /* Using global constants example */
+}
+
+.link {
+    composes: tone;                 /* Composition example */
+    text-decoration: none;
+}
