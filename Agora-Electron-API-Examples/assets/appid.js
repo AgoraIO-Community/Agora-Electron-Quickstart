@@ -1,0 +1,1 @@
+global.AGORA_APPID = process.env["AGORA_APPID"]

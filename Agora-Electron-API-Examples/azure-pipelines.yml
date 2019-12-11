@@ -1,0 +1,46 @@
+# Build NodeJS Express app using Azure Pipelines
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript?view=azure-devops
+strategy:
+  matrix:
+    mac:
+      displayName: MacOS-Build
+      imageName: 'macos-10.13'
+      packtype: 'mac'
+    windows:
+      displayName: Windows-Build
+      imageName: 'vs2017-win2016'
+      packtype: 'win'
+
+pool:
+  vmImage: $(imageName)
+
+variables:
+  - group: ElectronQuickStart
+
+steps:
+
+- task: NodeTool@0
+  inputs:
+    versionSpec: '8.x'
+
+- script: npm install
+
+- script: npm run write-config
+  env:
+    AGORA_APPID: $(agora.appId)
+    
+    
+- script: npm run package:$(packtype)
+- script: npm run zip-consumable
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(System.DefaultWorkingDirectory)'
+    Contents: |
+      out.zip
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: $(displayName)
