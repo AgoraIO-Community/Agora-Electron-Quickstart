@@ -5,7 +5,7 @@ This tutorial describes how to create an Agora account and build a sample app wi
 ## Prerequisites
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
 - [Node.js](https://nodejs.org/en/download/) 6.9.1+ with C++11 support
-- [Electron](https://electronjs.org) >= 1.8.3
+- [Electron](https://electronjs.org) = \[1.8.3, 3.0.6, 4.2.8, 5.0.8, 6.1.5, 7.1.2]
 
 ## Quick Start
 This section shows you how to prepare and build the Agora Electron wrapper.
