@@ -1,0 +1,29 @@
+{
+  "name": "electron-vue-webpack",
+  "version": "1.0.0",
+  "description": "A minimal Electron + Vue 2 + Webpack 2 setup with few dependencies for quick development.",
+  "main": "main.js",
+  "scripts": {
+    "bundle": "webpack --mode development",
+    "serve": "electron .",
+    "start": "npm-run-all --parallel bundle serve"
+  },
+  "author": "J. Renato Ramos González <renato.etc.etc.etc@gmail.com>",
+  "repository": "pastahito/electron-vue-webpack",
+  "license": "WTFPL",
+  "dependencies": {
+    "vue": "^2.6.11"
+  },
+  "devDependencies": {
+    "agora-electron-sdk": "^2.9.0-hotfix.2",
+    "css-loader": "^0.25.0",
+    "electron": "5.0.8",
+    "electron-reload": "^1.0.2",
+    "file-loader": "^5.0.2",
+    "npm-run-all": "^4.1.5",
+    "vue-loader": "^14.2.4",
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^3.1.1"
+  }
+}
