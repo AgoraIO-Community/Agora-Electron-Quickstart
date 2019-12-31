@@ -1,6 +1,9 @@
+const isProduction = process.env["NODE_ENV"] === "production"
+
+
 module.exports = {
     externals: {"agora-electron-sdk": "commonjs2 agora-electron-sdk"},
-    watch: true,
+    watch: isProduction ? false : true,
 
     target: 'electron-renderer',
 

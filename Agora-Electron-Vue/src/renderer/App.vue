@@ -21,7 +21,7 @@
     // With shell.openExternal(url) is how
     // external urls must be handled, not href
     const shell = require('electron').shell
-    const APPID = "aab8b8f5a8cd4469a63042fcfafe7063"
+    const APPID = ""
 
     export default {
         components: {
@@ -42,7 +42,7 @@
                 }
 
                 if(!APPID) {
-                    alert('Please provide APPID in App.jsx')
+                    alert('Please provide APPID in App.vue')
                     return
                 }
 
