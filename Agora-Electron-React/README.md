@@ -16,5 +16,5 @@ $ npm run dev
 ```
 
 ## Related
-- [electron-vue-webpack](https://github.com/pastahito/electron-vue-webpack) -
+- [Agora-Electron-Vue](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/tree/master/Agora-Electron-Vue) -
 Minimal Electron template using Vue 2 instead of React.
