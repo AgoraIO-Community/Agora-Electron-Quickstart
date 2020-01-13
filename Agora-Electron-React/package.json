@@ -18,7 +18,8 @@
   "scripts": {
     "bundle": "webpack --mode development",
     "serve": "electron .",
-    "dev": "cross-env NODE_ENV=development npm-run-all --parallel bundle serve",
+    "serve-dev": "rimraf build && wait-on build/bundle.js && electron .",
+    "dev": "cross-env NODE_ENV=development npm-run-all --parallel bundle serve-dev",
     "dist": "cross-env NODE_ENV=production webpack --mode development && electron-builder"
   },
   "author": "J. Renato Ramos González <renato.etc.etc.etc@gmail.com>",
@@ -36,11 +37,13 @@
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^1.1.10",
     "npm-run-all": "^4.1.2",
+    "rimraf": "^3.0.0",
+    "wait-on": "^3.3.0",
     "webpack": "^4.1.1",
     "webpack-cli": "^3.1.1"
   },
   "dependencies": {
-    "agora-electron-sdk": "^2.9.1-beta.1",
+    "agora-electron-sdk": "^2.9.1-beta.5",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   }
