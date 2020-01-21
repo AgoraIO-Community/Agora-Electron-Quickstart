@@ -17,7 +17,7 @@
 /* Category Colors */
 
 .u-category-video-audio     { --color-accent: hsl(222, 53%, 50%); }
-.u-category-windows       { --color-accent: hsl(116, 30%, 36%); }
+.u-category-live-streaming       { --color-accent: hsl(116, 30%, 36%); }
 .u-category-menu          { --color-accent: hsl(194, 60%, 36%); }
 .u-category-native-ui     { --color-accent: hsl(222, 53%, 50%); }
 .u-category-communication { --color-accent: hsl(285, 47%, 46%); }

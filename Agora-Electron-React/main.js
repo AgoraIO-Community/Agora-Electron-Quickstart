@@ -29,7 +29,7 @@ app.on('ready', () => {
     }
 
     if(isDevelopment) {
-        mainWindow.loadURL(`file://${__dirname}/index.html`)
+        mainWindow.loadURL(`file://${__dirname}/web-desktop/index.html`)
     } else {
         mainWindow.loadURL(format({
             pathname: path.join(__dirname, 'index.html'),

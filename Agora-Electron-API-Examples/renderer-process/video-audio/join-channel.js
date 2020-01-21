@@ -11,6 +11,7 @@
   
   if(!APPID) {
     alert(`AGORA_APPID not found in environment variables`)
+    return
   }
   
   if(global.rtcEngine) {
