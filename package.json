@@ -28,7 +28,8 @@
         "NSMicrophoneUsageDescription": "Request mic usage"
       }
     },
-    "publish": "never"
+    "npmRebuilt": false,
+    "publish": null
   },
   "dependencies": {
     "agora-electron-sdk": "2.9.0-hotfix.2",
