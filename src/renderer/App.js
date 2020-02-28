@@ -190,6 +190,9 @@ export default class App extends Component {
    */
   prepareScreenShare(token = null, info = '', timeout = 30000) {
     return new Promise((resolve, reject) => {
+      if(this.sharingPrepared){
+        return resolve(this.state.localVideoSource)
+      }
       let timer = setTimeout(() => {
         reject(new Error('Timeout'))
       }, timeout)
@@ -411,6 +414,14 @@ export default class App extends Component {
       })
   }
 
+  stopSharing = () => {
+    let rtcEngine = this.getRtcEngine()
+    rtcEngine.stopScreenCapture2()
+    this.setState({
+      localSharing: false
+    })
+  }
+
   togglePlaybackTest = e => {
     let rtcEngine = this.getRtcEngine()
     if (!this.state.playbackTestOn) {
@@ -602,11 +613,14 @@ export default class App extends Component {
           </div>
           <label className="label">Screen Share</label>
           <div className="field is-grouped">
-            <div className="control">
+            <div className={this.state.localSharing ? "hidden control" : "control"}>
               <button onClick={this.handleScreenSharing} className="button is-link">Screen Share</button>
             </div>
-            <div className="control">
+            <div className={this.state.localSharing ? "hidden control" : "control"}>
               <button onClick={this.handleDisplaySharing} className="button is-link">Display Share</button>
+            </div>
+            <div className={this.state.localSharing ? "control" : "hidden control"}>
+              <button onClick={this.stopSharing} className="button is-link">Stop Share</button>
             </div>
           </div>
           <div className="field">
