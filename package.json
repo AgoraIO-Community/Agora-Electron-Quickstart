@@ -27,7 +27,8 @@
         "NSCameraUsageDescription": "Request camera usage",
         "NSMicrophoneUsageDescription": "Request mic usage"
       }
-    }
+    },
+    "publish": "never"
   },
   "dependencies": {
     "agora-electron-sdk": "2.9.0-hotfix.2",
