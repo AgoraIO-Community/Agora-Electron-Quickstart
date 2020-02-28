@@ -6,7 +6,7 @@
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "write-config": "node ./scripts/writeAppId.js",
-    "dist": "npm run compile && electron-builder",
+    "dist": "GH_TOKEN=dummy npm run compile && electron-builder",
     "dist:dir": "npm run dist --dir -c.compression=store -c.mac.identity=null"
   },
   "build": {
