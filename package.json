@@ -28,7 +28,7 @@
         "NSMicrophoneUsageDescription": "Request mic usage"
       }
     },
-    "npmRebuilt": false,
+    "npmRebuild": false,
     "publish": null
   },
   "dependencies": {
