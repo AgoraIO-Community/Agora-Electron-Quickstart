@@ -149,6 +149,11 @@ export default class App extends Component {
     rtcEngine.joinChannel(null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }
 
+  handleLeave = () => {
+    let rtcEngine = this.getRtcEngine()
+    rtcEngine.leaveChannel()
+  }
+
   handleCameraChange = e => {
     this.setState({camera: e.currentTarget.value});
     this.getRtcEngine().setVideoDevice(this.state.videoDevices[e.currentTarget.value].deviceid);
@@ -600,6 +605,9 @@ export default class App extends Component {
             </div>
           </div> */}
           <div className="field is-grouped is-grouped-right">
+            <div className="control">
+              <button onClick={this.handleLeave} className="button is-link">Leave</button>
+            </div>
             <div className="control">
               <button onClick={this.handleJoin} className="button is-link">Join</button>
             </div>
