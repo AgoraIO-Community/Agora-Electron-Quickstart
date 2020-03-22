@@ -1,0 +1,64 @@
+<template class="task-template">
+  <section id="screen-share-section" class="section js-section u-category-video-audio">
+    <header class="section-header">
+      <div class="section-wrapper">
+        <h1>
+          <svg class="section-icon"><use xlink:href="assets/img/icons.svg#icon-windows"></use></svg>
+          Screen Share
+        </h1>
+        <h3>This tutorial shows you how to start a screen share.</h3>
+
+        <p>Open the <a href="https://docs.agora.io/cn/Interactive%20Broadcast/API%20Reference/electron/index.html">full API documentation<span class="u-visible-to-screen-reader">(opens in new window)</span></a> in your browser.</p>
+      </div>
+    </header>
+
+    <div class="demo">
+      <div class="demo-wrapper">
+        <button id="vs-screen-share-display-demo-toggle" class="js-container-target demo-toggle-button">Screen Share By Display
+          <div class="demo-meta u-avoid-clicks">Supports: Win, macOS <span class="demo-meta-divider">|</span> Process: Renderer</div>
+        </button>
+        <div class="demo-box">
+          <div class="demo-controls">
+            <button class="demo-button" id="agora-vs-screen-display-share" data-target="vs-screen-share-display-code">View Demo</button>
+            <span class="demo-response" id="agora-vs-screen-share-display-console"></span>
+          </div>
+          <div class="video-controls">
+            <div id="vs-screen-share-display-local-video" class="video-box"></div>
+            <div id="vs-screen-share-display-local-screen" class="video-box"></div>
+            <div id="vs-screen-share-display-remote-video" class="video-box"></div>
+          </div>
+          <p>If you don't need camera video to be upstreamed together with screenshare stream, it would be easy.</p>
+          <h5>Renderer Process</h5>
+          <pre>
+            <div id="vs-screen-share-display-code" class="editor" style="width: 100%"><code data-path="renderer-process/video-audio/vs-screen-share-display.js"></code></div>
+          </pre>
+        </div>
+      </div>
+      <div class="demo-wrapper">
+        <button id="vs-screen-share-window-demo-toggle" class="js-container-target demo-toggle-button">Screen Share By Window
+          <div class="demo-meta u-avoid-clicks">Supports: Win, macOS <span class="demo-meta-divider">|</span> Process: Renderer</div>
+        </button>
+        <div class="demo-box">
+          <div class="demo-controls">
+            <button class="demo-button" id="agora-vs-screen-display-share" data-target="vs-screen-share-window-code">View Demo</button>
+            <span class="demo-response" id="agora-vs-screen-share-window-console"></span>
+          </div>
+          <div class="video-controls">
+            <div id="vs-screen-share-window-local-video" class="video-box"></div>
+            <div id="vs-screen-share-window-local-screen" class="video-box"></div>
+            <div id="vs-screen-share-window-remote-video" class="video-box"></div>
+          </div>
+          <p>If you don't need camera video to be upstreamed together with screenshare stream, it would be easy.</p>
+          <h5>Renderer Process</h5>
+          <pre>
+            <div id="vs-screen-share-window-code" class="editor" style="width: 100%"><code data-path="renderer-process/video-audio/vs-screen-share-window.js"></code></div>
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+    </script>
+
+  </section>
+</template>
