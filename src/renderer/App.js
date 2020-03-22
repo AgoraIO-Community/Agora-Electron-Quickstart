@@ -136,7 +136,7 @@ export default class App extends Component {
     // rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
     // rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
     rtcEngine.enableDualStreamMode(true)
-    rtcEngine.enableAudioVolumeIndication(1000, 3)
+    rtcEngine.enableAudioVolumeIndication(1000, 3, false)
 
     //enable beauty options
     // rtcEngine.setBeautyEffectOptions(true, {
