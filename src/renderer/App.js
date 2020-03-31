@@ -75,12 +75,13 @@ export default class App extends Component {
     })
     rtcEngine.on('removestream', (uid, reason) => {
       this.setState({
-        users: this.state.users.delete(this.state.users.indexOf(uid))
+        users: this.state.users.filter(u => u != uid)
       })
     })
     rtcEngine.on('leavechannel', () => {
       this.setState({
-        local: ''
+        local: '',
+        users: new List()
       })
     })
     rtcEngine.on('audiodevicestatechanged', () => {
