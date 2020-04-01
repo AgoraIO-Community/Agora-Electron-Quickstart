@@ -20,7 +20,7 @@ export default class App extends Component {
         local: '',
         localVideoSource: '',
         localSharing: false,
-        users: new List(),
+        users: [],
         channel: '',
         role: 1,
         voiceReverbPreset: 0,
@@ -70,10 +70,11 @@ export default class App extends Component {
         return
       }
       this.setState({
-        users: this.state.users.push(uid)
+        users: this.state.users.concat([uid])
       })
     })
     rtcEngine.on('removestream', (uid, reason) => {
+      console.log(`user left ${uid}`)
       this.setState({
         users: this.state.users.filter(u => u != uid)
       })
@@ -82,7 +83,7 @@ export default class App extends Component {
       this.sharingPrepared = false
       this.setState({
         local: '',
-        users: new List(),
+        users: [],
         localSharing: false,
         localVideoSource: ''
       })
@@ -334,7 +335,7 @@ export default class App extends Component {
   handleRelease = () => {
     this.setState({
       localVideoSource: "",
-      users: new List(),
+      users: [],
       localSharing: false,
       local: ''
     })
@@ -682,7 +683,7 @@ export default class App extends Component {
         </div>
         <div className="column is-three-quarters window-container">
           {this.state.users.map((item, key) => (
-            <Window key={key} uid={item} rtcEngine={this.rtcEngine} role={item===SHARE_ID?'remoteVideoSource':'remote'}></Window>
+            <Window key={item} uid={item} rtcEngine={this.rtcEngine} role={item===SHARE_ID?'remoteVideoSource':'remote'}></Window>
           ))}
           {this.state.local ? (<Window uid={this.state.local} rtcEngine={this.rtcEngine} role="local">
 
