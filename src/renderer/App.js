@@ -134,8 +134,13 @@ export default class App extends Component {
     rtcEngine.enableWebSdkInteroperability(true)
     let encoderProfile = videoProfileList[this.state.encoderConfiguration]
     rtcEngine.setVideoEncoderConfiguration({width: encoderProfile.width, height: encoderProfile.height, frameRate: encoderProfile.fps, bitrate: encoderProfile.bitrate})
-    rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
-    rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
+    
+    if(this.state.voiceChangerPreset !== 0) {
+      rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
+    }
+    if(this.state.voiceReverbPreset !== 0) {
+      rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
+    }
     rtcEngine.enableDualStreamMode(true)
     rtcEngine.enableAudioVolumeIndication(1000, 3, false)
 
