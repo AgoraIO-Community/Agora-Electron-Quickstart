@@ -79,9 +79,12 @@ export default class App extends Component {
       })
     })
     rtcEngine.on('leavechannel', () => {
+      this.sharingPrepared = false
       this.setState({
         local: '',
-        users: new List()
+        users: new List(),
+        localSharing: false,
+        localVideoSource: ''
       })
     })
     rtcEngine.on('audiodevicestatechanged', () => {
@@ -169,6 +172,7 @@ export default class App extends Component {
   handleLeave = () => {
     let rtcEngine = this.getRtcEngine()
     rtcEngine.leaveChannel()
+    rtcEngine.videoSourceLeave()
   }
 
   handleCameraChange = e => {
@@ -330,7 +334,9 @@ export default class App extends Component {
   handleRelease = () => {
     this.setState({
       localVideoSource: "",
-      localSharing: false
+      users: new List(),
+      localSharing: false,
+      local: ''
     })
     if(this.rtcEngine) {
       this.sharingPrepared = false
