@@ -141,6 +141,17 @@ export default class App extends Component {
     if(this.state.voiceReverbPreset !== 0) {
       rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
     }
+
+    if(this.state.videoDevices.length > 0) {
+      rtcEngine.setVideoDevice(this.state.videoDevices[this.state.camera].deviceid)
+    }
+    if(this.state.audioDevices.length > 0) {
+      rtcEngine.setAudioRecordingDevice(this.state.audioDevices[this.state.mic].deviceid);
+    }
+    if(this.state.audioPlaybackDevices.length > 0) {
+      rtcEngine.setAudioPlaybackDevice(this.state.audioDevices[this.state.speaker].deviceid);
+    }
+
     rtcEngine.enableDualStreamMode(true)
     rtcEngine.enableAudioVolumeIndication(1000, 3, false)
 
