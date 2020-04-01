@@ -333,6 +333,7 @@ export default class App extends Component {
       localSharing: false
     })
     if(this.rtcEngine) {
+      this.sharingPrepared = false
       this.rtcEngine.release();
       this.rtcEngine = null;
     }
