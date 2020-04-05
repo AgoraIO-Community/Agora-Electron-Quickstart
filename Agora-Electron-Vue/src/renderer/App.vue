@@ -21,7 +21,7 @@
     // With shell.openExternal(url) is how
     // external urls must be handled, not href
     const shell = require('electron').shell
-    const APPID = ""
+    const APPID = process.env["AGORA_APPID"] || ""
 
     export default {
         components: {

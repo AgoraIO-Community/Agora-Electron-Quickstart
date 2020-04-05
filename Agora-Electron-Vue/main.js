@@ -9,7 +9,7 @@ const isDevelopment = process.env["NODE_ENV"] === "development"
 
 if(isDevelopment) {
     //only load reload module in dev mode
-    require('electron-reload')(__dirname)
+    require('electron-reload')(process.cwd())
 }
 
 // To avoid being garbage collected

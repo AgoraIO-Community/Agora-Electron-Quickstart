@@ -17,8 +17,8 @@
   },
   "scripts": {
     "bundle": "webpack --mode development",
-    "serve": "cross-env NODE_ENV=development electron .",
-    "start": "npm-run-all --parallel bundle serve",
+    "serve-dev": "rimraf build && wait-on build/bundle.js && electron .",
+    "dev": "cross-env NODE_ENV=development npm-run-all --parallel bundle serve-dev",
     "dist": "cross-env NODE_ENV=production webpack --mode development && electron-builder"
   },
   "author": "J. Renato Ramos González <renato.etc.etc.etc@gmail.com>",
@@ -40,6 +40,8 @@
     "vue-loader": "^14.2.4",
     "vue-template-compiler": "^2.6.11",
     "webpack": "^4.1.1",
-    "webpack-cli": "^3.1.1"
+    "webpack-cli": "^3.1.1",
+    "rimraf": "^3.0.0",
+    "wait-on": "^3.3.0"
   }
 }
