@@ -69,6 +69,7 @@ export default class App extends Component {
       if (uid === SHARE_ID && this.state.localSharing) {
         return
       }
+      rtcEngine.muteRemoteVideoStream(uid, false)
       this.setState({
         users: this.state.users.concat([uid])
       })
