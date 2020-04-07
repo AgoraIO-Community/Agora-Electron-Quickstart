@@ -133,7 +133,7 @@ export default class App extends Component {
     rtcEngine.setClientRole(this.state.role)
     rtcEngine.setAudioProfile(0, 1)
     rtcEngine.enableVideo()
-    let logpath = path.resolve(os.homedir(), "./agoramain.sdk")
+    let logpath = path.resolve(os.homedir(), `./agoramainsdk-${new Date()}.log`)
     rtcEngine.setLogFile(logpath)
     rtcEngine.enableWebSdkInteroperability(true)
     let encoderProfile = videoProfileList[this.state.encoderConfiguration]
@@ -447,8 +447,12 @@ export default class App extends Component {
   stopSharing = () => {
     let rtcEngine = this.getRtcEngine()
     rtcEngine.stopScreenCapture2()
+    rtcEngine.videoSourceLeave()
+    rtcEngine.videoSourceRelease()
+    this.sharingPrepared = false
     this.setState({
-      localSharing: false
+      localSharing: false,
+      localVideoSource: ""
     })
   }
 
@@ -645,7 +649,7 @@ export default class App extends Component {
             </div>
           </div>
           <label className="label">Screen Share</label>
-          <div className="field is-grouped">
+          <div className={this.state.users.filter(u => u === 2).length > 0 ? "hidden field is-grouped" : "field is-grouped"}>
             <div className={this.state.localSharing ? "hidden control" : "control"}>
               <button onClick={this.handleScreenSharing} className="button is-link">Screen Share</button>
             </div>
