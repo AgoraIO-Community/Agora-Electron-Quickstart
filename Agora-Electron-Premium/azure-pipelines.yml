@@ -4,7 +4,7 @@ strategy:
   matrix:
     mac:
       displayName: MacOS-Build
-      imageName: 'macos-10.13'
+      imageName: 'macos-latest'
     windows:
       displayName: Windows-Build
       imageName: 'vs2017-win2016'
