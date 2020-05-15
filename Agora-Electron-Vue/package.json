@@ -27,7 +27,7 @@
   "dependencies": {
     "url": "^0.11.0",
     "vue": "^2.6.11",
-    "agora-electron-sdk": "^2.9.0-hotfix.2"
+    "agora-electron-sdk": "latest"
   },
   "devDependencies": {
     "cross-env": "^6.0.3",
