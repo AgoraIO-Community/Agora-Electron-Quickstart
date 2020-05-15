@@ -19,7 +19,7 @@ jobs:
         env:
           AGORA_APP_ID: $(agora.appId)
 
-      - script: cd ${{ parameters.workingDirectory }} && npm run package:win
+      - script: cd ${{ parameters.workingDirectory }} && npm run package:win && ls -alt out
 
       - script: cd ${{ parameters.workingDirectory }} && 7z a -r -tzip agora-electron-api-example-win.zip out/Electron\ API\ Demos-win32-ia32
 
