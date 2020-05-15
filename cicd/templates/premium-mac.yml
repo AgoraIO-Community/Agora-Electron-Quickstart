@@ -3,7 +3,7 @@ parameters:
   workingDirectory: ''
 
 jobs:
-  - job: ${{ parameters.displayName }}Mac
+  - job: ${{ parameters.displayName }}
     displayName: ${{ parameters.displayName }}
 
     pool:
@@ -25,5 +25,5 @@ jobs:
 
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: agora-electron.zip.zip
+          PathtoPublish: ${{ parameters.workingDirectory }}/agora-electron.zip
           ArtifactName: ${{ parameters.displayName }}
