@@ -19,9 +19,9 @@ jobs:
         env:
           AGORA_APP_ID: $(agora.appId)
 
-      - script: cd ${{ parameters.workingDirectory }} && npm run package:win && ls -alt out/Electron API Demos-win32-ia32
+      - script: cd ${{ parameters.workingDirectory }} && npm run package:win && ls -alt "out/Electron API Demos-win32-ia32"
 
-      - script: cd ${{ parameters.workingDirectory }} && 7z a -r -tzip agora-electron-api-example-win.zip out/Electron\ API\ Demos-win32-ia32
+      - script: cd ${{ parameters.workingDirectory }} && 7z a -r -tzip agora-electron-api-example-win.zip "out/Electron API Demos-win32-ia32"
 
       - task: PublishBuildArtifacts@1
         inputs:
