@@ -11,7 +11,7 @@ jobs:
     parameters:
       displayName: 'AgoraElectronAPIExampleWin'
       workingDirectory: 'Agora-Electron-API-Examples'
-  - template: cicd/templates/api-example-win.yml
+  - template: cicd/templates/api-example-mac.yml
     parameters:
       displayName: 'AgoraElectronAPIExampleMac'
       workingDirectory: 'Agora-Electron-API-Examples'
