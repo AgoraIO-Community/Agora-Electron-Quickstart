@@ -21,9 +21,9 @@ jobs:
 
       - script: cd ${{ parameters.workingDirectory }} && npm run dist
 
-      - script: cd ${{ parameters.workingDirectory }} && 7z a -r -tzip agora-electron-premium-win.zip dist/win-ia32-unpacked
+      - script: cd ${{ parameters.workingDirectory }} && 7z a -r -tzip agora-electron-api-example-win.zip out/Electron\ API\ Demos-win32-ia32
 
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: ${{ parameters.workingDirectory }}/agora-electron-premium-win.zip
+          PathtoPublish: ${{ parameters.workingDirectory }}/agora-electron-api-example-win.zip
           ArtifactName: ${{ parameters.displayName }}

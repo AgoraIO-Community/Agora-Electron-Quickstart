@@ -7,7 +7,7 @@ jobs:
     displayName: ${{ parameters.displayName }}
 
     pool:
-      vmImage: 'vs2017-win2016'
+      vmImage: 'macOS-latest'
 
     # variables:
     #   - group: AgoraKeys
@@ -17,13 +17,13 @@ jobs:
       
       - script: cd ${{ parameters.workingDirectory }} && npm run write-config
         env:
-          AGORA_APP_ID: $(agora.appId)
+          AGORA_APPID: $(agora.appId)
 
-      - script: cd ${{ parameters.workingDirectory }} && npm run dist
+      - script: cd ${{ parameters.workingDirectory }} && npm run package:mac
 
-      - script: cd ${{ parameters.workingDirectory }} && 7z a -r -tzip agora-electron-premium-win.zip dist/win-ia32-unpacked
+      - script: cd ${{ parameters.workingDirectory }} && zip -r agora-electron-api-example-mac.zip out/Electron\ API\ Demos-darwin-x64
 
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: ${{ parameters.workingDirectory }}/agora-electron-premium-win.zip
+          PathtoPublish: ${{ parameters.workingDirectory }}/agora-electron-api-example-mac.zip
           ArtifactName: ${{ parameters.displayName }}

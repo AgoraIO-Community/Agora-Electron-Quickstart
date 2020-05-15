@@ -21,7 +21,7 @@ jobs:
 
       - script: cd ${{ parameters.workingDirectory }} && npm run dist
 
-      - script: cd ${{ parameters.workingDirectory }} && zip -r agora-electron.zip dist/mac/electron-webpack-quick-start.app
+      - script: cd ${{ parameters.workingDirectory }} && zip -r agora-electron-premium-mac.zip dist/mac/electron-webpack-quick-start.app
 
       - task: PublishBuildArtifacts@1
         inputs:

@@ -7,3 +7,11 @@ jobs:
     parameters:
       displayName: 'AgoraElectronPremiumWin'
       workingDirectory: 'Agora-Electron-Premium'
+  - template: cicd/templates/api-example-win.yml
+    parameters:
+      displayName: 'AgoraElectronAPIExampleWin'
+      workingDirectory: 'Agora-Electron-API-Examples'
+  - template: cicd/templates/api-example-win.yml
+    parameters:
+      displayName: 'AgoraElectronAPIExampleMac'
+      workingDirectory: 'Agora-Electron-API-Examples'
