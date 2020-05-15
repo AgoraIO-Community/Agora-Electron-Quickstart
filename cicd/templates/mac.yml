@@ -1,0 +1,27 @@
+parameters:
+  displayName: ''
+  workingDirectory: ''
+
+jobs:
+  - job: ${{ parameters.displayName }}-Mac
+    displayName: ${{ parameters.displayName }}
+
+    pool:
+      vmImage: 'macOS-latest'
+
+    # variables:
+    #   - group: AgoraKeys
+
+    steps:    
+      - script: cd ${{ parameters.workingDirectory }} && npm install
+      
+      - script: cd ${{ parameters.workingDirectory }} && npm run write-config
+        env:
+          AGORA_APP_ID: $(agora.appId)
+
+      - script: cd ${{ parameters.workingDirectory }} && npm run dist
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: ${{ parameters.workingDirectory }}/${{ parameters.displayName }}.zip
+          ArtifactName: ${{ parameters.displayName }}
