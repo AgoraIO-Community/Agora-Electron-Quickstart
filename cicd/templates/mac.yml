@@ -3,7 +3,7 @@ parameters:
   workingDirectory: ''
 
 jobs:
-  - job: ${{ parameters.displayName }}-Mac
+  - job: ${{ parameters.displayName }}Mac
     displayName: ${{ parameters.displayName }}
 
     pool:

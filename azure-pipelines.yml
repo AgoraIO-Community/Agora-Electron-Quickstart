@@ -1,5 +1,5 @@
 jobs:
   - template: cicd/templates/mac.yml
     parameters:
-      displayName: 'Agora-Electron-Premium'
+      displayName: 'AgoraElectronPremium'
       workingDirectory: 'Agora-Electron-Premium'
