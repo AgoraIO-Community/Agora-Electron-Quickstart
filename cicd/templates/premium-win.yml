@@ -7,7 +7,7 @@ jobs:
     displayName: ${{ parameters.displayName }}
 
     pool:
-      vmImage: 'macOS-latest'
+      vmImage: 'vs2017-win2016'
 
     # variables:
     #   - group: AgoraKeys
@@ -21,9 +21,9 @@ jobs:
 
       - script: cd ${{ parameters.workingDirectory }} && npm run dist
 
-      - script: cd ${{ parameters.workingDirectory }} && zip -r agora-electron.zip dist/mac/electron-webpack-quick-start.app
+      - script: cd ${{ parameters.workingDirectory }} && 7z a -r -tzip agora-electron.zip dist/win-ia32-unpacked
 
       - task: PublishBuildArtifacts@1
         inputs:
-          PathtoPublish: ${{ parameters.workingDirectory }}/agora-electron-premium-mac.zip
+          PathtoPublish: ${{ parameters.workingDirectory }}/agora-electron-premium-win.zip
           ArtifactName: ${{ parameters.displayName }}

@@ -3,3 +3,7 @@ jobs:
     parameters:
       displayName: 'AgoraElectronPremiumMac'
       workingDirectory: 'Agora-Electron-Premium'
+  - template: cicd/templates/premium-win.yml
+    parameters:
+      displayName: 'AgoraElectronPremiumWin'
+      workingDirectory: 'Agora-Electron-Premium'
