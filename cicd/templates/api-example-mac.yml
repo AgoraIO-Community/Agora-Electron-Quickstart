@@ -14,10 +14,6 @@ jobs:
 
     steps:    
       - script: cd ${{ parameters.workingDirectory }} && npm install
-      
-      - script: cd ${{ parameters.workingDirectory }} && npm run write-config
-        env:
-          AGORA_APPID: $(agora.appId)
 
       - script: cd ${{ parameters.workingDirectory }} && npm run package:mac
 

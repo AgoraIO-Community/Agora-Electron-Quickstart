@@ -4,7 +4,7 @@ import { List } from 'immutable';
 import path from 'path';
 import os from 'os'
 
-import {voiceChangerList, voiceReverbPreset, videoProfileList, audioProfileList, audioScenarioList, APP_ID, SHARE_ID, RTMP_URL, voiceReverbList } from '../utils/settings'
+import {voiceChangerList, voiceReverbPreset, videoProfileList, audioProfileList, audioScenarioList, SHARE_ID, RTMP_URL, voiceReverbList } from '../utils/settings'
 import {readImage} from '../utils/base64'
 import WindowPicker from './components/WindowPicker/index.js'
 import DisplayPicker from './components/DisplayPicker/index.js'
@@ -12,45 +12,54 @@ import DisplayPicker from './components/DisplayPicker/index.js'
 export default class App extends Component {
   constructor(props) {
     super(props)
-    if (!APP_ID) {
-      alert('APP_ID cannot be empty!')
-    } else {
-      let rtcEngine = this.getRtcEngine()
-      this.state = {
-        local: '',
-        localVideoSource: '',
-        localSharing: false,
-        users: [],
-        channel: '',
-        role: 1,
-        voiceReverbPreset: 0,
-        voiceChangerPreset: 0,
-        videoDevices: rtcEngine.getVideoDevices(),
-        audioDevices: rtcEngine.getAudioRecordingDevices(),
-        audioPlaybackDevices: rtcEngine.getAudioPlaybackDevices(),
-        camera: 0,
-        mic: 0,
-        speaker: 0,
-        encoderConfiguration: 3,
-        showWindowPicker: false,
-        showDisplayPicker: false,
-        recordingTestOn: false,
-        playbackTestOn: false,
-        lastmileTestOn: false,
-        rtmpTestOn: false,
-        windowList: [],
-        displayList: [],
-      }
+    this.state = {
+      appid: '',
+      token: '',
+      local: '',
+      localVideoSource: '',
+      localSharing: false,
+      users: [],
+      channel: '',
+      role: 1,
+      voiceReverbPreset: 0,
+      voiceChangerPreset: 0,
+      // videoDevices: rtcEngine.getVideoDevices(),
+      // audioDevices: rtcEngine.getAudioRecordingDevices(),
+      // audioPlaybackDevices: rtcEngine.getAudioPlaybackDevices(),
+      videoDevices: [],
+      audioDevices: [],
+      audioPlaybackDevices: [],
+      camera: 0,
+      mic: 0,
+      speaker: 0,
+      encoderConfiguration: 3,
+      showWindowPicker: false,
+      showDisplayPicker: false,
+      recordingTestOn: false,
+      playbackTestOn: false,
+      lastmileTestOn: false,
+      rtmpTestOn: false,
+      windowList: [],
+      displayList: [],
     }
-    this.enableAudioMixing = false;
   }
 
   getRtcEngine() {
+    if(!this.state.appid){
+      alert("Please enter appid")
+      return
+    }
     if(!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine()
-      this.rtcEngine.initialize(APP_ID)
+      this.rtcEngine.initialize(this.state.appid)
       this.subscribeEvents(this.rtcEngine)
       window.rtcEngine = this.rtcEngine;
+
+      this.setState({
+        videoDevices: rtcEngine.getVideoDevices(),
+        audioDevices: rtcEngine.getAudioRecordingDevices(),
+        audioPlaybackDevices: rtcEngine.getAudioPlaybackDevices(),
+      })
     }
 
     return this.rtcEngine
@@ -129,6 +138,10 @@ export default class App extends Component {
   }
 
   handleJoin = () => {
+    if(!this.state.channel){
+      alert("Please enter channel")
+      return
+    }
     let rtcEngine = this.getRtcEngine()
     rtcEngine.setChannelProfile(1)
     rtcEngine.setClientRole(this.state.role)
@@ -168,7 +181,7 @@ export default class App extends Component {
     //   rednessLevel: 0
     // })
 
-    rtcEngine.joinChannel(null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
+    rtcEngine.joinChannel(this.state.token || null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }
 
   handleLeave = () => {
@@ -231,7 +244,7 @@ export default class App extends Component {
         resolve(uid)
       });
       try {
-        rtcEngine.videoSourceInitialize(APP_ID);
+        rtcEngine.videoSourceInitialize(this.state.appid);
         let logpath = path.resolve(os.homedir(), "./agorascreenshare.log")
         rtcEngine.videoSourceSetLogFile(logpath)
         rtcEngine.videoSourceSetChannelProfile(1);
@@ -538,6 +551,18 @@ export default class App extends Component {
         { this.state.showWindowPicker ? windowPicker : '' }
         { this.state.showDisplayPicker ? displayPicker : '' }
         <div className="column is-one-quarter" style={{overflowY: 'auto'}}>
+          <div className="field">
+            <label className="label">App ID</label>
+            <div className="control">
+              <input onChange={e => this.setState({appid: e.currentTarget.value})} value={this.state.appid} className="input" type="text" placeholder="APP ID" />
+            </div>
+          </div>
+          <div className="field">
+            <label className="label">Token(Optional)</label>
+            <div className="control">
+              <input onChange={e => this.setState({token: e.currentTarget.value})} value={this.state.token} className="input" type="text" placeholder="Token(Leave it empty if you didn't enable it)" />
+            </div>
+          </div>
           <div className="field">
             <label className="label">Channel</label>
             <div className="control">

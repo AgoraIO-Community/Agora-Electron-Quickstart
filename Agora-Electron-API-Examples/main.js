@@ -10,7 +10,6 @@ let mainWindow = null
 
 function initialize () {
   makeSingleInstance()
-
   loadDemos()
 
   function createWindow () {
