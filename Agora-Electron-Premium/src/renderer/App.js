@@ -369,9 +369,9 @@ export default class App extends Component {
     if(!this.state.rtmpTestOn) {
       this.rtcEngine.setLiveTranscoding({
         /** width of canvas */
-        width: 640,
+        width: 480,
         /** height of canvas */
-        height: 480,
+        height: 640,
         /** kbps value, for 1-1 mapping pls look at https://docs.agora.io/cn/Interactive%20Broadcast/API%20Reference/cpp/structagora_1_1rtc_1_1_video_encoder_configuration.html */
         videoBitrate: 500,
         /** fps, default 15 */
@@ -388,30 +388,31 @@ export default class App extends Component {
         backgroundColor: 0xc0c0c0,
         /** The number of users in the live broadcast */
         userCount: 1,
-        audioSampleRate: 1,
+        audioSampleRate: 48000,
         audioChannels: 1,
         audioBitrate: 48,
+        transcodingExtraInfo: "",
         /** transcodingusers array */
-        transcodingUsers: [
+       transcodingUsers: [
           {
             uid: this.state.local,
             x: 0,
-            y: 0,
-            width: 320,
-            height: 240,
-            zOrder: 1,
-            alpha: 1,
+            y: 320,
+            width: 240,
+            height: 320,
+            zOrder: 2,
+            alpha: 1.0,
             audioChannel: 1
           }
         ],
         watermark: {
-          url: "",
+          url: "https://winaero.com/blog/wp-content/uploads/2019/11/Photos-new-icon.png",
           x: 0,
           y:0,
-          width: 0,
-          height: 0
+          width: 50,
+          height: 50
         }
-      });
+      })
       this.rtcEngine.addPublishStreamUrl(
         url,
         true
