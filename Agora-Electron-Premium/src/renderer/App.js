@@ -61,7 +61,7 @@ export default class App extends Component {
         audioPlaybackDevices: rtcEngine.getAudioPlaybackDevices(),
       })
     }
-
+  
     return this.rtcEngine
   }
 
@@ -70,11 +70,13 @@ export default class App extends Component {
 
   subscribeEvents = (rtcEngine) => {
     rtcEngine.on('joinedchannel', (channel, uid, elapsed) => {
+      console.log(`onJoinChannel channel: ${channel}  uid: ${uid}`)
       this.setState({
         local: uid
       });
     });
     rtcEngine.on('userjoined', (uid, elapsed) => {
+      console.log(`userJoined ---- ${uid}`)
       if (uid === SHARE_ID && this.state.localSharing) {
         return
       }
@@ -84,12 +86,13 @@ export default class App extends Component {
       })
     })
     rtcEngine.on('removestream', (uid, reason) => {
-      console.log(`user left ${uid}`)
+      console.log(`useroffline ${uid}`)
       this.setState({
         users: this.state.users.filter(u => u != uid)
       })
     })
-    rtcEngine.on('leavechannel', () => {
+    rtcEngine.on('leavechannel', (rtcStats) => {
+      console.log(`onleaveChannel----`)
       this.sharingPrepared = false
       this.setState({
         local: '',
@@ -143,22 +146,23 @@ export default class App extends Component {
       return
     }
     let rtcEngine = this.getRtcEngine()
+    let logpath = path.resolve(os.homedir(), `./agoramainsdk-${new Date()}.log`)
+    rtcEngine.setLogFile(logpath)
     rtcEngine.setChannelProfile(1)
     rtcEngine.setClientRole(this.state.role)
     rtcEngine.setAudioProfile(0, 1)
     rtcEngine.enableVideo()
-    let logpath = path.resolve(os.homedir(), `./agoramainsdk-${new Date()}.log`)
-    rtcEngine.setLogFile(logpath)
+    
     rtcEngine.enableWebSdkInteroperability(true)
     let encoderProfile = videoProfileList[this.state.encoderConfiguration]
-    rtcEngine.setVideoEncoderConfiguration({width: encoderProfile.width, height: encoderProfile.height, frameRate: encoderProfile.fps, bitrate: encoderProfile.bitrate})
-    
-    if(this.state.voiceChangerPreset !== 0) {
-      rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
-    }
-    if(this.state.voiceReverbPreset !== 0) {
-      rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
-    }
+    let rett = rtcEngine.setVideoEncoderConfiguration({width: encoderProfile.width, height: encoderProfile.height, frameRate: encoderProfile.fps, bitrate: encoderProfile.bitrate})
+    console.log(`setVideoEncoderConfiguration --- ${JSON.stringify(encoderProfile)}  ret: ${rett}`)
+
+    let ret1 = rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
+    console.log(`setLocalVoiceChanger : ${ret1} -- e ${this.state.voiceChangerPreset}`)
+
+    let ret2 = rtcEngine.setLocalVoiceReverbPreset(this.state.voiceReverbPreset)
+    console.log(`setLocalVoiceReverbPreset : ${ret2} -- e ${this.state.voiceReverbPreset}`)
 
     if(this.state.videoDevices.length > 0) {
       rtcEngine.setVideoDevice(this.state.videoDevices[this.state.camera].deviceid)
@@ -212,12 +216,14 @@ export default class App extends Component {
   }
 
   handleVoiceChanger = e => {
+    console.log(`handleVoiceChanger  ${e.currentTarget.value}`)
     this.setState({
       voiceChangerPreset: Number(e.currentTarget.value)
     })
   }
 
   handleVoiceReverbPreset = e => {
+    console.log(`handleVoiceReverbPreset  ${e.currentTarget.value}`)
     this.setState({
       voiceReverbPreset: Number(e.currentTarget.value)
     })
