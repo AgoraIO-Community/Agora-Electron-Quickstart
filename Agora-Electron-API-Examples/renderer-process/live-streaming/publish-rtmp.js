@@ -55,7 +55,7 @@
       backgroundColor: 0xc0c0c0,
       /** The number of users in the live broadcast */
       userCount: 1,
-      audioSampleRate: 1,
+      audioSampleRate: 32000,
       audioChannels: 1,
       audioBitrate: 48,
       /** transcodingusers array */
