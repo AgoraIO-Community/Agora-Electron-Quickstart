@@ -45,11 +45,18 @@
 
       // start screenshare
       rtcEngine.videoSourceSetVideoProfile(43, false);
+      // let list = rtcEngine.getScreenWindowsInfo();
+      // let excludeListFull = list.map((item, index) => {
+      //   return item.windowId
+      // });
+      // let excludeList = excludeListFull;
+      let excludeList = []
       rtcEngine.videoSourceStartScreenCaptureByScreen(displays[0].displayId, {
         x: 0, y: 0, width: 0, height: 0
       }, {
-        width: 0, height: 0, frameRate: 5, bitrate: 0
+        width: 0, height: 0, bitrate: 500, frameRate: 5, captureMouseCursor: false, windowFocus: false, excludeWindowList: excludeList, excludeWindowCount: excludeList.length
       })
+      
       //setup dom where to display screenshare preview
       rtcEngine.setupLocalVideoSource(localScreenContainer)
       rtcEngine.startScreenCapturePreview()

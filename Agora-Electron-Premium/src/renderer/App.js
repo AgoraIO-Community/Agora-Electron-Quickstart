@@ -303,11 +303,19 @@ export default class App extends Component {
       // rtcEngine.startScreenCapture2(windowId, captureFreq, rect, bitrate);
       // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
       // note although it's called, it's not taking any effect, to control the screenshare dimension, use captureParam instead
-      console.log(`start sharing display ${displayId}`)
+      console.log(`start sharing display ${JSON.stringify(displayId)}`)
       rtcEngine.videoSourceSetVideoProfile(43, false);
-      // rtcEngine.videosourceStartScreenCaptureByWindow(windowId, {x: 0, y: 0, width: 0, height: 0}, {width: 0, height: 0, bitrate: 500, frameRate: 15})
-      rtcEngine.videoSourceStartScreenCaptureByScreen(displayId, {x: 0, y: 0, width: 0, height: 0}, {width: 0, height: 0, bitrate: 500, frameRate: 5, captureMouseCursor: false, windowFocus: false})
+      // let list = rtcEngine.getScreenWindowsInfo();
+      // let excludeListFull = list.map((item, index) => {
+      //   return item.windowId
+      // });
+      // let excludeList = excludeListFull;
+      let excludeList = []
+      
+      rtcEngine.videoSourceStartScreenCaptureByScreen(displayId, {x: 0, y: 0, width: 0, height: 0}, {width: 0, height: 0, bitrate: 500, frameRate: 5, captureMouseCursor: false, windowFocus: false, excludeWindowList: excludeList, excludeWindowCount: excludeList.length});
       rtcEngine.startScreenCapturePreview();
+
+
     });
   }
 
