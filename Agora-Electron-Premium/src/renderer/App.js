@@ -177,6 +177,11 @@ export default class App extends Component {
     rtcEngine.enableDualStreamMode(true)
     rtcEngine.enableAudioVolumeIndication(1000, 3, false)
 
+    // rtcEngine.setEncryptionSecret("hello")
+    // rtcEngine.setEncryptionMode("aes-128-xts")
+    
+    // rtcEngine.enableEncryption(true, {encryptionMode: 1, encryptionKey: "hello"})
+    
     //enable beauty options
     // rtcEngine.setBeautyEffectOptions(true, {
     //   lighteningContrastLevel: 2,
@@ -257,6 +262,11 @@ export default class App extends Component {
         rtcEngine.videoSourceEnableWebSdkInteroperability(true)
         // to adjust render dimension to optimize performance
         rtcEngine.setVideoRenderDimension(3, SHARE_ID, 1200, 680);
+
+        // rtcEngine.videoSourceSetEncryptionSecret("hello")
+        // rtcEngine.videoSourceSetEncryptionMode("aes-128-xts")
+        
+        // rtcEngine.videoSourceEnableEncryption(true, {encryptionMode: 1, encryptionKey: "hello"});
         rtcEngine.videoSourceJoin(token, this.state.channel, info, SHARE_ID);
       } catch(err) {
         clearTimeout(timer)
