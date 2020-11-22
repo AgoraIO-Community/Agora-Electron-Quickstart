@@ -8,7 +8,7 @@ const isDevelopment = process.env["NODE_ENV"] === "development"
 // Let electron reloads by itself when webpack watches changes in ./app/
 if(isDevelopment) {
     //only load reload module in dev mode
-    require('electron-reload')(__dirname)
+    require('electron-reload')(path.join(__dirname, "src"))
 }
 
 // To avoid being garbage collected
