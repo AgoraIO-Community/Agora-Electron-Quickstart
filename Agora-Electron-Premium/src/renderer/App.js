@@ -4,10 +4,14 @@ import { List } from 'immutable';
 import path from 'path';
 import os from 'os'
 
+import desktopCapturer from 'electron'
+
 import {voiceChangerList, voiceReverbPreset, videoProfileList, audioProfileList, audioScenarioList, SHARE_ID, RTMP_URL, voiceReverbList } from '../utils/settings'
 import {readImage} from '../utils/base64'
 import WindowPicker from './components/WindowPicker/index.js'
 import DisplayPicker from './components/DisplayPicker/index.js'
+
+// const getSourcess = desktopCapturer.getSource()
 
 export default class App extends Component {
   constructor(props) {
@@ -40,7 +44,7 @@ export default class App extends Component {
       lastmileTestOn: false,
       rtmpTestOn: false,
       windowList: [],
-      displayList: [],
+      displayList: []
     }
   }
 
@@ -52,6 +56,9 @@ export default class App extends Component {
     if(!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine()
       this.rtcEngine.initialize(this.state.appid)
+      let ret = this.rtcEngine.setLogFileSize(2000)
+      console.log(`setLogFileSize ${ret}`)
+      this.rtcEngine.setLogFile("./Agora_SDK_Log.txt")
       this.subscribeEvents(this.rtcEngine)
       window.rtcEngine = this.rtcEngine;
 
@@ -70,10 +77,12 @@ export default class App extends Component {
 
   subscribeEvents = (rtcEngine) => {
     rtcEngine.on('joinedchannel', (channel, uid, elapsed) => {
-      console.log(`onJoinChannel channel: ${channel}  uid: ${uid}`)
+      console.log(`onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(rtcEngine.getVersion())})`)
       this.setState({
         local: uid
       });
+      let ret = rtcEngine.addPublishStreamUrl("rtmp://vid-218.push.chinanetcenter.broadcastapp.agora.io/live/rawPublishStrem", false)
+      console.log(`addPublishStreamUrl ret: ${ret}`);
     });
     rtcEngine.on('userjoined', (uid, elapsed) => {
       console.log(`userJoined ---- ${uid}`)
@@ -189,7 +198,6 @@ export default class App extends Component {
     //   smoothnessLevel: 1,
     //   rednessLevel: 0
     // })
-
     rtcEngine.joinChannel(this.state.token || null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }
 
@@ -391,7 +399,7 @@ export default class App extends Component {
       return
     }
     if(!this.state.rtmpTestOn) {
-      this.rtcEngine.setLiveTranscoding({
+      let ret = this.rtcEngine.setLiveTranscoding({
         /** width of canvas */
         width: 480,
         /** height of canvas */
@@ -399,7 +407,10 @@ export default class App extends Component {
         /** kbps value, for 1-1 mapping pls look at https://docs.agora.io/cn/Interactive%20Broadcast/API%20Reference/cpp/structagora_1_1rtc_1_1_video_encoder_configuration.html */
         videoBitrate: 500,
         /** fps, default 15 */
-        videoFrameRate: 15,
+        // 2.9.0.107
+        videoFramerate: 15,
+        //3.2.1.71
+        // videoFrameRate: 15,
         /** true for low latency, no video quality garanteed; false - high latency, video quality garanteed */
         lowLatency: true,
         /** Video GOP in frames, default 30 */
@@ -412,7 +423,10 @@ export default class App extends Component {
         backgroundColor: 0xc0c0c0,
         /** The number of users in the live broadcast */
         userCount: 1,
-        audioSampleRate: 48000,
+        //3.2.1.71
+        // audioSampleRate: 48000,
+        //2.9.0.107
+        audioSampleRateType: 48000,
         audioChannels: 1,
         audioBitrate: 48,
         transcodingExtraInfo: "",
@@ -435,8 +449,16 @@ export default class App extends Component {
           y:0,
           width: 50,
           height: 50
+        },
+        background: {
+          url: "https://winaero.com/blog/wp-content/uploads/2019/11/Photos-new-icon.png",
+          x: 0,
+          y:0,
+          width: 50,
+          height: 50
         }
       })
+      console.log(`setLiveTranscoding ${ret}`);
       this.rtcEngine.addPublishStreamUrl(
         url,
         true
