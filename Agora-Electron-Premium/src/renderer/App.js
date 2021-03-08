@@ -17,7 +17,7 @@ export default class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      appid: '',
+      appid: ,
       token: '',
       local: '',
       localVideoSource: '',
@@ -198,6 +198,7 @@ export default class App extends Component {
     //   smoothnessLevel: 1,
     //   rednessLevel: 0
     // })
+    rtcEngine.setRenderMode(2)
     rtcEngine.joinChannel(this.state.token || null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }
 
@@ -261,7 +262,12 @@ export default class App extends Component {
         clearTimeout(timer)
         this.sharingPrepared = true
         resolve(uid)
+        console.log(`videosourcejoinedsuccess`)
       });
+
+      rtcEngine.once('videoSourceLeaveChannel', ()=>{
+        console.log(`videoSourceLeaveChannel`)
+      })
       try {
         rtcEngine.videoSourceInitialize(this.state.appid);
         let logpath = path.resolve(os.homedir(), "./agorascreenshare.log")
@@ -788,6 +794,7 @@ class Window extends Component {
     let dom = document.querySelector(`#video-${this.props.uid}`)
     if (this.props.role === 'local') {
       dom && this.props.rtcEngine.setupLocalVideo(dom)
+      this.props.rtcEngine.setupViewContentMode("local", 1)
     } else if (this.props.role === 'localVideoSource') {
       dom && this.props.rtcEngine.setupLocalVideoSource(dom)
       this.props.rtcEngine.setupViewContentMode('videosource', 1);
