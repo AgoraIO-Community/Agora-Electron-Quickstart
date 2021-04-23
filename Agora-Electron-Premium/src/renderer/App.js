@@ -340,8 +340,6 @@ export default class App extends Component {
       
       rtcEngine.videoSourceStartScreenCaptureByScreen(displayId, {x: 0, y: 0, width: 0, height: 0}, {width: 0, height: 0, bitrate: 500, frameRate: 5, captureMouseCursor: false, windowFocus: false, excludeWindowList: excludeList, excludeWindowCount: excludeList.length});
       rtcEngine.startScreenCapturePreview();
-
-
     });
   }
 
