@@ -233,6 +233,8 @@ export default class App extends Component {
     console.log(`handleVoiceChanger  ${e.currentTarget.value}`)
     this.setState({
       voiceChangerPreset: Number(e.currentTarget.value)
+    }, () => {
+      this.rtcEngine.setLocalVoiceChanger(this.state.voiceChangerPreset)
     })
   }
 
