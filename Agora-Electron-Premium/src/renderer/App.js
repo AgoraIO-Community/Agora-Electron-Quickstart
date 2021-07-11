@@ -269,6 +269,7 @@ export default class App extends Component {
 
       rtcEngine.once('videoSourceLeaveChannel', ()=>{
         console.log(`videoSourceLeaveChannel`)
+        rtcEngine.videoSourceRelease()
       })
       try {
         rtcEngine.videoSourceInitialize(this.state.appid);
@@ -516,7 +517,6 @@ export default class App extends Component {
     let rtcEngine = this.getRtcEngine()
     rtcEngine.stopScreenCapture2()
     rtcEngine.videoSourceLeave()
-    rtcEngine.videoSourceRelease()
     this.sharingPrepared = false
     this.setState({
       localSharing: false,
