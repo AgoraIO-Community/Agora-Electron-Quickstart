@@ -5,5 +5,9 @@ build
 dist/
 node_modules/
 thumbs.db
-
+.history
 local_settings.js
+*.txt
+appID.js
+*.log
+*.log*

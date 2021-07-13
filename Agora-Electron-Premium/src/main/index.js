@@ -8,27 +8,27 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow
+app.allowRendererProcessReuse = false
 
 function createMainWindow() {
   const window = new BrowserWindow({
     width: 1366,
     height: 768,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: { nodeIntegration: true, contextIsolation: false },
   })
 
-  // if (isDevelopment) {
-    window.webContents.openDevTools()
-  // }
+  window.webContents.openDevTools({ mode: 'detach' })
 
   if (isDevelopment) {
     window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`)
-  }
-  else {
-    window.loadURL(formatUrl({
-      pathname: path.join(__dirname, 'index.html'),
-      protocol: 'file',
-      slashes: true
-    }))
+  } else {
+    window.loadURL(
+      formatUrl({
+        pathname: path.join(__dirname, 'index.html'),
+        protocol: 'file',
+        slashes: true,
+      })
+    )
   }
 
   window.on('closed', () => {
