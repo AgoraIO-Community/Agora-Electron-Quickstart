@@ -10,6 +10,7 @@
     "dist:dir": "npm run dist --dir -c.compression=store -c.mac.identity=null"
   },
   "build": {
+    "asar": false,
     "appId": "io.agora.wayang.electron",
     "win": {
       "target": [
@@ -48,7 +49,7 @@
     "webpack": "^4.39.2"
   },
   "resolutions": {
-    "webpack-sources": "1.0.1"
+    "electron-rebuild": "1.0.1"
   },
   "electronWebpack": {
     "renderer": {

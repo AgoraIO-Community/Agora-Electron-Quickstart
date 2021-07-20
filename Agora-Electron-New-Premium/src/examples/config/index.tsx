@@ -1,0 +1,42 @@
+import {
+  // AUDIO_PROFILE_TYPE,
+  // AUDIO_SCENARIO_TYPE,
+  // CLIENT_ROLE_TYPE,
+  // FRAME_RATE,
+} from 'agora-electron-sdk';
+
+export const AudioProfileList = {
+  // Default: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT, //0
+  // SpeechStandard: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_SPEECH_STANDARD, //1
+  // MusicStandard: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_STANDARD, //2
+  // MusicStandardStereo: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_STANDARD_STEREO, //3
+  // MusicHigh: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_HIGH_QUALITY, //4
+  // MusicHighStereo: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_HIGH_QUALITY_STEREO, //5
+  // IOT: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_IOT, //6
+};
+export const AudioScenarioList = {
+  // Standard: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_DEFAULT, //0
+  // Entertainment: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_ENTERTAINMENT, //1
+  // Education: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_EDUCATION, //2
+  // HighQuality: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_GAME_STREAMING, //3
+  // Showroom: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_SHOWROOM, //4
+  // Gaming: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_GAMING, //5
+  // Meeting: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_MEETING, //8
+};
+
+export const RoleTypeMap = {
+  // Broadcaster: CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER, //1
+  // Audience: CLIENT_ROLE_TYPE.CLIENT_ROLE_AUDIENCE, //2
+};
+export const ResolutionMap = {
+  // '320x240': { width: 320, height: 240 },
+  // '640x480': { width: 640, height: 480 },
+  // '960x720': { width: 960, height: 720 },
+  // '1920x1080': { width: 1920, height: 1080 },
+};
+export const FpsMap = {
+  // '15fps': FRAME_RATE.FRAME_RATE_FPS_15,
+  // '30fps': FRAME_RATE.FRAME_RATE_FPS_30,
+};
+
+export default {};
