@@ -63,6 +63,9 @@ export default class JoinChannelAudio extends Component<State> {
           this.rtcEngine.setAddonLogFile(config.addonLogPath);
       res = this.rtcEngine.videoSourceInitialize(config.appID);
       console.log('initialize:', res);
+
+      res = this.rtcEngine.videoSourceSetAddonLogFile(config.videoSourceAddonLogPath);
+      res = this.rtcEngine.videoSourceSetLogFile(config.nativeSDKVideoSourceLogPath);
     }
 
     return this.rtcEngine;
@@ -181,12 +184,8 @@ export default class JoinChannelAudio extends Component<State> {
               return { dropId: deviceid, dropText: devicename, ...obj };
             })}
             onPress={(res) => {
-              console.log('设置videoSourceEnableLoopbackRecording true');
-
-              this.rtcEngine?.videoSourceEnableLoopbackRecording(
-                true,
-                res.dropId
-              );
+              this.rtcEngine?.videoSourceEnableLoopbackRecording(true,res.dropText);
+      
             }}
           />
           <SliderBar
