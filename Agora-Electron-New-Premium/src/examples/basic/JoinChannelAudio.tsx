@@ -150,7 +150,7 @@ export default class JoinChannelAudio extends Component<State> {
             })}
             onPress={(res) => {
               this.rtcEngine?.setAudioRecordingDevice(res.dropId);
-              this.rtcEngine?.enableLoopbackRecording(true, res.dropId);
+              this.rtcEngine?.enableLoopbackRecording(true, res.dropText);
             }}
           />
           <SliderBar
