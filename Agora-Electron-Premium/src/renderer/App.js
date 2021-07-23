@@ -798,13 +798,11 @@ class Window extends Component {
     } else if (this.props.role === 'localVideoSource') {
       dom && this.props.rtcEngine.setupLocalVideoSource(dom)
       this.props.rtcEngine.setupViewContentMode('videosource', 1);
-      this.props.rtcEngine.setupViewContentMode(String(SHARE_ID), 1);
     } else if (this.props.role === 'remote') {
       dom && this.props.rtcEngine.subscribe(this.props.uid, dom)
       this.props.rtcEngine.setupViewContentMode(this.props.uid, 1);
     } else if (this.props.role === 'remoteVideoSource') {
       dom && this.props.rtcEngine.subscribe(this.props.uid, dom)
-      this.props.rtcEngine.setupViewContentMode('videosource', 1);
       this.props.rtcEngine.setupViewContentMode(String(SHARE_ID), 1);
     }
   }
