@@ -55,7 +55,7 @@ export default class JoinChannelAudio extends Component<State> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
-
+      window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
       let res = this.rtcEngine.initialize(config.appID);
       console.log('initialize', res);
