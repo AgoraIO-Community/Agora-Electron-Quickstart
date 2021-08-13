@@ -1,6 +1,6 @@
 let localAppId = ''
 try {
-  localAppId = require("appID.js").default;
+  localAppId = require("appID").default;
   console.log(localAppId);
 } catch (error) {
   console.log('require   appID ',error);
