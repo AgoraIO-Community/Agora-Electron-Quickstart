@@ -363,6 +363,46 @@ export default class App extends Component {
       });
     })
   }
+  startChildProcessCamera = async (e) => {
+    this.rtcEngine.setRenderMode(1);
+    console.log('click');
+    let res = this.rtcEngine.videoSourceInitialize(this.state.appid);
+
+    console.log('videoSourceInitialize',res)
+
+    const deviceList=rtcEngine.getVideoDevices();
+    console.log('deviceList',deviceList);
+    if (deviceList.length>0) {
+      console.log('deviceList[0].deviceid',deviceList[0].deviceid);
+      res = this.rtcEngine.videoSourceSetVideoDevice(deviceList[0].deviceid);  
+    }
+    this.rtcEngine.videoSourceEnableVideo();
+    res = this.rtcEngine.videoSourceEnableLocalAudio(false);
+    console.log('videoSourceEnableLocalAudio',res);
+    res = this.rtcEngine.videoSourceEnableLocalVideo(true);
+    console.log('videoSourceEnableLocalVideo',res);
+
+    res=await this.prepareScreenShare();
+    console.log('join success ',res);;
+
+    this.setState({localVideoSource:SHARE_ID},()=>{
+      this.rtcEngine.setRenderMode(1);
+      this.rtcEngine.startScreenCapturePreview();  
+    })
+  }
+
+  stopChildProcessCamera = async (e) => {
+    
+    let rtcEngine = this.getRtcEngine()
+    rtcEngine.stopScreenCapture2()
+    rtcEngine.videoSourceLeave()
+    this.sharingPrepared = false
+    this.setState({
+      localSharing: false,
+      localVideoSource: ""
+    })
+  }
+
 
   handleDisplaySharing = (e) => {
     // getWindowInfo and open Modal
@@ -740,6 +780,18 @@ export default class App extends Component {
               <button onClick={this.stopSharing} className="button is-link">Stop Share</button>
             </div>
           </div>
+          
+          <label className="label">Sub Process Camera</label>
+          <div className={"field is-grouped"}>
+            <div className={this.state.localSharing ? "hidden control" : "control"}>
+              <button onClick={this.startChildProcessCamera} className="button is-link">Start</button>
+            </div>
+            <div className={"control"}>
+              <button onClick={this.stopChildProcessCamera} className="button is-link">Stop</button>
+            </div>
+          </div>
+          
+          
           <div className="field">
             <label className="label">RTMP</label>
             <div className="control">

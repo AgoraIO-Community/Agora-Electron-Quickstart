@@ -33,7 +33,7 @@
     "publish": null
   },
   "dependencies": {
-    "agora-electron-sdk": "latest",
+    "agora-electron-sdk": "2.9.0-rc.107-build.814",
     "bulma": "^0.7.1",
     "immutable": "^3.8.2",
     "react": "^16.4.2",
@@ -43,7 +43,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
-    "electron": "5.0.8",
+    "electron": "11.0.0",
     "electron-builder": "21.2.0",
     "electron-webpack": "^2.7.4",
     "webpack": "^4.39.2"
@@ -58,6 +58,6 @@
   },
   "agora_electron": {
     "prebuilt": true,
-    "electron_version": "5.0.8"
+    "electron_version": "11.0.0"
   }
 }
