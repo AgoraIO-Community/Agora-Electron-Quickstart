@@ -1,4 +1,5 @@
 export const SHARE_ID = 2
+export const LOCAL_USER_ID = 1
 export const RTMP_URL = ''
 
 export const voiceReverbList = [
