@@ -19,7 +19,7 @@ export default class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      appid: 'aab8b8f5a8cd4469a63042fcfafe7063',
+      appid: '',
       token: '',
       local: '',
       isShowLocalVideoSource: '',
@@ -296,8 +296,8 @@ export default class App extends Component {
       windowId,
       { x: 0, y: 0, width: 0, height: 0 },
       {
-        width: 1000,
-        height: 1000,
+        width: 1920,
+        height: 1080,
         bitrate: 500,
         frameRate: 15,
         captureMouseCursor: false,
@@ -328,9 +328,9 @@ export default class App extends Component {
       displayId,
       { x: 0, y: 0, width: 0, height: 0 },
       {
-        width: 1000,
-        height: 1000,
-        bitrate: 500,
+        width: 1920,
+        height: 1080,
+        bitrate: 1000,
         frameRate: 15,
         captureMouseCursor: false,
         windowFocus: false,
