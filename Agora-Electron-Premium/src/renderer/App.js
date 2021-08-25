@@ -44,6 +44,7 @@ export default class App extends Component {
       rtmpTestOn: false,
       windowList: [],
       displayList: [],
+      screenShareConnectionId: 0
     }
   }
 
@@ -221,7 +222,7 @@ export default class App extends Component {
   handleLeave = () => {
     let rtcEngine = this.getRtcEngine()
     rtcEngine.leaveChannel()
-    rtcEngine.videoSourceLeave()
+    rtcEngine.leaveChannelEx(this.state.channel, this.state.screenShareConnectionId)
   }
 
   handleCameraChange = (e) => {
@@ -304,7 +305,7 @@ export default class App extends Component {
         windowFocus: false,
       }
     )
-    res = rtcEngine.joinChannelEx('', this.state.channel, SHARE_ID, {
+    this.state.screenShareConnectionId = rtcEngine.joinChannelEx('', this.state.channel, SHARE_ID, {
       publishCameraTrack: false,
       publishAudioTrack: false,
       publishScreenTrack: true,
@@ -338,7 +339,7 @@ export default class App extends Component {
         excludeWindowCount: excludeWindowList.length,
       }
     )
-    rtcEngine.joinChannelEx('', this.state.channel, SHARE_ID, {
+    this.state.screenShareConnectionId = rtcEngine.joinChannelEx('', this.state.channel, SHARE_ID, {
       publishCameraTrack: false,
       publishAudioTrack: false,
       publishScreenTrack: true,
