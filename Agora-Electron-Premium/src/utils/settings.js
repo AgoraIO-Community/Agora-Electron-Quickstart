@@ -1,5 +1,5 @@
-export const SHARE_ID = 0
-export const LOCAL_USER_ID = 0
+export const SHARE_ID = 10000
+export const LOCAL_USER_ID = 10001
 export const RTMP_URL = ''
 
 export const voiceReverbList = [
