@@ -3,6 +3,7 @@ import AgoraRtcEngine, {
   LOG_LEVEL,
   AREA_CODE,
   CLIENT_ROLE_TYPE,
+  EngineEvents,
 } from 'agora-electron-sdk';
 import { List, Card } from 'antd';
 import config from '../../agora.config';
@@ -42,7 +43,8 @@ export default class JoinChannelAudio extends Component<State> {
   };
 
   componentDidMount() {
-    const audioRecordDevices = this.getRtcEngine().getAudioRecordingDevices() as Device[];
+    const audioRecordDevices =
+      this.getRtcEngine().getAudioRecordingDevices() as Device[];
 
     this.setState({ audioRecordDevices });
   }
@@ -72,7 +74,7 @@ export default class JoinChannelAudio extends Component<State> {
   }
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on('joinedChannel', (channel, uid, elapsed) => {
+    rtcEngine.on(EngineEvents.JOINED_CHANNEL, (channel, uid, elapsed) => {
       console.log(
         `onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(
           rtcEngine.getVersion()
@@ -86,7 +88,7 @@ export default class JoinChannelAudio extends Component<State> {
         allUser: newAllUser,
       });
     });
-    rtcEngine.on('userJoined', (uid, elapsed) => {
+    rtcEngine.on(EngineEvents.USER_JOINED, (uid, elapsed) => {
       console.log(`userJoined ---- ${uid}`);
 
       const { allUser: oldAllUser } = this.state;
@@ -96,7 +98,7 @@ export default class JoinChannelAudio extends Component<State> {
         allUser: newAllUser,
       });
     });
-    rtcEngine.on('userOffline', (uid, reason) => {
+    rtcEngine.on(EngineEvents.USER_OFFLINE, (uid, reason) => {
       console.log(`userOffline ---- ${uid}`);
 
       const { allUser: oldAllUser } = this.state;
@@ -106,13 +108,13 @@ export default class JoinChannelAudio extends Component<State> {
       });
     });
 
-    rtcEngine.on('leaveChannel', (rtcStats) => {
+    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (rtcStats) => {
       this.setState({
         isJoined: false,
         allUser: [],
       });
     });
-    rtcEngine.on('error', (err) => {
+    rtcEngine.on(EngineEvents.ERROR, (err) => {
       console.error(err);
     });
   };
