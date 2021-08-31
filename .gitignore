@@ -8,6 +8,6 @@ thumbs.db
 .history
 local_settings.js
 *.txt
-appID.js
+appID.*
 *.log
 *.log*
