@@ -3,6 +3,7 @@ import AgoraRtcEngine, {
   ScreenSymbol,
   AREA_CODE,
   LOG_LEVEL,
+  VideoSourceEvents,
 } from 'agora-electron-sdk';
 import { Card, message, Radio, Space } from 'antd';
 import config from '../../agora.config';
@@ -265,13 +266,16 @@ export default class ScreenShare extends Component<{}, State, any> {
         reject(new Error('Join Channel Timeout'));
       }, timeout);
       const rtcEngine = this.getRtcEngine();
-      rtcEngine.once('videoSourceJoinChannelSuccess', (uid) => {
-        clearTimeout(timer);
-        console.log(`videoSourceJoinChannelSuccess`);
-        resolve(uid);
-      });
+      rtcEngine.once(
+        VideoSourceEvents.VIDEO_SOURCE_JOIN_CHANNEL_SUCCESS,
+        (uid) => {
+          clearTimeout(timer);
+          console.log(`videoSourceJoinChannelSuccess`);
+          resolve(uid);
+        }
+      );
 
-      rtcEngine.once('videoSourceLeaveChannel', () => {
+      rtcEngine.once(VideoSourceEvents.VIDEO_SOURCE_LEAVE_CHANNEL, () => {
         console.log(`videoSourceLeaveChannel`);
       });
       try {
@@ -341,12 +345,8 @@ export default class ScreenShare extends Component<{}, State, any> {
   };
 
   renderRightBar = () => {
-    const {
-      windowInfoList,
-      screenInfoList,
-      selectedShareInfo,
-      pluginState,
-    } = this.state;
+    const { windowInfoList, screenInfoList, selectedShareInfo, pluginState } =
+      this.state;
     const {
       type,
       info: { image, name },
