@@ -8,7 +8,9 @@
     "write-config": "node ./scripts/writeAppId.js",
     "dist": "npm run compile && electron-builder",
     "dist:dir": "npm run dist --dir -c.compression=store -c.mac.identity=null",
-    "dist:zip": "npm run compile && electron-builder  --dir -c.compression=store -c.mac.identity=null"
+    "dist:zip": "npm run compile && electron-builder --dir -c.compression=store -c.mac.identity=null",
+    "dist:win32": "npm run compile && electron-builder --win --ia32",
+    "dist:win64": "npm run compile && electron-builder --win --x64"
   },
   "build": {
     "asar": false,
@@ -16,10 +18,7 @@
     "win": {
       "target": [
         {
-          "target": "zip",
-          "arch": [
-            "ia32"
-          ]
+          "target": "zip"
         }
       ]
     },
@@ -34,7 +33,7 @@
     "publish": null
   },
   "dependencies": {
-    "agora-electron-sdk": "latest",
+    "agora-electron-sdk": "3.4.7-rc.122-build.906",
     "bulma": "^0.7.1",
     "immutable": "^3.8.2",
     "react": "^16.4.2",
