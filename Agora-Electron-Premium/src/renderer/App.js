@@ -198,7 +198,7 @@ export default class App extends Component {
     //   smoothnessLevel: 1,
     //   rednessLevel: 0
     // })
-    rtcEngine.setRenderMode(2)
+    rtcEngine.setRenderMode(1)
     rtcEngine.joinChannel(this.state.token || null, this.state.channel, '',  Number(`${new Date().getTime()}`.slice(7)))
   }
 
