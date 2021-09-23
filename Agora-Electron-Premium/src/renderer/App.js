@@ -19,7 +19,7 @@ export default class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      appid: '',
+      appid: 'aab8b8f5a8cd4469a63042fcfafe7063',
       token: '',
       local: '',
       isShowLocalVideoSource: '',
@@ -44,7 +44,7 @@ export default class App extends Component {
       rtmpTestOn: false,
       windowList: [],
       displayList: [],
-      screenShareConnectionId: 0
+      screenShareConnectionId: 0,
     }
   }
 
@@ -55,10 +55,11 @@ export default class App extends Component {
     }
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine()
-      this.rtcEngine.initialize(this.state.appid)
+      const res = this.rtcEngine.initialize(this.state.appid)
+      console.log('initialize', res)
       let ret = this.rtcEngine.setLogFileSize(2000)
       console.log(`setLogFileSize ${ret}`)
-      this.rtcEngine.setLogFile('./Agora_SDK_Log.txt')
+      // this.rtcEngine.setLogFile('./Agora_SDK_Log.txt')
       this.subscribeEvents(this.rtcEngine)
       window.rtcEngine = this.rtcEngine
 
@@ -73,7 +74,9 @@ export default class App extends Component {
   }
 
   subscribeEvents = (rtcEngine) => {
-    rtcEngine.on('joinedchannel', (connId, channel, uid, elapsed) => {
+    rtcEngine.on('joinedChannel', (channel, uid, elapsed) => {
+      console.log('joinedChannel---------', channel, uid, elapsed)
+
       if (uid === SHARE_ID) {
         return
       }
@@ -91,7 +94,7 @@ export default class App extends Component {
       )
       console.log(`addPublishStreamUrl ret: ${ret}`)
     })
-    rtcEngine.on('userjoined', (connId, uid, elapsed) => {
+    rtcEngine.on('userjoined', (connection, uid, elapsed) => {
       if (
         [SHARE_ID, LOCAL_USER_ID].includes(uid) ||
         this.state.users.includes(uid)
@@ -99,18 +102,18 @@ export default class App extends Component {
         return
       }
       console.log(`userJoined ---- ${uid}`)
-      rtcEngine.muteRemoteVideoStream(uid, false)
+      // rtcEngine.muteRemoteVideoStream(uid, false)
       this.setState({
         users: this.state.users.concat([uid]),
       })
     })
-    rtcEngine.on('removestream', (connId, uid, reason) => {
+    rtcEngine.on('removestream', (connection, uid, reason) => {
       console.log(`useroffline ${uid}`)
       this.setState({
         users: this.state.users.filter((u) => u != uid),
       })
     })
-    rtcEngine.on('leavechannel', (connId, rtcStats) => {
+    rtcEngine.on('leavechannel', (connection, rtcStats) => {
       console.log(`onleaveChannel----`)
       this.setState({
         local: '',
@@ -144,9 +147,9 @@ export default class App extends Component {
     })
     rtcEngine.on(
       'audiovolumeindication',
-      (connId, speakers, speakerNumber, totalVolume) => {
+      (connection, speakers, speakerNumber, totalVolume) => {
         console.log(
-          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
+          `uid${uid} volume${connection} speakerNumber${speakerNumber} totalVolume${totalVolume}`
         )
       }
     )
@@ -161,7 +164,7 @@ export default class App extends Component {
       return
     }
     let rtcEngine = this.getRtcEngine()
-    rtcEngine.setLogFile('./agora_native.log')
+    // rtcEngine.setLogFile('./agora_native.log')
     rtcEngine.setChannelProfile(1)
     rtcEngine.setClientRole(this.state.role)
     rtcEngine.setAudioProfile(0, 1)
@@ -222,7 +225,10 @@ export default class App extends Component {
   handleLeave = () => {
     let rtcEngine = this.getRtcEngine()
     rtcEngine.leaveChannel()
-    rtcEngine.leaveChannelEx(this.state.channel, this.state.screenShareConnectionId)
+    rtcEngine.leaveChannelEx(
+      this.state.channel,
+      this.state.screenShareConnectionId
+    )
   }
 
   handleCameraChange = (e) => {
@@ -305,19 +311,47 @@ export default class App extends Component {
         windowFocus: false,
       }
     )
-    this.state.screenShareConnectionId = rtcEngine.joinChannelEx('', this.state.channel, SHARE_ID, {
-      publishCameraTrack: false,
-      publishAudioTrack: false,
-      publishScreenTrack: true,
-      publishCustomAudioTrack: false,
-      publishCustomVideoTrack: false,
-      publishEncodedVideoTrack: false,
-      publishMediaPlayerAudioTrack: false,
-      publishMediaPlayerVideoTrack: false,
-      autoSubscribeAudio: false,
-      autoSubscribeVideo: false,
-      clientRoleType: 1,
-    })
+    console.warn(
+      'ce sho',
+      '',
+      {
+        localUid: SHARE_ID,
+        channelId: this.state.channel,
+      },
+      {
+        publishCameraTrack: false,
+        publishAudioTrack: false,
+        publishScreenTrack: true,
+        publishCustomAudioTrack: false,
+        publishCustomVideoTrack: false,
+        publishEncodedVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
+        publishMediaPlayerVideoTrack: false,
+        autoSubscribeAudio: false,
+        autoSubscribeVideo: false,
+        clientRoleType: 1,
+      }
+    )
+    this.state.screenShareConnectionId = rtcEngine.joinChannelEx(
+      '',
+      {
+        localUid: SHARE_ID,
+        channelId: this.state.channel,
+      },
+      {
+        publishCameraTrack: false,
+        publishAudioTrack: false,
+        publishScreenTrack: true,
+        publishCustomAudioTrack: false,
+        publishCustomVideoTrack: false,
+        publishEncodedVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
+        publishMediaPlayerVideoTrack: false,
+        autoSubscribeAudio: false,
+        autoSubscribeVideo: false,
+        clientRoleType: 1,
+      }
+    )
   }
 
   startScreenShareByDisplay(displayId) {
@@ -339,19 +373,24 @@ export default class App extends Component {
         excludeWindowCount: excludeWindowList.length,
       }
     )
-    this.state.screenShareConnectionId = rtcEngine.joinChannelEx('', this.state.channel, SHARE_ID, {
-      publishCameraTrack: false,
-      publishAudioTrack: false,
-      publishScreenTrack: true,
-      publishCustomAudioTrack: false,
-      publishCustomVideoTrack: false,
-      publishEncodedVideoTrack: false,
-      publishMediaPlayerAudioTrack: false,
-      publishMediaPlayerVideoTrack: false,
-      autoSubscribeAudio: false,
-      autoSubscribeVideo: false,
-      clientRoleType: 1,
-    })
+    this.state.screenShareConnectionId = rtcEngine.joinChannelEx(
+      '',
+      this.state.channel,
+      SHARE_ID,
+      {
+        publishCameraTrack: false,
+        publishAudioTrack: false,
+        publishScreenTrack: true,
+        publishCustomAudioTrack: false,
+        publishCustomVideoTrack: false,
+        publishEncodedVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
+        publishMediaPlayerVideoTrack: false,
+        autoSubscribeAudio: false,
+        autoSubscribeVideo: false,
+        clientRoleType: 1,
+      }
+    )
   }
 
   handleScreenSharing = (e) => {
@@ -409,80 +448,53 @@ export default class App extends Component {
   }
 
   handleRtmp = () => {
-    const url = RTMP_URL
-    if (!url) {
-      alert('RTMP URL Empty')
-      return
+    const engine = this.rtcEngine
+    engine.enableLocalTrapezoidCorrection(true, false)
+    const opt = {
+      dragSrcPoint: { x: 2.2, y: 3.3 },
+      dragDstPoint: { x: 4.4, y: 5.5 },
+      dragFinished: 1,
+      dragSrcPoints: new Float32Array([0.1, 0.2, 0.3]).buffer,
+      dragDstPoints: new Float32Array([0.4, 0.5, 0.6]).buffer,
+      hasMultiPoints: true,
+      assistLine: 2,
+      resetDragPoints: 3,
     }
-    if (!this.state.rtmpTestOn) {
-      let ret = this.rtcEngine.setLiveTranscoding({
-        /** width of canvas */
-        width: 480,
-        /** height of canvas */
-        height: 640,
-        /** kbps value, for 1-1 mapping pls look at https://docs.agora.io/cn/Interactive%20Broadcast/API%20Reference/cpp/structagora_1_1rtc_1_1_video_encoder_configuration.html */
-        videoBitrate: 500,
-        /** fps, default 15 */
-        // 2.9.0.107
-        videoFramerate: 15,
-        //3.2.1.71
-        // videoFrameRate: 15,
-        /** true for low latency, no video quality garanteed; false - high latency, video quality garanteed */
-        lowLatency: true,
-        /** Video GOP in frames, default 30 */
-        videoGop: 30,
-        videoCodecProfile: 77,
-        /**
-         * RGB hex value. Value only, do not include a #. For example, 0xC0C0C0.
-         * number color = (A & 0xff) << 24 | (R & 0xff) << 16 | (G & 0xff) << 8 | (B & 0xff)
-         */
-        backgroundColor: 0xc0c0c0,
-        /** The number of users in the live broadcast */
-        userCount: 1,
-        //3.2.1.71
-        // audioSampleRate: 48000,
-        //2.9.0.107
-        audioSampleRateType: 48000,
-        audioChannels: 1,
-        audioBitrate: 48,
-        transcodingExtraInfo: '',
-        /** transcodingusers array */
-        transcodingUsers: [
-          {
-            uid: LOCAL_USER_ID,
-            x: 0,
-            y: 320,
-            width: 240,
-            height: 320,
-            zOrder: 2,
-            alpha: 1.0,
-            audioChannel: 1,
-          },
-        ],
-        watermark: {
-          url: 'https://winaero.com/blog/wp-content/uploads/2019/11/Photos-new-icon.png',
-          x: 0,
-          y: 0,
-          width: 50,
-          height: 50,
-        },
-        background: {
-          url: 'https://winaero.com/blog/wp-content/uploads/2019/11/Photos-new-icon.png',
-          x: 0,
-          y: 0,
-          width: 50,
-          height: 50,
-        },
-      })
-      console.log(`setLiveTranscoding ${ret}`)
-      this.rtcEngine.addPublishStreamUrl(url, true)
-    } else {
-      this.rtcEngine.removePublishStreamUrl(url)
-    }
+    let res;
+    // engine.setLocalTrapezoidCorrectionOptions(opt)
+    // res = engine.getLocalTrapezoidCorrectionOptions()
+    // console.log('getLocalTrapezoidCorrectionOptions', res)
 
-    this.setState({
-      rtmpTestOn: !this.state.rtmpTestOn,
+    res = engine.enableRemoteTrapezoidCorrection(1,true)
+    console.log('enableRemoteTrapezoidCorrection 1', res)
+
+    res = engine.enableRemoteTrapezoidCorrection(2,true, {
+      localUid: 3,
+      channelId: 'enableRemoteTrapezoidCorrection',
     })
+    console.log('enableRemoteTrapezoidCorrection 2', res)
+
+
+    res = engine.setRemoteTrapezoidCorrectionOptions(4, opt)
+    console.log('setRemoteTrapezoidCorrectionOptions 1', res)
+
+    res = engine.setRemoteTrapezoidCorrectionOptions(5, opt, {
+      localUid: 6,
+      channelId: 'setRemoteTrapezoidCorrectionOptions',
+    })
+    console.log('setRemoteTrapezoidCorrectionOptions 2', res)
+
+    res = engine.getRemoteTrapezoidCorrectionOptions(7)
+    console.log('getRemoteTrapezoidCorrectionOptions ', res)
+
+    res = engine.applyTrapezoidCorrectionToRemote(8, true)
+    console.log('applyTrapezoidCorrectionToRemote 1', res)
+
+    res = engine.applyTrapezoidCorrectionToRemote(9, true, {
+      localUid: 10,
+      channelId: 'applyTrapezoidCorrectionToRemote',
+    })
+    console.log('applyTrapezoidCorrectionToRemote 2', res)
   }
 
   handleScreenPicker = (windowId) => {
@@ -852,7 +864,7 @@ export default class App extends Component {
             </div>
           </div>
           <div className='field'>
-            <label className='label'>RTMP</label>
+            <label className='label'>Testaaa</label>
             <div className='control'>
               <button onClick={this.handleRtmp} className='button is-link'>
                 {this.state.rtmpTestOn ? 'stop' : 'start'}
@@ -893,6 +905,7 @@ export default class App extends Component {
         <div className='column is-three-quarters window-container'>
           {this.state.users.map((item, key) => (
             <Window
+              channelId={this.state.channel}
               key={item}
               uid={item}
               rtcEngine={this.rtcEngine}
@@ -901,6 +914,7 @@ export default class App extends Component {
           ))}
           {this.state.local ? (
             <Window
+              channelId={this.state.channel}
               uid={this.state.local}
               rtcEngine={this.rtcEngine}
               role='local'
@@ -909,7 +923,11 @@ export default class App extends Component {
             ''
           )}
           {this.state.isShowLocalVideoSource ? (
-            <Window rtcEngine={this.rtcEngine} role='localVideoSource'></Window>
+            <Window
+              rtcEngine={this.rtcEngine}
+              role='localVideoSource'
+              channelId={this.state.channel}
+            ></Window>
           ) : (
             ''
           )}
