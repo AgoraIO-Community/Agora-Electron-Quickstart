@@ -1046,10 +1046,10 @@
   resolved "https://registry.npmjs.org/@types/node/-/node-10.17.13.tgz#ccebcdb990bd6139cd16e84c39dc2fb1023ca90c"
   integrity sha512-pMCcqU2zT4TjqYFrWtYHKal7Sl30Ims6ulZ4UFXxI4xbtQqK/qqKwkDoBFCfooRqqmRu9vY3xaJRwxSh673aYg==
 
-"@types/node@^12.0.12":
-  version "12.20.26"
-  resolved "https://registry.nlark.com/@types/node/download/@types/node-12.20.26.tgz?cache=0&sync_timestamp=1632251307629&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40types%2Fnode%2Fdownload%2F%40types%2Fnode-12.20.26.tgz#a6db0d0577e40844f0b28c2a9289c09e5b44b541"
-  integrity sha1-ptsNBXfkCETwsowqkonAnltEtUE=
+"@types/node@^14.6.2":
+  version "14.17.19"
+  resolved "https://registry.npmmirror.com/@types/node/download/@types/node-14.17.19.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Fnode%2Fdownload%2F%40types%2Fnode-14.17.19.tgz#7341e9ac1b5d748d7a3ddc04336ed536a6f91c31"
+  integrity sha1-c0HprBtddI16PdwEM27VNqb5HDE=
 
 "@types/source-list-map@*":
   version "0.1.2"
@@ -1280,10 +1280,10 @@ aggregate-error@^3.0.0:
     clean-stack "^2.0.0"
     indent-string "^4.0.0"
 
-agora-electron-sdk@3.2.1-rc.131-build.726:
-  version "3.2.1-rc.131-build.726"
-  resolved "https://registry.nlark.com/agora-electron-sdk/download/agora-electron-sdk-3.2.1-rc.131-build.726.tgz#58db771678737df56f4dc52ce0ccf385d8c630a4"
-  integrity sha1-WNt3FnhzffVvTcUs4MzzhdjGMKQ=
+agora-electron-sdk@3.6.200-rc.100-build.918:
+  version "3.6.200-rc.100-build.918"
+  resolved "https://registry.npmmirror.com/agora-electron-sdk/download/agora-electron-sdk-3.6.200-rc.100-build.918.tgz#bc3add802b5c8c19cba6e55219a02dd35fee3ef0"
+  integrity sha1-vDrdgCtcjBnLpuVSGaAt01/uPvA=
   dependencies:
     bluebird "^3.7.1"
     download "^7.1.0"
@@ -3379,13 +3379,13 @@ electron-webpack@^2.7.4:
     webpack-merge "^4.2.2"
     yargs "^15.3.1"
 
-electron@10.2.0:
-  version "10.2.0"
-  resolved "https://registry.npmmirror.com/electron/download/electron-10.2.0.tgz#4b00f0907b28aca4b93661bb53ce9a4f8ad32201"
-  integrity sha1-SwDwkHsorKS5NmG7U86aT4rTIgE=
+electron@12.0.0:
+  version "12.0.0"
+  resolved "https://registry.npmmirror.com/electron/download/electron-12.0.0.tgz#b3b1d88cc64622e59c637521da5a6b6ab4df4eb5"
+  integrity sha1-s7HYjMZGIuWcY3Uh2lprarTfTrU=
   dependencies:
     "@electron/get" "^1.0.1"
-    "@types/node" "^12.0.12"
+    "@types/node" "^14.6.2"
     extract-zip "^1.0.3"
 
 elliptic@^6.5.3:

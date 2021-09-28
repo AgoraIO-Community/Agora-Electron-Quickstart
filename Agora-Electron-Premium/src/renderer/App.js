@@ -458,6 +458,7 @@ export default class App extends Component {
       dragDstPoints: new Float32Array([0.4, 0.5, 0.6]).buffer,
       hasMultiPoints: true,
       assistLine: 2,
+      autoCorrect:4,
       resetDragPoints: 3,
     }
     let res;
@@ -495,6 +496,26 @@ export default class App extends Component {
       channelId: 'applyTrapezoidCorrectionToRemote',
     })
     console.log('applyTrapezoidCorrectionToRemote 2', res)
+
+    res = engine.applyTrapezoidCorrectionToRemote(9, true, {
+      localUid: 10,
+      channelId: 'applyTrapezoidCorrectionToRemote',
+    })
+    console.log('applyTrapezoidCorrectionToRemote 2', res)
+
+    res = engine.enableBrightnessCorrection(true,1)
+    console.log('enableBrightnessCorrection 2', res)
+
+   
+
+    res = engine.applyVideoEncoderMirrorToRemote(11, 1, {
+      localUid: 12,
+      channelId: 'applyVideoEncoderMirrorToRemote',
+    })
+    console.log('applyVideoEncoderMirrorToRemote 2', res)
+
+    res = engine.applyVideoEncoderMirrorToRemote(13, 0)
+    console.log('applyVideoEncoderMirrorToRemote 2', res)
   }
 
   handleScreenPicker = (windowId) => {
