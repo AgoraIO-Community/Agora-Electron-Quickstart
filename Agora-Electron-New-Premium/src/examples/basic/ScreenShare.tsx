@@ -65,7 +65,9 @@ export default class ScreenShare extends Component<{}, State, any> {
       windowId,
       name:
         name.length < 20
-          ? name
+          ? name === ''
+            ? 'no name'
+            : name
           : name.replace(/\s+/g, '').substr(0, 20) + '...',
     }));
     this.setState({ windowInfoList });
@@ -115,9 +117,9 @@ export default class ScreenShare extends Component<{}, State, any> {
     const rtcEngine = this.getRtcEngine();
     console.log('config.appID', config.appID);
 
-    rtcEngine.videoSourceInitialize(config.appID, 1);
+    rtcEngine.videoSourceInitialize(config.appID);
     rtcEngine.videoSourceSetLogFile(config.nativeSDKLogPath);
-    rtcEngine.videoSourceSetAddonLogFile(config.videoSourceAddonLogPath)
+    rtcEngine.videoSourceSetAddonLogFile(config.videoSourceAddonLogPath);
     rtcEngine.videoSourceEnableAudio();
   };
 

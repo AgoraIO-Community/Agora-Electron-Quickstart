@@ -5,7 +5,7 @@ packOldPremium() {
   pushd Agora-Electron-Premium
   echo 当前工作路径:$(pwd)
   rm -rf node_modules
-  yarn --verbose
+  yarn
   cp -P -R ../Electron-*/* node_modules/agora-electron-sdk/
   yarn dist:zip
 

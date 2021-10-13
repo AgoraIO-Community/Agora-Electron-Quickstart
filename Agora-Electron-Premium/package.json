@@ -33,7 +33,7 @@
     "publish": null
   },
   "dependencies": {
-    "agora-electron-sdk": "3.4.7-rc.122-build.906",
+    "agora-electron-sdk": "3.5.0-rc.4-build.1011",
     "bulma": "^0.7.1",
     "immutable": "^3.8.2",
     "react": "^16.4.2",
