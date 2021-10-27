@@ -13,8 +13,9 @@ import {
 } from '@ant-design/icons';
 import './App.global.scss';
 import { Layout, Menu } from 'antd';
-import basicRoutes from './examples/basic';
 import AuthInfoScreen from './examples/AuthInfoScreen';
+import basicRoute from './examples/basic';
+import advanceRoute from './examples/advanced';
 
 const { Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -41,7 +42,7 @@ class App extends React.Component {
                 <Link to="/">Setting</Link>
               </Menu.Item>
               <SubMenu key="sub1" icon={<HomeOutlined />} title="Basic">
-                {basicRoutes.map(({ path, title }, index) => {
+                {basicRoute.map(({ path, title }, index) => {
                   return (
                     <Menu.Item key={`${index} ${title}`}>
                       <Link to={path}>{title}</Link>
@@ -50,8 +51,13 @@ class App extends React.Component {
                 })}
               </SubMenu>
               <SubMenu key="sub2" icon={<DingtalkOutlined />} title="Advanced">
-                <Menu.Item key="6">Team 1</Menu.Item>
-                <Menu.Item key="8">Team 2</Menu.Item>
+                {advanceRoute.map(({ path, title }, index) => {
+                  return (
+                    <Menu.Item key={`${index} ${title}`}>
+                      <Link to={path}>{title}</Link>
+                    </Menu.Item>
+                  );
+                })}
               </SubMenu>
             </Menu>
           </Sider>
@@ -59,7 +65,15 @@ class App extends React.Component {
             <Content>
               <Switch>
                 <Route path="/" children={<AuthInfoScreen />} exact={true} />
-                {basicRoutes.map((route, index) => (
+
+                {basicRoute.map((route, index) => (
+                  <Route
+                    key={`${index}`}
+                    path={route.path}
+                    children={<route.component />}
+                  />
+                ))}
+                {advanceRoute.map((route, index) => (
                   <Route
                     key={`${index}`}
                     path={route.path}
