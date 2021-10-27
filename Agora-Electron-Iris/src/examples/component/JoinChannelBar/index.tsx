@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Divider, Input, Form, Button } from 'antd';
-import config from '../../../agora.config';
+import config from '../../config/agora.config';
 
 interface JoinChannelBarProps {
   onPressJoin: (channelId: string) => boolean;

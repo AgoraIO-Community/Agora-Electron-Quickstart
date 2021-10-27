@@ -1,6 +1,8 @@
 import React from 'react';
 import { Input, Row, Card, Form, Button } from 'antd';
-import config from '../../agora.config';
+import config from '../config/agora.config';
+
+console.log('config',config);
 
 const layout = {
   labelCol: {
