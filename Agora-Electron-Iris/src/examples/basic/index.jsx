@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
-import { Button } from 'antd';
 import JoinChannelAudio from './JoinChannelAudio';
 import JoinChannelVideo from './JoinChannelVideo';
-import ScreenShare from './ScreenShare';
 
-const basicRoutes = [
+const basicRoute = [
   {
     path: '/JoinChannelVideo',
     component: JoinChannelVideo,
@@ -15,11 +12,6 @@ const basicRoutes = [
     component: JoinChannelAudio,
     title: 'JoinChannelAudio',
   },
-  {
-    path: '/ScreenShare',
-    component: ScreenShare,
-    title: 'ScreenShare',
-  },
 ];
 
-export default basicRoutes;
+export default basicRoute;

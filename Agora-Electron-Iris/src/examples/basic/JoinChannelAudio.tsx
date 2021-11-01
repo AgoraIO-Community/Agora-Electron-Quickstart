@@ -6,9 +6,9 @@ import AgoraRtcEngine, {
   EngineEvents,
 } from 'agora-electron-sdk';
 import { List, Card } from 'antd';
-import config from '../../agora.config';
+import config from '../config/agora.config';
 import DropDownButton from '../component/DropDownButton';
-import styles from './index.scss';
+import styles from '../config/public.scss';
 import { AudioScenarioList, AudioProfileList } from '../config';
 import { configMapToOptions } from '../util';
 import SliderBar from '../component/SliderBar';

@@ -3,16 +3,17 @@ import AgoraRtcEngine, {
   ScreenSymbol,
   AREA_CODE,
   LOG_LEVEL,
+  EngineEvents,
   VideoSourceEvents,
 } from 'agora-electron-sdk';
 import { Card, message, Radio, Space } from 'antd';
-import config from '../../agora.config';
-import DropDownButton from '../component/DropDownButton';
-import styles from './index.scss';
+import config from '../../config/agora.config';
+import DropDownButton from '../../component/DropDownButton';
+import styles from '../../config/public.scss';
 import screenStyle from './ScreenShare.scss';
-import JoinChannelBar from '../component/JoinChannelBar';
-import Window from '../component/Window';
-import { readImage } from '../util/base64';
+import JoinChannelBar from '../../component/JoinChannelBar';
+import Window from '../../component/Window';
+import { readImage } from '../../util/base64';
 
 interface State {
   /**
@@ -130,29 +131,32 @@ export default class ScreenShare extends Component<{}, State, any> {
   };
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on('joinedChannel', (channel, uid, elapsed) => {
+    rtcEngine.on(EngineEvents.JOINED_CHANNEL, (channel, uid, elapsed) => {
       console.log(
         `onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(
           rtcEngine.getVersion()
         )})`
       );
     });
-    rtcEngine.on('userJoined', (uid, elapsed) => {
+    rtcEngine.on(EngineEvents.USER_JOINED, (uid, elapsed) => {
       if (uid === SCREEN_SHARE_ID) {
         console.log(`screen share join ---- ${SCREEN_SHARE_ID}`);
         return;
       }
       console.log(`userJoined ---- ${uid}`);
     });
-    rtcEngine.on('userOffline', (uid, reason) => {});
+    rtcEngine.on(EngineEvents.USER_OFFLINE, (uid, reason) => {});
 
-    rtcEngine.on('error', (err) => {
+    rtcEngine.on(EngineEvents.ERROR, (err) => {
       console.error(err);
     });
-    rtcEngine.on('firstLocalVideoFrame', (width, height, elapsed) => {
-      console.log(`firstLocalVideoFrame width: ${width}, ${height}`);
-    });
-    rtcEngine.on('videoSourceApiCallExecuted', (api, err) =>
+    rtcEngine.on(
+      EngineEvents.FIRST_LOCAL_VIDEO_FRAME,
+      (width, height, elapsed) => {
+        console.log(`firstLocalVideoFrame width: ${width}, ${height}`);
+      }
+    );
+    rtcEngine.on(VideoSourceEvents.VIDEO_SOURCE_API_CALL_EXECUTED, (api, err) =>
       console.log(`videoSourceApiCallExecuted ${api} ${err}`)
     );
   };
@@ -168,7 +172,6 @@ export default class ScreenShare extends Component<{}, State, any> {
         fileSize: 2000,
       },
     });
-    rtcEngine.videoSourceSetAddonLogFile(config.videoSourceAddonLogPath);
     rtcEngine.videoSourceEnableVideo();
     rtcEngine.videoSourceEnableAudio();
   };
