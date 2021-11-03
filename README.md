@@ -1,20 +1,20 @@
 # <img src="https://cloud.githubusercontent.com/assets/378023/15172388/b2b81950-1790-11e6-9a7c-ccc39912bb3a.png" width="60px" align="center" alt="Electron API Demos icon"> Agora Electron API Demos
 
 [![NPM version][npm-image]][npm-url] [![node version][node-image]][node-url] [![npm download][download-image]][download-url] [![npm license][license-image]][download-url]
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
-<!-- code_chunk_output -->
 ## Content
-- [<img src="https://cloud.githubusercontent.com/assets/378023/15172388/b2b81950-1790-11e6-9a7c-ccc39912bb3a.png" width="60px" align="center" alt="Electron API Demos icon"> Agora Electron API Demos](#img-srchttpscloudgithubusercontentcomassets37802315172388b2b81950-1790-11e6-9a7c-ccc39912bb3apng-width60px-aligncenter-altelectron-api-demos-icon-agora-electron-api-demos)
+
+- Agora Electron API Demos
   - [Content](#content)
   - [Building](#building)
   - [More](#more)
     - [Integrate SDK with other web frameworks](#integrate-sdk-with-other-web-frameworks)
     - [Use the refactored version of agora-electron-sdk](#use-the-refactored-version-of-agora-electron-sdk)
       - [Building](#building-1)
----
-<!-- /code_chunk_output -->
 
+---
+
+<!-- /code_chunk_output -->
 
 [npm-image]: https://img.shields.io/npm/v/agora-electron-sdk.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/agora-electron-sdk

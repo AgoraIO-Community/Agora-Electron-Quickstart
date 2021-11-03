@@ -25,7 +25,7 @@ Run the `install` command in your project directory:
 
 ```bash  
   # install dependencies
-  npm install 
+  yarn
 ```
 
 **Note:** During install, the C++ add-on is downloaded instead of being built.
@@ -34,7 +34,7 @@ Use the `run start` command to build the Agora Electron wrapper.
 	
 ```bash
 # enable dynamic compiling and HMR developing environment
-npm run start
+yarn start
 ```
 
 ## Resources
