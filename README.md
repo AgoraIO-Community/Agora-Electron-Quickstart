@@ -55,7 +55,7 @@ You'll need [Node.js](https://nodejs.org) and [Yarn](https://yarnpkg.com/) insta
 
 ```bash
 $ git clone https://github.com/AgoraIO-Community/Agora-Electron-Quickstart
-$ cd Agora-Electron-API-Examples
+$ cd Agora-Electron-API-Example-Iris
 $ yarn
 $ yarn start
 ```
