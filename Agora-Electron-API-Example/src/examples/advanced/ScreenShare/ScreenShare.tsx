@@ -252,7 +252,11 @@ export default class ScreenShare extends Component<{}, State, any> {
   renderPopup = (item: { image: string }) => {
     return (
       <div>
-        <img src={item.image} alt="preview img" />
+        <img
+          src={item.image}
+          alt="preview img"
+          className={screenStyle.previewShotBig}
+        />
       </div>
     );
   };

@@ -206,16 +206,16 @@ export default class ScreenShare extends Component<{}, State, any> {
     } else {
       // window
 
-      const pix = window.devicePixelRatio;
-      const value = 100;
-      const resultValue = pix * value;
+      // const pix = window.devicePixelRatio;
+      // const value = 100;
+      // const resultValue = pix * value;
       rtcEngine.videoSourceStartScreenCaptureByWindow(
         screenSymbol,
         {
-          x: resultValue,
-          y: resultValue,
-          width: resultValue,
-          height: resultValue,
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
         },
         {
           dimensions: { width: 0, height: 0 },
@@ -345,7 +345,11 @@ export default class ScreenShare extends Component<{}, State, any> {
   renderPopup = (item: { image: string }) => {
     return (
       <div>
-        <img src={item.image} alt="preview img" />
+        <img
+          src={item.image}
+          alt="preview img"
+          className={screenStyle.previewShotBig}
+        />
       </div>
     );
   };
