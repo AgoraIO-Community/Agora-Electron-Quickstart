@@ -19,6 +19,12 @@ interface User {
 }
 
 interface State {
+  /**
+   * 1: don't register
+   * 2: register before join channel
+   * 3: register after join channel
+   */
+  pluginState: 1 | 2 | 3;
   isJoined: boolean;
   channelId: string;
   allUser: User[];
@@ -28,10 +34,18 @@ interface State {
   currentResolution?: { width: number; height: number };
 }
 
-export default class JoinChannelVideo extends Component<{}, State, any> {
+const pluginId = 'my-plugin';
+
+export default class LoadCppPlugin extends Component<{}, State, any> {
   rtcEngine?: AgoraRtcEngine;
 
   state: State = {
+    /**
+     * 1: don't register
+     * 2: register before join channel
+     * 3: register after join channel
+     */
+    pluginState: 1,
     channelId: '',
     allUser: [],
     isJoined: false,
@@ -68,6 +82,31 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
 
     return this.rtcEngine;
   }
+
+  registerPlugin = () => {
+    console.log('----------registerPlugin--------');
+    console.log('plugin path:', config.pluginPath);
+    
+    const rtcEngine = this.getRtcEngine();
+    rtcEngine.initializePluginManager();
+
+    if (!config.pluginPath) {
+      message.error('Please set plugin path');
+    }
+
+    const registerRes = rtcEngine.registerPlugin({
+      id: pluginId,
+      path: config.pluginPath,
+    });
+    console.log(`registerPlugin: registerPlugin  result: ${registerRes}`);
+    const enabledRes = rtcEngine.enablePlugin(pluginId, true);
+    console.log('registerPlugin: enablePlugin ', enabledRes);
+    console.log('----------registerPlugin--------');
+
+    const plugin = rtcEngine.getPlugins().find(plugin => plugin.id === pluginId);
+    console.log('plugin?.enable',plugin?.enable());
+    ;
+  };
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
     rtcEngine.on('joinedChannel', (channel, uid, elapsed) => {
@@ -133,6 +172,10 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   };
 
   onPressJoinChannel = (channelId: string) => {
+    const { pluginState } = this.state;
+    if (pluginState === 2) {
+      this.registerPlugin();
+    }
     this.setState({ channelId });
     this.rtcEngine?.setChannelProfile(1);
     this.rtcEngine?.setAudioProfile(0, 1);
@@ -149,6 +192,9 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       '',
       Number(`${new Date().getTime()}`.slice(7))
     );
+    if (pluginState === 3) {
+      this.registerPlugin();
+    }
   };
 
   setVideoConfig = () => {
@@ -171,7 +217,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   };
 
   renderRightBar = () => {
-    const { audioRecordDevices, cameraDevices } = this.state;
+    const { audioRecordDevices, cameraDevices, pluginState } = this.state;
     console.log(
       'audioRecordDevices, cameraDevices',
       audioRecordDevices,
@@ -225,10 +271,26 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
               this.setState({ currentFps: res.dropId }, this.setVideoConfig);
             }}
           />
+          <div className={styles.selectedItem}>
+            (Optional) Register custom plugin
+          </div>
+          <Radio.Group
+            onChange={({ target: { value } }) => {
+              this.setState({ pluginState: value });
+            }}
+            value={pluginState}
+          >
+            <Space direction="vertical">
+              <Radio value={1}>Don&apos;t register plugin</Radio>
+              <Radio value={2}>Plugin register before join</Radio>
+              <Radio value={3}>Plugin register after join</Radio>
+            </Space>
+          </Radio.Group>
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
           onPressLeave={() => {
+            this.rtcEngine?.unregisterPlugin(pluginId);
             this.rtcEngine?.leaveChannel();
           }}
         />

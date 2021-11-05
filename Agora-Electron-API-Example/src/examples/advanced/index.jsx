@@ -1,5 +1,6 @@
 import ScreenShare from './ScreenShare/ScreenShare';
 import ControlAudioOnSubProcess from './AudioChildProcess';
+import LoadCppPlugin from './LoadCppPlugin';
 
 const advanceRoute = [
   {
@@ -11,6 +12,11 @@ const advanceRoute = [
     path: '/ControlAudioOnSubProcess',
     component: ControlAudioOnSubProcess,
     title: 'ControlAudioOnSubProcess',
+  },
+  {
+    path: '/LoadCppPlugin',
+    component: LoadCppPlugin,
+    title: 'LoadCppPlugin',
   },
 ];
 
