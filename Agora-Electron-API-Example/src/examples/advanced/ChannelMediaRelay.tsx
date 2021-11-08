@@ -116,7 +116,26 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
     rtcEngine.on('lastMileQuality', (quality) => {
       console.log(`lastmilequality: ${JSON.stringify(quality)}`);
     });
+<<<<<<< HEAD
 
+=======
+    rtcEngine.on(
+      'audiovolumeindication',
+      (uid, volume, speakerNumber, totalVolume) => {
+        console.log(
+          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
+        );
+      }
+    );
+    rtcEngine.on(
+      'audiovolumeindication',
+      (uid, volume, speakerNumber, totalVolume) => {
+        console.log(
+          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
+        );
+      }
+    );
+>>>>>>> a4a6d19 (Dev/lh (#87))
     rtcEngine.on('channelMediaRelayState', (state, code) => {
       console.log('channelMediaRelayState: state', state, 'code', code);
     });
@@ -149,12 +168,42 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
     );
   };
 
+<<<<<<< HEAD
   renderRightBar = () => {
     const { isJoined, isRelaying } = this.state;
+=======
+  setVideoConfig = () => {
+    const { currentFps, currentResolution } = this.state;
+    if (!currentResolution || !currentFps) {
+      return;
+    }
+    const { width, height } = currentResolution;
+    this.getRtcEngine().setVideoEncoderConfiguration({
+      width,
+      height,
+      frameRate: currentFps!,
+      minFrameRate: 10,
+      bitrate: 65,
+      minBitrate: 65,
+      orientationMode: 0,
+      degradationPreference: 2,
+      mirrorMode: 0,
+    });
+  };
+
+  renderRightBar = () => {
+    const { audioRecordDevices, cameraDevices } = this.state;
+    console.log(
+      'audioRecordDevices, cameraDevices',
+      audioRecordDevices,
+      cameraDevices
+    );
+>>>>>>> a4a6d19 (Dev/lh (#87))
 
     return (
       <div className={styles.rightBar}>
         <div>
+<<<<<<< HEAD
           <p>Relay Channel:</p>
           <Search
             placeholder="ChannelName"
@@ -176,6 +225,68 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
               this.setState({ isRelaying: !isRelaying });
             }}
           />
+=======
+          <DropDownButton
+            options={cameraDevices.map((obj) => {
+              const { deviceid, devicename } = obj;
+              return { dropId: deviceid, dropText: devicename, ...obj };
+            })}
+            onPress={(res) => {
+              this.getRtcEngine().setVideoDevice(res.dropId);
+            }}
+            title="Camera"
+          />
+          <DropDownButton
+            title="Microphone"
+            options={audioRecordDevices.map((obj) => {
+              const { deviceid, devicename } = obj;
+              return { dropId: deviceid, dropText: devicename, ...obj };
+            })}
+            onPress={(res) => {
+              this.getRtcEngine().setAudioRecordingDevice(res.dropId);
+            }}
+          />
+          <DropDownButton
+            title="Role"
+            options={configMapToOptions(RoleTypeMap)}
+            onPress={(res) => {
+              this.getRtcEngine().setClientRole(res.dropId);
+            }}
+          />
+          <DropDownButton
+            title="Resolution"
+            options={configMapToOptions(ResolutionMap)}
+            onPress={(res) => {
+              this.setState(
+                { currentResolution: res.dropId },
+                this.setVideoConfig
+              );
+            }}
+          />
+          <DropDownButton
+            title="FPS"
+            options={configMapToOptions(FpsMap)}
+            onPress={(res) => {
+              this.setState({ currentFps: res.dropId }, this.setVideoConfig);
+            }}
+          />
+          <Button
+            onClick={() => {
+              const { channelId, allUser } = this.state;
+              const tconfig = {
+                srcInfo: { channelName: channelId, uid: allUser[0].uid },
+                destInfos: [{ channelName: 'test2' }],
+              };
+              console.log(tconfig);
+
+              const result =
+                this.getRtcEngine().startChannelMediaRelay(tconfig);
+              console.log('result', result);
+            }}
+          >
+            Start Relay
+          </Button>
+>>>>>>> a4a6d19 (Dev/lh (#87))
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
