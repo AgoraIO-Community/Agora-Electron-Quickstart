@@ -135,12 +135,13 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId });
     this.rtcEngine?.setChannelProfile(1);
+    this.rtcEngine?.setClientRole(1);
     this.rtcEngine?.setAudioProfile(0, 1);
 
     this.rtcEngine?.enableDualStreamMode(true);
     this.rtcEngine?.enableAudioVolumeIndication(1000, 3, false);
-
     this.rtcEngine?.setRenderMode(1);
+    this.rtcEngine?.enableVideo();
     this.rtcEngine?.enableLocalVideo(true);
 
     this.rtcEngine?.joinChannel(
