@@ -15,8 +15,8 @@ packOldPremium() {
   popd
 }
 
-packIris() {
-  pushd Agora-Electron-Iris
+packExample() {
+  pushd $1
   echo 当前工作路径:$(pwd)
   rm -rf node_modules
   rm -rf src/node_modules
@@ -31,17 +31,20 @@ packIris() {
   popd
 }
 
+
+
 case $chooseExampleType in
 1)
-  echo '打包: 老版本Premium'
-  packOldPremium
+  echo '打包: API-Example'
+  packExample Agora-Electron-API-Example
   ;;
 2)
   echo '打包: Iris'
-  packIris
+  packExample Agora-Electron-API-Example-Iris
   ;;
 3)
   echo '你选择了 3'
+  packOldPremium
   ;;
 4)
   echo '你选择了 4'
