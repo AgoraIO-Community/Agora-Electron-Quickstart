@@ -77,6 +77,10 @@ const createWindow = async () => {
       contextIsolation: false,
     },
   });
+  mainWindow.webContents.openDevTools({
+    mode: 'detach',
+    activate: true,
+  });
 
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
