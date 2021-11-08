@@ -36,7 +36,7 @@ interface State {
 
 const pluginId = 'my-plugin';
 
-export default class LoadCppPlugin extends Component<{}, State, any> {
+export default class LoadPlugin extends Component<{}, State, any> {
   rtcEngine?: AgoraRtcEngine;
 
   state: State = {
