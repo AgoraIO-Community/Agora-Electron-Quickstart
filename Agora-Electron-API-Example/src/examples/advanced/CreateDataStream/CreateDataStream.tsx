@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
-import { List, Card } from 'antd';
-import config from '../config/agora.config';
-import DropDownButton from '../component/DropDownButton';
-import styles from '../config/public.scss';
-import { AudioScenarioList, AudioProfileList } from '../config';
-import { configMapToOptions } from '../util';
-import SliderBar from '../component/SliderBar';
-import JoinChannelBar from '../component/JoinChannelBar';
+import { List, Card, Input } from 'antd';
+import config from '../../config/agora.config';
+import styles from '../../config/public.scss';
+import JoinChannelBar from '../../component/JoinChannelBar';
+import createDataStreamStyle from './CreateDataStream.scss';
 
+const { Search } = Input;
 interface User {
   isMyself: boolean;
   uid: number;
@@ -24,30 +22,21 @@ interface State {
   audioScenario: number;
   allUser: User[];
   isJoined: boolean;
+  msgs: string[];
 }
 
-export default class JoinChannelAudio extends Component<State> {
+export default class CreateDataStream extends Component<State> {
   rtcEngine?: AgoraRtcEngine;
 
+  streamId?: number;
+
   state: State = {
-    audioRecordDevices: [],
-    audioProfile: AudioProfileList.SpeechStandard,
-    audioScenario: AudioScenarioList.Standard,
     allUser: [],
     isJoined: false,
+    msgs: [],
   };
 
-  componentDidMount() {
-    const audioRecordDevices =
-      this.getRtcEngine().getAudioRecordingDevices() as Device[];
-
-    console.log(
-      'audioRecordDevices',
-      this.getRtcEngine().getAudioRecordingDevices()
-    );
-
-    this.setState({ audioRecordDevices });
-  }
+  componentDidMount() {}
 
   componentWillUnmount() {
     this.rtcEngine?.leaveChannel();
@@ -116,11 +105,30 @@ export default class JoinChannelAudio extends Component<State> {
     rtcEngine.on('error', (err) => {
       console.error(err);
     });
+    rtcEngine.on('streamMessage', (uid, streamId, msg, len) => {
+      this.setState({
+        msgs: [...this.state.msgs, `from:${uid} message:${msg}`],
+      });
+      console.log('received message: ', uid, streamId, msg);
+    });
   };
 
-  setAudioProfile = () => {
-    const { audioProfile, audioScenario } = this.state;
-    this.rtcEngine?.setAudioProfile(audioProfile, audioScenario);
+  getStreamId = () => {
+    if (!this.streamId) {
+      this.streamId = this.rtcEngine?.createDataStreamWithConfig({
+        syncWithAudio: false,
+        ordered: true,
+      });
+    }
+
+    return this.streamId!;
+  };
+
+  pressSendMsg = (msg: string) => {
+    // create the data stream
+    // Each user can create up to five data streams during the lifecycle of the agoraKit
+    this.rtcEngine?.sendStreamMessage(this.getStreamId(), msg);
+    console.log('streamId:', this.streamId, ' content:', msg);
   };
 
   renderItem = ({ isMyself, uid }) => {
@@ -132,69 +140,36 @@ export default class JoinChannelAudio extends Component<State> {
   };
 
   renderRightBar = () => {
-    const { audioRecordDevices: audioDevices } = this.state;
+    const { isJoined, msgs } = this.state;
     return (
-      <div className={styles.rightBar}>
-        <div>
-          <DropDownButton
-            options={configMapToOptions(AudioProfileList)}
-            onPress={(res) =>
-              this.setState({ audioProfile: res.dropId }, this.setAudioProfile)
-            }
-            title="Audio Profile"
-          />
-          <DropDownButton
-            options={configMapToOptions(AudioScenarioList)}
-            onPress={(res) =>
-              this.setState({ audioScenario: res.dropId }, this.setAudioProfile)
-            }
-            title="Audio Scenario"
-          />
-          <DropDownButton
-            title="Microphone"
-            options={audioDevices.map((obj) => {
-              const { deviceid, devicename } = obj;
-              return { dropId: deviceid, dropText: devicename, ...obj };
-            })}
-            onPress={(res) => {
-              this.rtcEngine?.setAudioRecordingDevice(res.dropId);
-              // this.rtcEngine?.enableLoopbackRecording(true, res.dropText);
-            }}
-          />
-          <SliderBar
-            max={100}
-            title="Device Recording Volume"
-            onChange={(value) => {
-              this.rtcEngine?.adjustRecordingSignalVolume(value);
-            }}
-          />
-          <SliderBar
-            max={100}
-            title="SDK Recording Volume"
-            onChange={(value) => {
-              this.rtcEngine?.adjustRecordingSignalVolume(value);
-            }}
-          />
-          <SliderBar
-            max={100}
-            title="Device Playout Volume"
-            onChange={(value) => {
-              this.rtcEngine?.adjustAudioMixingPlayoutVolume(value);
-            }}
-          />
-          <SliderBar
-            max={100}
-            title="SDK Playout Volume SDK"
-            onChange={(value) => {
-              this.rtcEngine?.adjustPlaybackSignalVolume(value);
-            }}
-          />
+      <div className={styles.rightBarBig}>
+        <div className={createDataStreamStyle.toolBarContent}>
+          <div>
+            <p>Received Messages:</p>
+            <div className={createDataStreamStyle.msgList}>
+              {msgs.map((msg, index) => (
+                <div key={index} className={createDataStreamStyle.msg}>
+                  {msg}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p>Send Message:</p>
+            <Search
+              placeholder="input msg text"
+              enterButton="Send"
+              size="middle"
+              onSearch={this.pressSendMsg}
+              disabled={!isJoined}
+            />
+          </div>
         </div>
         <JoinChannelBar
           onPressJoin={(channelId) => {
             const rtcEngine = this.getRtcEngine();
             rtcEngine.disableVideo();
-            rtcEngine.enableAudio();
+            rtcEngine.disableAudio();
             rtcEngine.setClientRole(1);
 
             rtcEngine.joinChannel(

@@ -1,17 +1,12 @@
 import React, { Component } from 'react';
-import AgoraRtcEngine, {
-  AREA_CODE,
-  LOG_LEVEL,
-  AgoraRtcChannel,
-  ChannelEvents,
-} from 'agora-electron-sdk';
+import AgoraRtcEngine from 'agora-electron-sdk';
 import { List, Card, Button } from 'antd';
 import config from '../../config/agora.config';
 
 import styles from '../../config/public.scss';
 
 interface State {
-  channels: AgoraRtcChannel[];
+  channels: any[];
 }
 
 export default class JoinMultipleChannel extends Component<{}, State, any> {
@@ -30,51 +25,43 @@ export default class JoinMultipleChannel extends Component<{}, State, any> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore:next-line
-      window.rtcEngine = this.rtcEngine;
-      const res = this.rtcEngine.initializeWithContext({
-        appId: config.appID,
-        areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
-          level: LOG_LEVEL.LOG_LEVEL_INFO,
-          filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
+      const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
+        level: 0x0001,
+        filePath: config.nativeSDKLogPath,
+        fileSize: 2000,
       });
+      console.log('initialize', res);
       this.rtcEngine.setAddonLogFile(config.addonLogPath);
-      console.log('initialize:', res);
     }
 
     return this.rtcEngine;
   }
 
-  subscribeEvents = (channel: AgoraRtcChannel) => {
-    channel.on(
-      ChannelEvents.JOIN_CHANNEL_SUCCESS,
-      (channelId, uid, elapsed) => {
-        console.log(
-          `joinChannelSuccess: ${channelId} uid:${uid},elapsed:${elapsed}`
-        );
-      }
-    );
-    channel.on(ChannelEvents.LEAVE_CHANNEL, (channelId, stats) => {
+  subscribeEvents = (channel: any) => {
+    const channelId = channel.rtcChannel.channelId();
+
+    channel.on('joinChannelSuccess', (uid, elapsed) => {
+      console.log(
+        `joinChannelSuccess: ${channelId} uid:${uid},elapsed:${elapsed}`
+      );
+    });
+    channel.on('leaveChannel', (stats) => {
       const { channels } = this.state;
       console.log(`leaveChannel: ${channelId}`, stats);
       this.setState({
         channels: channels.filter((c) => c.channelId() !== channelId),
       });
     });
-    channel.on(ChannelEvents.CHANNEL_ERROR, (channelId, err, msg) => {
+    channel.on('channelError', (err, msg) => {
       console.log(`channelError: ${channelId}`, channelId, err, msg);
     });
-    channel.on(ChannelEvents.CHANNEL_WARNING, (channelId, warn, msg) => {
+    channel.on('channelWarning', (warn, msg) => {
       console.log(`channelError: ${channelId}`, channelId, warn, msg);
     });
-    channel.on(ChannelEvents.USER_JOINED, (channelId, uid, elapsed) => {
+    channel.on('userJoined', (uid, elapsed) => {
       console.log(`userJoined: ${channelId}`, uid, elapsed);
     });
-    channel.on(ChannelEvents.RTC_STATS, (channelId, stats) => {
+    channel.on('rtcStats', (stats) => {
       console.log(`rtcStats: ${channelId}`, stats);
     });
   };
@@ -103,16 +90,15 @@ export default class JoinMultipleChannel extends Component<{}, State, any> {
       </div>
     );
   };
-  renderItem = (channel: AgoraRtcChannel, index: number) => {
-    return (
-      <List.Item>
-        <Card title={`order: ${index}`}>
-          <p>{`ChannelId:\n${channel.channelId()}`}</p>
-          <a onClick={() => channel.leaveChannel()}>Leave</a>
-        </Card>
-      </List.Item>
-    );
-  };
+
+  renderItem = (channel: any, index: number) => (
+    <List.Item>
+      <Card title={`order: ${index}`}>
+        <p>{`ChannelId:\n${channel.channelId()}`}</p>
+        <a onClick={() => channel.leaveChannel()}>Leave</a>
+      </Card>
+    </List.Item>
+  );
 
   render() {
     const { channels } = this.state;
