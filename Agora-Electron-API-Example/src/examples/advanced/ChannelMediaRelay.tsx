@@ -1,18 +1,13 @@
 import React, { Component } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
-import { List, Card, Radio, Space, message, Button } from 'antd';
+import { List, Card, Button, Input } from 'antd';
 import config from '../config/agora.config';
-import DropDownButton from '../component/DropDownButton';
 import styles from '../config/public.scss';
 import JoinChannelBar from '../component/JoinChannelBar';
-import { RoleTypeMap, ResolutionMap, FpsMap } from '../config';
-import { configMapToOptions } from '../util';
 import Window from '../component/Window';
 
-interface Device {
-  devicename: string;
-  deviceid: string;
-}
+const { Search } = Input;
+
 interface User {
   isMyself: boolean;
   uid: number;
@@ -20,6 +15,7 @@ interface User {
 
 interface State {
   isJoined: boolean;
+  isRelaying: boolean;
   channelId: string;
   allUser: User[];
   audioRecordDevices: Object[];
@@ -37,6 +33,7 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
     isJoined: false,
     audioRecordDevices: [],
     cameraDevices: [],
+    isRelaying: false,
   };
 
   componentDidMount() {
@@ -119,22 +116,7 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
     rtcEngine.on('lastMileQuality', (quality) => {
       console.log(`lastmilequality: ${JSON.stringify(quality)}`);
     });
-    rtcEngine.on(
-      'audiovolumeindication',
-      (uid, volume, speakerNumber, totalVolume) => {
-        console.log(
-          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
-        );
-      }
-    );
-    rtcEngine.on(
-      'audiovolumeindication',
-      (uid, volume, speakerNumber, totalVolume) => {
-        console.log(
-          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
-        );
-      }
-    );
+
     rtcEngine.on('channelMediaRelayState', (state, code) => {
       console.log('channelMediaRelayState: state', state, 'code', code);
     });
@@ -167,96 +149,33 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
     );
   };
 
-  setVideoConfig = () => {
-    const { currentFps, currentResolution } = this.state;
-    if (!currentResolution || !currentFps) {
-      return;
-    }
-    const { width, height } = currentResolution;
-    this.getRtcEngine().setVideoEncoderConfiguration({
-      width,
-      height,
-      frameRate: currentFps!,
-      minFrameRate: 10,
-      bitrate: 65,
-      minBitrate: 65,
-      orientationMode: 0,
-      degradationPreference: 2,
-      mirrorMode: 0,
-    });
-  };
-
   renderRightBar = () => {
-    const { audioRecordDevices, cameraDevices } = this.state;
-    console.log(
-      'audioRecordDevices, cameraDevices',
-      audioRecordDevices,
-      cameraDevices
-    );
+    const { isJoined, isRelaying } = this.state;
 
     return (
       <div className={styles.rightBar}>
         <div>
-          <DropDownButton
-            options={cameraDevices.map((obj) => {
-              const { deviceid, devicename } = obj;
-              return { dropId: deviceid, dropText: devicename, ...obj };
-            })}
-            onPress={(res) => {
-              this.getRtcEngine().setVideoDevice(res.dropId);
-            }}
-            title="Camera"
-          />
-          <DropDownButton
-            title="Microphone"
-            options={audioRecordDevices.map((obj) => {
-              const { deviceid, devicename } = obj;
-              return { dropId: deviceid, dropText: devicename, ...obj };
-            })}
-            onPress={(res) => {
-              this.getRtcEngine().setAudioRecordingDevice(res.dropId);
-            }}
-          />
-          <DropDownButton
-            title="Role"
-            options={configMapToOptions(RoleTypeMap)}
-            onPress={(res) => {
-              this.getRtcEngine().setClientRole(res.dropId);
+          <p>Relay Channel:</p>
+          <Search
+            placeholder="ChannelName"
+            allowClear
+            enterButton={!isRelaying ? 'Start Relay' : 'Stop Relay'}
+            size="small"
+            disabled={!isJoined}
+            onSearch={(relayChannnelName) => {
+              if (isRelaying) {
+                this.getRtcEngine().stopChannelMediaRelay();
+              } else {
+                const { channelId, allUser } = this.state;
+                const self = allUser.filter((user) => user.isMyself)[0];
+                this.getRtcEngine().startChannelMediaRelay({
+                  srcInfo: { channelName: channelId, uid: self.uid },
+                  destInfos: [{ channelName: relayChannnelName }],
+                });
+              }
+              this.setState({ isRelaying: !isRelaying });
             }}
           />
-          <DropDownButton
-            title="Resolution"
-            options={configMapToOptions(ResolutionMap)}
-            onPress={(res) => {
-              this.setState(
-                { currentResolution: res.dropId },
-                this.setVideoConfig
-              );
-            }}
-          />
-          <DropDownButton
-            title="FPS"
-            options={configMapToOptions(FpsMap)}
-            onPress={(res) => {
-              this.setState({ currentFps: res.dropId }, this.setVideoConfig);
-            }}
-          />
-          <Button
-            onClick={() => {
-              const { channelId, allUser } = this.state;
-              const tconfig = {
-                srcInfo: { channelName: channelId, uid: allUser[0].uid },
-                destInfos: [{ channelName: 'test2' }],
-              };
-              console.log(tconfig);
-
-              const result =
-                this.getRtcEngine().startChannelMediaRelay(tconfig);
-              console.log('result', result);
-            }}
-          >
-            Start Relay
-          </Button>
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
