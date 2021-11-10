@@ -25,6 +25,11 @@
     align-items: stretch;
     justify-content: space-between;
   }
+  .rightBarBig {
+    @extend .rightBar;
+    width: 50%;
+  }
+
   .selectedItem {
     margin-top: 16px;
     .require {
