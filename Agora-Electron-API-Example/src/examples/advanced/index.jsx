@@ -1,5 +1,4 @@
 import ScreenShare from './ScreenShare/ScreenShare';
-import ControlAudioOnSubProcess from './AudioChildProcess';
 import LoadPlugin from './LoadPlugin';
 import ChannelMediaRelay from './ChannelMediaRelay';
 import CreateDataStream from './CreateDataStream/CreateDataStream';
@@ -10,11 +9,6 @@ const advanceRoute = [
     path: '/ScreenShare',
     component: ScreenShare,
     title: 'ScreenShare',
-  },
-  {
-    path: '/ControlAudioOnSubProcess',
-    component: ControlAudioOnSubProcess,
-    title: 'ControlAudioOnSubProcess',
   },
   {
     path: '/LoadPlugin',
