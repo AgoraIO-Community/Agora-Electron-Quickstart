@@ -168,7 +168,7 @@ export default class JoinChannelAudio extends Component<State> {
             max={255}
             title="Device Recording Volume"
             onChange={(value) => {
-              this.rtcEngine?.setAudioRecordingVolume(value);
+              this.rtcEngine?.adjustLoopbackRecordingSignalVolume(value);
             }}
           />
           <SliderBar

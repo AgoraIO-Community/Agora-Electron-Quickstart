@@ -103,6 +103,7 @@ export default class JoinMultipleChannel extends Component<{}, State, any> {
       </div>
     );
   };
+
   renderItem = (channel: AgoraRtcChannel, index: number) => {
     return (
       <List.Item>

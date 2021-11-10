@@ -19,20 +19,14 @@ const char *MyIAVFramePlugin::getParameter(const char *key) { return key; }
 int MyIAVFramePlugin::release() { return 0; }
 
 bool MyIAVFramePlugin::onPluginCaptureVideoFrame(VideoPluginFrame *videoFrame) {
-  fout << "onPluginCaptureVideoFrame" << endl;
-  fout << endl;
   return true;
 }
 bool MyIAVFramePlugin::onPluginRenderVideoFrame(unsigned int uid,
                                                 VideoPluginFrame *videoFrame) {
-  fout << "onPluginRenderVideoFrame" << endl;
-  fout << endl;
   return true;
 }
 
 bool MyIAVFramePlugin::onPluginRecordAudioFrame(AudioPluginFrame *audioFrame) {
-  fout << "onPluginRecordAudioFrame" << endl;
-  fout << endl;
   return true;
 }
 bool MyIAVFramePlugin::onPluginPlaybackAudioFrame(
@@ -40,42 +34,28 @@ bool MyIAVFramePlugin::onPluginPlaybackAudioFrame(
   return true;
 }
 bool MyIAVFramePlugin::onPluginMixedAudioFrame(AudioPluginFrame *audioFrame) {
-  fout << "onPluginMixedAudioFrame" << endl;
-  fout << endl;
   return true;
 }
 
 bool MyIAVFramePlugin::onPluginPlaybackAudioFrameBeforeMixing(
     unsigned int uid, AudioPluginFrame *audioFrame) {
-  fout << "onPluginPlaybackAudioFrameBeforeMixing" << endl;
-  fout << endl;
   return true;
 }
 
 bool MyIAVFramePlugin::onPluginSendAudioPacket(PluginPacket *packet) {
-  fout << "onPluginSendAudioPacket" << endl;
-  fout << endl;
   return true;
 }
 bool MyIAVFramePlugin::onPluginSendVideoPacket(PluginPacket *packet) {
-  fout << "onPluginSendVideoPacket" << endl;
-  fout << endl;
   return true;
 }
 bool MyIAVFramePlugin::onPluginReceiveAudioPacket(PluginPacket *packet) {
-  fout << "onPluginReceiveAudioPacket" << endl;
-  fout << endl;
   return true;
 }
 bool MyIAVFramePlugin::onPluginReceiveVideoPacket(PluginPacket *packet) {
-  fout << "onPluginReceiveVideoPacket" << endl;
-  fout << endl;
   return true;
 }
 
 IAVFramePlugin *createAVFramePlugin() {
-  fout = std::ofstream("./plugin.log");
-
   MyIAVFramePlugin *myPluginPtr = new MyIAVFramePlugin();
   return myPluginPtr;
 }

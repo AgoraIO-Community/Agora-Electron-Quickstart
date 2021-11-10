@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
-import { List, Card, Button, Input } from 'antd';
+import { List, Card, Input } from 'antd';
 import config from '../config/agora.config';
 import styles from '../config/public.scss';
 import JoinChannelBar from '../component/JoinChannelBar';
@@ -18,8 +18,6 @@ interface State {
   isRelaying: boolean;
   channelId: string;
   allUser: User[];
-  audioRecordDevices: Object[];
-  cameraDevices: Object[];
   currentFps?: number;
   currentResolution?: { width: number; height: number };
 }
@@ -31,18 +29,12 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
     channelId: '',
     allUser: [],
     isJoined: false,
-    audioRecordDevices: [],
-    cameraDevices: [],
     isRelaying: false,
   };
 
   componentDidMount() {
     this.getRtcEngine().enableVideo();
     this.getRtcEngine().enableAudio();
-    this.setState({
-      audioRecordDevices: this.getRtcEngine().getAudioRecordingDevices(),
-      cameraDevices: this.getRtcEngine().getVideoDevices(),
-    });
   }
 
   componentWillUnmount() {
@@ -53,6 +45,9 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
       const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
         level: 0x0001,
