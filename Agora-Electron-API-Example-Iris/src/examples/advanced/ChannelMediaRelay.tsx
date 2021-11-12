@@ -4,8 +4,12 @@ import AgoraRtcEngine, {
   AREA_CODE,
   CLIENT_ROLE_TYPE,
   EngineEvents,
+  CHANNEL_PROFILE_TYPE,
+  AUDIO_PROFILE_TYPE,
+  AUDIO_SCENARIO_TYPE,
+  RENDER_MODE,
 } from 'agora-electron-sdk';
-import { List, Card, Button, Input } from 'antd';
+import { List, Card, Input } from 'antd';
 import config from '../config/agora.config';
 import styles from '../config/public.scss';
 import JoinChannelBar from '../component/JoinChannelBar';
@@ -50,12 +54,19 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
-      const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
-        level: 0x0001,
-        filePath: config.nativeSDKLogPath,
-        fileSize: 2000,
-      });
+      const res = this.rtcEngine.initialize(
+        config.appID,
+        AREA_CODE.AREA_CODE_GLOB,
+        {
+          level: LOG_LEVEL.LOG_LEVEL_INFO,
+          filePath: config.nativeSDKLogPath,
+          fileSize: 2000,
+        }
+      );
       console.log('initialize:', res);
       this.rtcEngine.setAddonLogFile(config.addonLogPath);
     }
@@ -127,14 +138,19 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId });
-    this.rtcEngine?.setChannelProfile(1);
-    this.rtcEngine?.setClientRole(1);
-    this.rtcEngine?.setAudioProfile(0, 1);
+    this.rtcEngine?.setChannelProfile(
+      CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING
+    );
+    this.rtcEngine?.setClientRole(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
+    this.rtcEngine?.setAudioProfile(
+      AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT,
+      AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_ENTERTAINMENT
+    );
 
     this.rtcEngine?.enableDualStreamMode(true);
     this.rtcEngine?.enableAudioVolumeIndication(1000, 3, false);
 
-    this.rtcEngine?.setRenderMode(1);
+    this.rtcEngine?.setRenderMode(RENDER_MODE.SOFTWARE);
     this.rtcEngine?.enableVideo();
     this.rtcEngine?.enableLocalVideo(true);
 

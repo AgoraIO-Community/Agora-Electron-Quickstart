@@ -184,7 +184,7 @@ export default class CreateDataStream extends Component<State> {
             const rtcEngine = this.getRtcEngine();
             rtcEngine.disableVideo();
             rtcEngine.disableAudio();
-            rtcEngine.setClientRole(1);
+            rtcEngine.setClientRole(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
 
             rtcEngine.joinChannel(
               config.token,

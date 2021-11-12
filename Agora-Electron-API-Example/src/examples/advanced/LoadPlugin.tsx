@@ -70,6 +70,9 @@ export default class LoadPlugin extends Component<{}, State, any> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
       const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
         level: 0x0001,
@@ -86,7 +89,7 @@ export default class LoadPlugin extends Component<{}, State, any> {
   registerPlugin = () => {
     console.log('----------registerPlugin--------');
     console.log('plugin path:', config.pluginPath);
-    
+
     const rtcEngine = this.getRtcEngine();
     rtcEngine.initializePluginManager();
 
@@ -103,9 +106,10 @@ export default class LoadPlugin extends Component<{}, State, any> {
     console.log('registerPlugin: enablePlugin ', enabledRes);
     console.log('----------registerPlugin--------');
 
-    const plugin = rtcEngine.getPlugins().find(plugin => plugin.id === pluginId);
-    console.log('plugin?.enable',plugin?.enable());
-    ;
+    const plugin = rtcEngine
+      .getPlugins()
+      .find((plugin) => plugin.id === pluginId);
+    console.log('plugin?.enable', plugin?.enable());
   };
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {

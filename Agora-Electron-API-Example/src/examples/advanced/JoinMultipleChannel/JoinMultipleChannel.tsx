@@ -16,8 +16,6 @@ export default class JoinMultipleChannel extends Component<{}, State, any> {
     channels: [],
   };
 
-  componentDidMount() {}
-
   componentWillUnmount() {
     this.rtcEngine?.release();
   }
@@ -25,6 +23,9 @@ export default class JoinMultipleChannel extends Component<{}, State, any> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      window.rtcEngine = this.rtcEngine;
       const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
         level: 0x0001,
         filePath: config.nativeSDKLogPath,
