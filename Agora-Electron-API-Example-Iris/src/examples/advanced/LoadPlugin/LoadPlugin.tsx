@@ -9,13 +9,13 @@ import AgoraRtcEngine, {
   EngineEvents,
 } from 'agora-electron-sdk';
 import { List, Card, Radio, Space, message } from 'antd';
-import config from '../config/agora.config';
-import DropDownButton from '../component/DropDownButton';
-import styles from '../config/public.scss';
-import JoinChannelBar from '../component/JoinChannelBar';
-import { RoleTypeMap, ResolutionMap, FpsMap } from '../config';
-import { configMapToOptions } from '../util';
-import Window from '../component/Window';
+import config from '../../config/agora.config';
+import DropDownButton from '../../component/DropDownButton';
+import styles from '../../config/public.scss';
+import JoinChannelBar from '../../component/JoinChannelBar';
+import { RoleTypeMap, ResolutionMap, FpsMap } from '../../config';
+import { configMapToOptions } from '../../util';
+import Window from '../../component/Window';
 
 interface Device {
   devicename: string;
