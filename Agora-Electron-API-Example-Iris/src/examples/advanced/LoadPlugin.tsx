@@ -1,5 +1,13 @@
 import React, { Component } from 'react';
-import AgoraRtcEngine from 'agora-electron-sdk';
+import AgoraRtcEngine, {
+  AREA_CODE,
+  LOG_LEVEL,
+  CHANNEL_PROFILE_TYPE,
+  AUDIO_PROFILE_TYPE,
+  AUDIO_SCENARIO_TYPE,
+  RENDER_MODE,
+  EngineEvents,
+} from 'agora-electron-sdk';
 import { List, Card, Radio, Space, message } from 'antd';
 import config from '../config/agora.config';
 import DropDownButton from '../component/DropDownButton';
@@ -28,8 +36,8 @@ interface State {
   isJoined: boolean;
   channelId: string;
   allUser: User[];
-  audioRecordDevices: Object[];
-  cameraDevices: Object[];
+  audioRecordDevices: Device[];
+  cameraDevices: Device[];
   currentFps?: number;
   currentResolution?: { width: number; height: number };
 }
@@ -70,14 +78,21 @@ export default class LoadPlugin extends Component<{}, State, any> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
-      const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
-        level: 0x0001,
-        filePath: config.nativeSDKLogPath,
-        fileSize: 2000,
+      const res = this.rtcEngine.initializeWithContext({
+        appId: config.appID,
+        areaCode: AREA_CODE.AREA_CODE_GLOB,
+        logConfig: {
+          level: LOG_LEVEL.LOG_LEVEL_INFO,
+          filePath: config.nativeSDKLogPath,
+          fileSize: 2000,
+        },
       });
-      console.log('initialize:', res);
       this.rtcEngine.setAddonLogFile(config.addonLogPath);
+      console.log('initialize:', res);
     }
 
     return this.rtcEngine;
@@ -85,31 +100,24 @@ export default class LoadPlugin extends Component<{}, State, any> {
 
   registerPlugin = () => {
     console.log('----------registerPlugin--------');
-    console.log('plugin path:', config.pluginPath);
-    
     const rtcEngine = this.getRtcEngine();
-    rtcEngine.initializePluginManager();
-
     if (!config.pluginPath) {
       message.error('Please set plugin path');
     }
 
     const registerRes = rtcEngine.registerPlugin({
-      id: pluginId,
-      path: config.pluginPath,
+      pluginId,
+      pluginPath: config.pluginPath,
+      order: 1,
     });
     console.log(`registerPlugin: registerPlugin  result: ${registerRes}`);
     const enabledRes = rtcEngine.enablePlugin(pluginId, true);
     console.log('registerPlugin: enablePlugin ', enabledRes);
     console.log('----------registerPlugin--------');
-
-    const plugin = rtcEngine.getPlugins().find(plugin => plugin.id === pluginId);
-    console.log('plugin?.enable',plugin?.enable());
-    ;
   };
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on('joinedChannel', (channel, uid, elapsed) => {
+    rtcEngine.on(EngineEvents.JOINED_CHANNEL, (channel, uid, elapsed) => {
       console.log(
         `onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(
           rtcEngine.getVersion()
@@ -123,8 +131,7 @@ export default class LoadPlugin extends Component<{}, State, any> {
         allUser: newAllUser,
       });
     });
-
-    rtcEngine.on('userJoined', (uid, elapsed) => {
+    rtcEngine.on(EngineEvents.USER_JOINED, (uid, elapsed) => {
       console.log(`userJoined ---- ${uid}`);
 
       const { allUser: oldAllUser } = this.state;
@@ -134,7 +141,7 @@ export default class LoadPlugin extends Component<{}, State, any> {
         allUser: newAllUser,
       });
     });
-    rtcEngine.on('userOffline', (uid, reason) => {
+    rtcEngine.on(EngineEvents.USER_OFFLINE, (uid, reason) => {
       console.log(`userOffline ---- ${uid}`);
 
       const { allUser: oldAllUser } = this.state;
@@ -144,29 +151,13 @@ export default class LoadPlugin extends Component<{}, State, any> {
       });
     });
 
-    rtcEngine.on('leavechannel', (rtcStats) => {
-      console.log('leavechannel', rtcStats);
-
+    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (rtcStats) => {
       this.setState({
         isJoined: false,
         allUser: [],
       });
     });
-    rtcEngine.on('lastmileProbeResult', (result) => {
-      console.log(`lastmileproberesult: ${JSON.stringify(result)}`);
-    });
-    rtcEngine.on('lastMileQuality', (quality) => {
-      console.log(`lastmilequality: ${JSON.stringify(quality)}`);
-    });
-    rtcEngine.on(
-      'audiovolumeindication',
-      (uid, volume, speakerNumber, totalVolume) => {
-        console.log(
-          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
-        );
-      }
-    );
-    rtcEngine.on('error', (err) => {
+    rtcEngine.on(EngineEvents.ERROR, (err) => {
       console.error(err);
     });
   };
@@ -177,14 +168,18 @@ export default class LoadPlugin extends Component<{}, State, any> {
       this.registerPlugin();
     }
     this.setState({ channelId });
-    this.rtcEngine?.setChannelProfile(1);
-    this.rtcEngine?.setAudioProfile(0, 1);
+    this.rtcEngine?.setChannelProfile(
+      CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_COMMUNICATION
+    );
+    this.rtcEngine?.setAudioProfile(
+      AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT,
+      AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_ENTERTAINMENT
+    );
 
     this.rtcEngine?.enableDualStreamMode(true);
     this.rtcEngine?.enableAudioVolumeIndication(1000, 3, false);
 
-    this.rtcEngine?.setRenderMode(1);
-    this.rtcEngine?.enableLocalVideo(true);
+    this.rtcEngine?.setRenderMode(RENDER_MODE.WEBGL);
 
     this.rtcEngine?.joinChannel(
       config.token,
@@ -202,15 +197,13 @@ export default class LoadPlugin extends Component<{}, State, any> {
     if (!currentResolution || !currentFps) {
       return;
     }
-    const { width, height } = currentResolution;
     this.getRtcEngine().setVideoEncoderConfiguration({
-      width,
-      height,
+      dimensions: currentResolution!,
       frameRate: currentFps!,
-      minFrameRate: 10,
-      bitrate: 65,
-      minBitrate: 65,
+      bitrate: 30,
       orientationMode: 0,
+      minFrameRate: 10,
+      minBitrate: 1,
       degradationPreference: 2,
       mirrorMode: 0,
     });
@@ -218,12 +211,6 @@ export default class LoadPlugin extends Component<{}, State, any> {
 
   renderRightBar = () => {
     const { audioRecordDevices, cameraDevices, pluginState } = this.state;
-    console.log(
-      'audioRecordDevices, cameraDevices',
-      audioRecordDevices,
-      cameraDevices
-    );
-
     return (
       <div className={styles.rightBar}>
         <div>

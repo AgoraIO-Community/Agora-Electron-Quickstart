@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
-import { List, Card, Radio, Space, message } from 'antd';
+import { List, Card } from 'antd';
 import config from '../config/agora.config';
 import DropDownButton from '../component/DropDownButton';
 import styles from '../config/public.scss';
@@ -9,10 +9,6 @@ import { RoleTypeMap, ResolutionMap, FpsMap } from '../config';
 import { configMapToOptions } from '../util';
 import Window from '../component/Window';
 
-interface Device {
-  devicename: string;
-  deviceid: string;
-}
 interface User {
   isMyself: boolean;
   uid: number;
@@ -56,6 +52,9 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
       const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
         level: 0x0001,

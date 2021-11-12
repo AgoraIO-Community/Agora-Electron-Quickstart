@@ -57,6 +57,9 @@ export default class JoinChannelAudio extends Component<State> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
       const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
         level: 0x0001,
@@ -172,7 +175,7 @@ export default class JoinChannelAudio extends Component<State> {
             max={100}
             title="SDK Recording Volume"
             onChange={(value) => {
-              this.rtcEngine?.adjustRecordingSignalVolume(value);
+              this.rtcEngine?.adjustLoopbackRecordingSignalVolume(value);
             }}
           />
           <SliderBar

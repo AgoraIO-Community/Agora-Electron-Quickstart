@@ -1,46 +1,71 @@
-# Agora Electron Quickstart
+# Agora-Electron-API-Example
 
-This tutorial describes how to create an Agora account and build a sample app with Agora using [Electron](https://electronjs.org/) and [React](https://github.com/facebook/react).
+_**其他语言版本：** [**简体中文**](README.zh.md)_
 
-## Prerequisites
+## Overview
+
+The Agora-Electron-API-Example project is an open-source demo that will show you different scenes on how to integrate Agora SDK APIs into your project.
+
+Any scene of this project can run successfully alone.
+
+## Project structure
+
+- **Basic demos:**
+
+| Demo                                                                                                                                                              | Description                                        | APIs                                                                                                                                                    |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [JoinChannelAudio](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/tree/master/Agora-Electron-API-Example/src/examples/basic/JoinChannelAudio.tsx) | basic demo to show audio call                      | getAudioRecordingDevices, ,adjustLoopbackRecordingSignalVolume, adjustRecordingSignalVolume, adjustAudioMixingPlayoutVolume, adjustPlaybackSignalVolume |
+| [JoinChannelVideo](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example/src/examples/basic/JoinChannelVideo.tsx) | video demo with role selection in Editor Inspector | enableVideo, getVideoDevices,setChannelProfile, setClientRole, setAudioProfile, setVideoEncoderConfiguration                                            |
+
+- **Advanced demos:**
+
+| Demo                                                                                                                                                                                           | Description                                                    | APIs                                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [ScreenShare](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example/src/examples/advanced/ScreenShare/ScreenShare.tsx)                         | sharing application screen view from Unity camera              | getWindowInfoList, getScreenInfoList, videoSourceSetVideoProfile, videoSourceStartScreenCaptureByScreen, startScreenCapturePreview, videoSourceStartScreenCaptureByWindow, stopScreenCapture2 , videoSourceLeave, videoSourceRelease |
+| [LoadPlugin](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example/src/examples/advanced/LoadPlugin.tsx)                                       | Load the cpp plug-in to process audio and video data           | initializePluginManager, enablePlugin, getPlugins                                                                                                                                                                                    |
+| [ChannelMediaRelay](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example/src/examples/advanced/ChannelMediaRelay.tsx)                         | audioMixing and play audio effect in the channel               | startChannelMediaRelay, stopChannelMediaRelay                                                                                                                                                                                        |
+| [CreateDataStream](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example/src/examples/advanced/CreateDataStream/CreateDataStream.tsx)          | use AudioSource to play raw data received in the Agora channel | createDataStreamWithConfig, sendStreamMessage                                                                                                                                                                                        |
+| [JoinMultipleChannel](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example/src/examples/advanced/JoinMultipleChannel/JoinMultipleChannel.tsx) | Sending raw data from AudioSource into the Agora channel       | createChannel                                                                                                                                                                                                                        |
+
+## How to run the sample project
+
+#### Developer Environment Requirements
+
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
 - [Node.js](https://nodejs.org/en/download/) 6.9.1+ with C++11 support
-- [Electron](https://electronjs.org) = \[1.8.3, 3.0.6, 4.2.8, 5.0.8, 6.1.5, 7.1.2, 9.0.0, 10.0.0, 11.2.0, 11.0.0, 12.0.0]
+- [Yarn](https://yarnpkg.com/)  package manager
 
-## Quick Start
-This section shows you how to prepare and build the Agora Electron wrapper.
+#### Steps to run
 
-### Create an Account and Obtain an App ID
-To build and run the sample application, first obtain an app ID: 
+First, create a developer account at [Agora.io](https://dashboard.agora.io/signin/), and obtain an App ID.
 
-1. Create a developer account at [agora.io](https://dashboard.agora.io/signin/). Once you finish the sign-up process, you are redirected to the dashboard.
-2. Navigate in the dashboard tree on the left to **Projects** > **Project List**.
-3. Copy the app ID that you obtain from the dashboard into a text file. You will use this when you launch the app.
+Then do the following:
 
-### Update and Run the Sample Application
+```shell 
+$ git clone https://github.com/AgoraIO-Community/Agora-Electron-Quickstart
+$ cd Agora-Electron-API-Example
+$ yarn
+$ yarn start
 
-Open the [agora.config.js](src/agora.config.js) file and add the app ID.
-
-Run the `install` command in your project directory:
-
-```bash  
-  # install dependencies
-  yarn
 ```
 
-**Note:** During install, the C++ add-on is downloaded instead of being built.
+## Feedback
 
-Use the `run start` command to build the Agora Electron wrapper.
-	
-```bash
-# enable dynamic compiling and HMR developing environment
-yarn start
-```
+If you have any problems or suggestions regarding the sample projects, feel free to file an issue.
 
-## Resources
-* [Documentation](https://docs.agora.io/en/Video/API%20Reference/electron/index.html)
-* [File bugs about this sample](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/issues)
-* Full Electron SDK wrapper addon source can be found at [Agora RTC SDK for Electron](https://github.com/AgoraIO-Community/Agora-RTC-SDK-for-Electron)
+## Reference
+
+- You can find full API document at [Document Center](https://docs.agora.io/en/Video/API%20Reference/electron/index.html)
+- You can file issues about this demo at [issue](https://github.com/AgoraIO/Electron-SDK/issues)
+
+## Related resources
+
+- Check our [FAQ](https://docs.agora.io/en/faq) to see if your issue has been recorded.
+- Dive into [Agora SDK Samples](https://github.com/AgoraIO) to see more tutorials
+- Take a look at [Agora Use Case](https://github.com/AgoraIO-usecase) for more complicated real use case
+- Repositories managed by developer communities can be found at [Agora Community](https://github.com/AgoraIO-Community)
+- If you encounter problems during integration, feel free to ask questions in [Stack Overflow](https://stackoverflow.com/questions/tagged/agora.io)
 
 ## License
-This software is under the MIT License (MIT). [View the license](LICENSE.md).
+
+The sample projects are under the MIT license.
