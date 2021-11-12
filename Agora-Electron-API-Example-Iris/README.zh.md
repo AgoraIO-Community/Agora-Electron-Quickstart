@@ -1,23 +1,23 @@
 # Agora-Electron-API-Example-Iris
 
-_**其他语言版本：** [**简体中文**](README.zh.md)_
+_Read this in other languages: [English](README.md)_
 
-## Overview
+## 简介
 
-The Agora-Electron-API-Example-Iris project is an open-source demo that will show you different scenes on how to integrate Agora SDK APIs into your project.
+这个开源示例项目演示了不同场景下，Agora SDK 的基本集成逻辑。 项目中每个 Scene 都是一个独立的场景，都可以成功独立运行。
 
-Any scene of this project can run successfully alone.
+在这个示例项目中包含的所有场景都可以独立运行：
 
 ## Project structure
 
-- **Basic demos:**
+- **基础案例:**
 
 | Demo                                                                                                                                                              | Description                                        | APIs                                                                                                                                                    |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [JoinChannelAudio](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/tree/master/Agora-Electron-API-Example-Iris/src/examples/basic/JoinChannelAudio.tsx) | basic demo to show audio call                      | getAudioRecordingDevices, ,adjustLoopbackRecordingSignalVolume, adjustRecordingSignalVolume, adjustAudioMixingPlayoutVolume, adjustPlaybackSignalVolume |
 | [JoinChannelVideo](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/examples/basic/JoinChannelVideo.tsx) | video demo with role selection in Editor Inspector | enableVideo, getVideoDevices,setChannelProfile, setClientRole, setAudioProfile, setVideoEncoderConfiguration                                            |
 
-- **Advanced demos:**
+- **进阶案例:**
 
 | Demo                                                                                                                                                                                           | Description                                                    | APIs                                                                                                                                                                                                                                 |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -27,21 +27,21 @@ Any scene of this project can run successfully alone.
 | [CreateDataStream](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/examples/advanced/CreateDataStream/CreateDataStream.tsx)          | use AudioSource to play raw data received in the Agora channel | createDataStreamWithConfig, sendStreamMessage                                                                                                                                                                                        |
 | [JoinMultipleChannel](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/examples/advanced/JoinMultipleChannel/JoinMultipleChannel.tsx) | Sending raw data from AudioSource into the Agora channel       | createChannel                                                                                                                                                                                                                        |
 
-## How to run the sample project
+## 如何运行示例程序
 
-#### Developer Environment Requirements
+#### 运行环境
 
 - Agora.io [Developer Account](https://dashboard.agora.io/signin/)
-- [Node.js](https://nodejs.org/en/download/) 6.9.1+ with C++11 support
-- [Yarn](https://yarnpkg.com/)  package manager
+- [Node.js](https://nodejs.org/en/download/)
+- [Yarn](https://yarnpkg.com/) package manager
 
-#### Steps to run
+#### 运行步骤
 
-First, create a developer account at [Agora.io](https://dashboard.agora.io/signin/), and obtain an App ID.
+- 首先在 [Agora.io 注册](https://dashboard.agora.io/cn/signup/) 注册账号，并创建自己的测试项目，获取到 AppID。
 
-Then do the following:
+然后进行以下操作:
 
-```shell 
+```shell
 $ git clone https://github.com/AgoraIO-Community/Agora-Electron-Quickstart
 $ cd Agora-Electron-API-Example-Iris
 $ yarn
@@ -49,23 +49,23 @@ $ yarn start
 
 ```
 
-## Feedback
+## 反馈
 
-If you have any problems or suggestions regarding the sample projects, feel free to file an issue.
+如果您对示例项目有任何问题或建议，请随时提交问题。
 
-## Reference
+## 参考文档
 
-- You can find full API document at [Document Center](https://docs.agora.io/en/Video/API%20Reference/electron/index.html)
-- You can file issues about this demo at [issue](https://github.com/AgoraIO/Electron-SDK/issues)
+- 您可以在 [文档中心](https://docs.agora.io/cn/Video/API%20Reference/electron/index.html)找到完整的 API 文档
 
-## Related resources
+## 相关资源
 
-- Check our [FAQ](https://docs.agora.io/en/faq) to see if your issue has been recorded.
-- Dive into [Agora SDK Samples](https://github.com/AgoraIO) to see more tutorials
-- Take a look at [Agora Use Case](https://github.com/AgoraIO-usecase) for more complicated real use case
-- Repositories managed by developer communities can be found at [Agora Community](https://github.com/AgoraIO-Community)
-- If you encounter problems during integration, feel free to ask questions in [Stack Overflow](https://stackoverflow.com/questions/tagged/agora.io)
+- 你可以先参阅[常见问题](https://docs.agora.io/cn/faq)
+- 如果你想了解更多官方示例，可以参考[官方 SDK 示例](https://github.com/AgoraIO)
+- 如果你想了解声网 SDK 在复杂场景下的应用，可以参考[官方场景案例](https://github.com/AgoraIO-usecase)
+- 如果你想了解声网的一些社区开发者维护的项目，可以查看[社区](https://github.com/AgoraIO-Community)
+- 若遇到问题需要开发者帮助，你可以到[开发者社区](https://rtcdeveloper.com/)提问
+- 如果需要售后技术支持, 你可以在[Agora Dashboard](https://dashboard.agora.io/)提交工单
 
-## License
+## 代码许可
 
-The sample projects are under the MIT license.
+示例项目遵守 MIT 许可证。
