@@ -1,6 +1,6 @@
 import ScreenShare from './ScreenShare/ScreenShare';
-import LoadPlugin from './LoadPlugin';
-import ChannelMediaRelay from './ChannelMediaRelay';
+import LoadPlugin from './LoadPlugin/LoadPlugin';
+import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay';
 import CreateDataStream from './CreateDataStream/CreateDataStream';
 import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel';
 

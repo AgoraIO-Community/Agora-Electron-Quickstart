@@ -10,10 +10,10 @@ import AgoraRtcEngine, {
   RENDER_MODE,
 } from 'agora-electron-sdk';
 import { List, Card, Input } from 'antd';
-import config from '../config/agora.config';
-import styles from '../config/public.scss';
-import JoinChannelBar from '../component/JoinChannelBar';
-import Window from '../component/Window';
+import config from '../../config/agora.config';
+import styles from '../../config/public.scss';
+import JoinChannelBar from '../../component/JoinChannelBar';
+import Window from '../../component/Window';
 
 const { Search } = Input;
 
