@@ -37,6 +37,23 @@ $ yarn start
 
 ## More
 
+### Replace SDK with other version
+
+Our electron project uses Two package.json Structure,if you want use sdk with other version, please replace from [Agora-Electron-API-Example-Iris/src/package.json](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/package.json) or [Agora-Electron-API-Example/src/package.json](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example/src/package.json)
+
+```json
+{
+  "dependencies": {
+    "agora-electron-sdk": "xxx" // replace here
+  }
+}
+
+```
+
+- More info about [Two package.json Structure](https://www.electron.build/tutorials/two-package-structure.html)
+
+
+
 ### Integrate SDK with other web frameworks
 
 - Other
