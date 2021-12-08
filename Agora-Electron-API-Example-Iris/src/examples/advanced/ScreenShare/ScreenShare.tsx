@@ -293,7 +293,13 @@ export default class ScreenShare extends Component<{}, State, any> {
           config.token,
           channelId,
           info,
-          SCREEN_SHARE_ID
+          SCREEN_SHARE_ID,
+          {
+            autoSubscribeAudio: false,
+            autoSubscribeVideo: false,
+            publishLocalAudio: false,
+            publishLocalVideo: true,
+          }
         );
       } catch (err) {
         clearTimeout(timer);
