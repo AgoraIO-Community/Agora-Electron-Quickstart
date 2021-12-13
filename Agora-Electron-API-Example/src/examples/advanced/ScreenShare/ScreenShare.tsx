@@ -8,6 +8,7 @@ import screenStyle from './ScreenShare.scss';
 import JoinChannelBar from '../../component/JoinChannelBar';
 import Window from '../../component/Window';
 import { readImage } from '../../util/base64';
+import { ipcRenderer } from 'electron';
 
 interface State {
   currentFps?: number;
@@ -222,6 +223,14 @@ export default class ScreenShare extends Component<{}, State, any> {
       message.error('Must select a window/screen to share');
       return true;
     }
+
+    // receive stop message
+    ipcRenderer.once('stop-screenshare', () => {
+      this.onPressStopSharing();
+    });
+
+    // send start message to ipc main
+    ipcRenderer.send('start-screenshare');
 
     const {
       info: { displayId, windowId },

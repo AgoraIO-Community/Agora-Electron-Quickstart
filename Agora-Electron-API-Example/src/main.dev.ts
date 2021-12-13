@@ -11,7 +11,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 
@@ -22,6 +22,7 @@ export default class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let toolbarWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -74,12 +75,28 @@ const createWindow = async () => {
       contextIsolation: false,
     },
   });
+
+  toolbarWindow = new BrowserWindow({
+    show: false,
+    width: 1024,
+    height: 48,
+    x: 0,
+    y: 0,
+    frame: false,
+    icon: getAssetPath('icon.png'),
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  })
+
   mainWindow.webContents.openDevTools({
     mode: 'detach',
     activate: true,
   });
 
   mainWindow.loadURL(`file://${__dirname}/index.html`);
+  toolbarWindow.loadURL(`file://${__dirname}/toolbar.html`);
 
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
@@ -112,6 +129,31 @@ const createWindow = async () => {
   // eslint-disable-next-line
   new AppUpdater();
 };
+
+let screenshareSender: any = null;
+
+ipcMain.on('start-screenshare', (event: any) => {
+  if (mainWindow) {
+    mainWindow.hide();
+  }
+  if (toolbarWindow) {
+    toolbarWindow.show();
+  }
+  screenshareSender = event.sender;
+});
+
+ipcMain.on('stop-screenshare', () => {
+  if (toolbarWindow) {
+    toolbarWindow.hide();
+  }
+  if (mainWindow) {
+    mainWindow.show();
+  }
+  if (screenshareSender) {
+    screenshareSender.send('stop-screenshare');
+  }
+});
+
 app.allowRendererProcessReuse = false;
 /**
  * Add event listeners...
