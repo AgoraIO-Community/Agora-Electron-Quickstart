@@ -238,7 +238,7 @@ export default class ScreenShare extends Component<{}, State, any> {
       });
       await this.startScreenOrWindowCapture(type, displayId || windowId);
     } catch (error) {
-      message.error('Screen Share Fail');
+      message.error('Screen Share Fail');
     }
   };
 
