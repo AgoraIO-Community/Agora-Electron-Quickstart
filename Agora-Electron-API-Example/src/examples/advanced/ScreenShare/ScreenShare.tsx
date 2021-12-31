@@ -89,6 +89,9 @@ export default class ScreenShare extends Component<{}, State, any> {
   }
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
+    rtcEngine.on('videoSourceScreenCaptureInfoUpdated', (info) => {
+      console.log('videoSourceScreenCaptureInfoUpdated', info);
+    });
     rtcEngine.on('joinedChannel', (channel, uid, elapsed) => {
       console.log(
         `onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(
