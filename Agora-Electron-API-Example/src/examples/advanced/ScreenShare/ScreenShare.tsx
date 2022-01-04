@@ -8,6 +8,7 @@ import screenStyle from './ScreenShare.scss';
 import JoinChannelBar from '../../component/JoinChannelBar';
 import Window from '../../component/Window';
 import { readImage } from '../../util/base64';
+import ChooseFilterWindowModal from '../../component/ChooseFilterWindowModal';
 
 interface State {
   currentFps?: number;
@@ -129,7 +130,11 @@ export default class ScreenShare extends Component<{}, State, any> {
     rtcEngine.videoSourceEnableAudio();
   };
 
-  startScreenOrWindowCapture = (type: string, screenSymbol: any) => {
+  startScreenOrWindowCapture = (
+    type: string,
+    screenSymbol: any,
+    excludeList: Array<number> = []
+  ) => {
     const rtcEngine = this.getRtcEngine();
     // rtcEngine.startScreenCapture2(windowId, captureFreq, rect, bitrate);
     // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
@@ -140,7 +145,7 @@ export default class ScreenShare extends Component<{}, State, any> {
     console.log('type', type);
     console.log('screenSymbol', screenSymbol);
 
-    const excludeList = new Array<number>();
+    console.log('excludeList', excludeList);
     if (type === 'screen') {
       rtcEngine.videoSourceStartScreenCaptureByScreen(
         screenSymbol,
@@ -225,7 +230,15 @@ export default class ScreenShare extends Component<{}, State, any> {
       message.error('Must select a window/screen to share');
       return true;
     }
-
+    const windows = this.getRtcEngine().getScreenWindowsInfo();
+    const windowIds = windows.map(({ windowId }) => windowId);
+    let excludeWindows = [];
+    const isCancel = !(await this.modal.showModal(windowIds, (res) => {
+      excludeWindows = (res && res.map((windowId) => parseInt(windowId))) || [];
+    }));
+    if (isCancel) {
+      return true;
+    }
     const {
       info: { displayId, windowId },
       type,
@@ -239,8 +252,15 @@ export default class ScreenShare extends Component<{}, State, any> {
       this.setState({
         localVideoSourceUid,
       });
-      await this.startScreenOrWindowCapture(type, displayId || windowId);
+
+      await this.startScreenOrWindowCapture(
+        type,
+        displayId || windowId,
+        excludeWindows
+      );
     } catch (error) {
+      console.log(error);
+
       message.error('Screen Share Fail');
     }
   };
@@ -331,6 +351,11 @@ export default class ScreenShare extends Component<{}, State, any> {
           buttonTitleDisable="Stop"
           onPressJoin={this.onPressStartShare}
           onPressLeave={this.onPressStopSharing}
+        />
+        <ChooseFilterWindowModal
+          cRef={(ref) => {
+            this.modal = ref;
+          }}
         />
       </div>
     );
