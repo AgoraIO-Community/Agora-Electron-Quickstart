@@ -9,6 +9,7 @@
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir src",
     "lint": "cross-env NODE_ENV=development eslint . --cache --ext .js,.jsx,.ts,.tsx",
     "package-mac": "rm -rf src/dist && yarn build && electron-builder build --dir -c.compression=store -c.mac.identity=null",
+    "package-mac-arm64": "rm -rf src/dist && yarn build && electron-builder build --arm64 --dir -c.compression=store -c.mac.identity=null",
     "dist:win32": "yarn build && electron-builder build --publish never --win --ia32",
     "dist:win64": "yarn build && electron-builder build --publish never --win --x64",
     "postinstall": "node -r @babel/register .erb/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn cross-env NODE_ENV=development webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.babel.js &&  yarn-deduplicate yarn.lock",
