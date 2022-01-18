@@ -20,7 +20,7 @@
   },
   "agora_electron": {
     "prebuilt": true,
-    "electron_version": "12.0.0"
+    "electron_version": "5.0.8"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -209,7 +209,7 @@
     "css-loader": "^5.0.1",
     "css-minimizer-webpack-plugin": "^1.1.5",
     "detect-port": "^1.3.0",
-    "electron": "12.0.0",
+    "electron": "5.0.8",
     "electron-builder": "22.13.1",
     "electron-devtools-installer": "^3.1.1",
     "electron-notarize": "^1.0.0",
