@@ -190,7 +190,7 @@ export default class ScreenShare extends Component<{}, State, any> {
 
     const excludeList = new Array<number>();
     if (type === 'screen') {
-      rtcEngine.videoSourceStartScreenCaptureByScreen(
+      rtcEngine.videoSourceStartScreenCaptureByDisplayId(
         screenSymbol,
         { x: 0, y: 0, width: 0, height: 0 },
         {
