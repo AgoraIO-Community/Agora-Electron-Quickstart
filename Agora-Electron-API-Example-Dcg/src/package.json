@@ -15,6 +15,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "agora-electron-sdk": "3.5.0-rc.3-iris.1123-build.1"
+    "agora-electron-sdk": "3.6.200-iris.1-dcg.1"
   }
 }
