@@ -4,6 +4,10 @@ import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay';
 import CreateDataStream from './CreateDataStream/CreateDataStream';
 import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel';
 import ScreenCapture from './ScreenCapture/ScreenCapture';
+import AudioMixing from './AudioMixing/AudioMixing';
+import SetEncryption from './SetEncryption/SetEncryption';
+import SetLiveTranscoding from './SetLiveTranscoding/SetLiveTranscoding';
+import VoiceChanger from './VoiceChanger/VoiceChanger';
 
 const advanceRoute = [
   {
@@ -36,7 +40,26 @@ const advanceRoute = [
     component: ScreenCapture,
     title: 'ScreenCapture',
   },
-  
+  {
+    path: '/AudioMixing',
+    component: AudioMixing,
+    title: 'AudioMixing',
+  },
+  {
+    path: '/SetEncryption',
+    component: SetEncryption,
+    title: 'SetEncryption',
+  },
+  {
+    path: '/SetLiveTranscoding',
+    component: SetLiveTranscoding,
+    title: 'SetLiveTranscoding',
+  },
+  {
+    path: '/VoiceChanger',
+    component: VoiceChanger,
+    title: 'VoiceChanger',
+  },
 ];
 
 export default advanceRoute;

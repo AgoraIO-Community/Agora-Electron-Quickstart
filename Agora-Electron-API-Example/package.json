@@ -90,7 +90,8 @@
       "output": "release"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      "./extraResources/**"
     ],
     "publish": {
       "provider": "github",
