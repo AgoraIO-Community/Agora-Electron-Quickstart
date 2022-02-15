@@ -13,23 +13,17 @@ class Window extends Component<WindowProps> {
     const { uid, role, rtcEngine, channelId } = this.props;
 
     const dom = document.querySelector(`#video-${uid}`);
-    console.log('Window', role);
+    console.log('Window', uid, role, channelId);
     // CROPPED = 0, FIT = 1
     if (role === 'local') {
       rtcEngine.setupLocalVideo(dom!);
-
-      rtcEngine.setupViewContentMode('local', 1, channelId);
-      console.log('local', uid, dom, channelId);
+      rtcEngine.setupViewContentMode('local', 1, undefined);
     } else if (role === 'localVideoSource') {
       rtcEngine.setupLocalVideoSource(dom!);
-      rtcEngine.setupViewContentMode('videosource', 1, channelId);
+      rtcEngine.setupViewContentMode('videosource', 1, undefined);
     } else if (role === 'remote') {
       rtcEngine.subscribe(uid as number, dom!);
       rtcEngine.setupViewContentMode(uid as number, 1, undefined);
-      console.log('remote', uid, dom, channelId);
-    } else if (role === 'remoteVideoSource') {
-      rtcEngine.subscribe(uid as number, dom!);
-      rtcEngine.setupViewContentMode(uid, 1);
     }
   }
 
