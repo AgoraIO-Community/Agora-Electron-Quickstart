@@ -5,6 +5,7 @@ import AgoraRtcEngine, {
   LOG_LEVEL,
   EngineEvents,
   VideoSourceEvents,
+  VIDEO_PROFILE_TYPE,
 } from 'agora-electron-sdk';
 import { Card, message, Radio, Space } from 'antd';
 import config from '../../config/agora.config';
@@ -189,7 +190,7 @@ export default class ScreenShare extends Component<{}, State, any> {
 
     const excludeList = new Array<number>();
     if (type === 'screen') {
-      rtcEngine.videoSourceStartScreenCaptureByScreen(
+      rtcEngine.videoSourceStartScreenCaptureByDisplayId(
         screenSymbol,
         { x: 0, y: 0, width: 0, height: 0 },
         {
@@ -236,7 +237,10 @@ export default class ScreenShare extends Component<{}, State, any> {
     // rtcEngine.startScreenCapture2(windowId, captureFreq, rect, bitrate);
     // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
     // note although it's called, it's not taking any effect, to control the screenshare dimension, use captureParam instead
-    rtcEngine.videoSourceSetVideoProfile(43, false);
+    rtcEngine.videoSourceSetVideoProfile(
+      VIDEO_PROFILE_TYPE.VIDEO_PROFILE_LANDSCAPE_480P_4,
+      false
+    );
     const pix = window.devicePixelRatio;
     const value = 100;
     const resultValue = pix * value;
@@ -289,7 +293,13 @@ export default class ScreenShare extends Component<{}, State, any> {
           config.token,
           channelId,
           info,
-          SCREEN_SHARE_ID
+          SCREEN_SHARE_ID,
+          {
+            autoSubscribeAudio: false,
+            autoSubscribeVideo: false,
+            publishLocalAudio: false,
+            publishLocalVideo: true,
+          }
         );
       } catch (err) {
         clearTimeout(timer);

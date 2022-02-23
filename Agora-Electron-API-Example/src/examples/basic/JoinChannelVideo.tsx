@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
-import { List, Card, Radio, Space, message } from 'antd';
+import { List, Card } from 'antd';
 import config from '../config/agora.config';
 import DropDownButton from '../component/DropDownButton';
 import styles from '../config/public.scss';
@@ -9,22 +9,12 @@ import { RoleTypeMap, ResolutionMap, FpsMap } from '../config';
 import { configMapToOptions } from '../util';
 import Window from '../component/Window';
 
-interface Device {
-  devicename: string;
-  deviceid: string;
-}
 interface User {
   isMyself: boolean;
   uid: number;
 }
 
 interface State {
-  /**
-   * 1: don't register
-   * 2: register before join channel
-   * 3: register after join channel
-   */
-  pluginState: 1 | 2 | 3;
   isJoined: boolean;
   channelId: string;
   allUser: User[];
@@ -34,18 +24,10 @@ interface State {
   currentResolution?: { width: number; height: number };
 }
 
-const pluginId = 'my-plugin';
-
 export default class JoinChannelVideo extends Component<{}, State, any> {
   rtcEngine?: AgoraRtcEngine;
 
   state: State = {
-    /**
-     * 1: don't register
-     * 2: register before join channel
-     * 3: register after join channel
-     */
-    pluginState: 1,
     channelId: '',
     allUser: [],
     isJoined: false,
@@ -70,6 +52,9 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   getRtcEngine() {
     if (!this.rtcEngine) {
       this.rtcEngine = new AgoraRtcEngine();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
       const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
         level: 0x0001,
@@ -82,23 +67,6 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
 
     return this.rtcEngine;
   }
-
-  registerPlugin = () => {
-    console.log('----------registerPlugin--------');
-    const rtcEngine = this.getRtcEngine();
-    if (!config.pluginPath) {
-      message.error('Please set plugin path');
-    }
-
-    const registerRes = rtcEngine.registerPlugin({
-      id: pluginId,
-      path: config.pluginPath,
-    });
-    console.log(`registerPlugin: registerPlugin  result: ${registerRes}`);
-    const enabledRes = rtcEngine.enablePlugin(pluginId, true);
-    console.log('registerPlugin: enablePlugin ', enabledRes);
-    console.log('----------registerPlugin--------');
-  };
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
     rtcEngine.on('joinedChannel', (channel, uid, elapsed) => {
@@ -164,18 +132,15 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   };
 
   onPressJoinChannel = (channelId: string) => {
-    const { pluginState } = this.state;
-    if (pluginState === 2) {
-      this.registerPlugin();
-    }
     this.setState({ channelId });
     this.rtcEngine?.setChannelProfile(1);
+    this.rtcEngine?.setClientRole(1);
     this.rtcEngine?.setAudioProfile(0, 1);
 
     this.rtcEngine?.enableDualStreamMode(true);
     this.rtcEngine?.enableAudioVolumeIndication(1000, 3, false);
-
     this.rtcEngine?.setRenderMode(1);
+    this.rtcEngine?.enableVideo();
     this.rtcEngine?.enableLocalVideo(true);
 
     this.rtcEngine?.joinChannel(
@@ -184,9 +149,6 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       '',
       Number(`${new Date().getTime()}`.slice(7))
     );
-    if (pluginState === 3) {
-      this.registerPlugin();
-    }
   };
 
   setVideoConfig = () => {
@@ -209,7 +171,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   };
 
   renderRightBar = () => {
-    const { audioRecordDevices, cameraDevices, pluginState } = this.state;
+    const { audioRecordDevices, cameraDevices } = this.state;
     console.log(
       'audioRecordDevices, cameraDevices',
       audioRecordDevices,
@@ -263,26 +225,10 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
               this.setState({ currentFps: res.dropId }, this.setVideoConfig);
             }}
           />
-          <div className={styles.selectedItem}>
-            (Optional) Register custom plugin
-          </div>
-          <Radio.Group
-            onChange={({ target: { value } }) => {
-              this.setState({ pluginState: value });
-            }}
-            value={pluginState}
-          >
-            <Space direction="vertical">
-              <Radio value={1}>Don&apos;t register plugin</Radio>
-              <Radio value={2}>Plugin register before join</Radio>
-              <Radio value={3}>Plugin register after join</Radio>
-            </Space>
-          </Radio.Group>
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
           onPressLeave={() => {
-            this.rtcEngine?.unregisterPlugin(pluginId);
             this.rtcEngine?.leaveChannel();
           }}
         />

@@ -14,7 +14,7 @@ interface State {
   channels: AgoraRtcChannel[];
 }
 
-export default class JoinChannelVideo extends Component<{}, State, any> {
+export default class JoinMultipleChannel extends Component<{}, State, any> {
   rtcEngine?: AgoraRtcEngine;
 
   state: State = {
@@ -68,8 +68,8 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
     channel.on(ChannelEvents.CHANNEL_ERROR, (channelId, err, msg) => {
       console.log(`channelError: ${channelId}`, channelId, err, msg);
     });
-    channel.on(ChannelEvents.CHANNEL_WARNING, (channelId, wran, msg) => {
-      console.log(`channelError: ${channelId}`, channelId, wran, msg);
+    channel.on(ChannelEvents.CHANNEL_WARNING, (channelId, warn, msg) => {
+      console.log(`channelError: ${channelId}`, channelId, warn, msg);
     });
     channel.on(ChannelEvents.USER_JOINED, (channelId, uid, elapsed) => {
       console.log(`userJoined: ${channelId}`, uid, elapsed);
@@ -87,7 +87,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
     const channel = rtcEngine.createChannel(channelId)!;
     this.subscribeEvents(channel);
     this.setState({ channels: [...channels, channel] });
-
+    // auto subscribe options after join channel
     channel.joinChannel(config.token, '', 0, {
       autoSubscribeAudio: false,
       autoSubscribeVideo: false,
@@ -103,6 +103,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       </div>
     );
   };
+
   renderItem = (channel: AgoraRtcChannel, index: number) => {
     return (
       <List.Item>

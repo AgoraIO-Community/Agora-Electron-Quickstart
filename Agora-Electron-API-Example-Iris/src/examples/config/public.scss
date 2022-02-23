@@ -7,12 +7,15 @@
     height: 340px;
   }
   .content {
+    overflow: auto;
+    max-height: 630px;
     padding: 0 16px;
     display: flex;
     width: 100%;
     background-color: rgb(238, 240, 243);
   }
   .rightBar {
+    max-height: 630px;
     display: flex;
     width: 40%;
     flex-direction: column;
@@ -22,6 +25,11 @@
     align-items: stretch;
     justify-content: space-between;
   }
+  .rightBarBig {
+    @extend .rightBar;
+    width: 50%;
+  }
+
   .selectedItem {
     margin-top: 16px;
     .require {
