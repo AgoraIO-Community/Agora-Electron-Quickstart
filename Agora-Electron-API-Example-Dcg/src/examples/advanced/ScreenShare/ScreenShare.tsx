@@ -4,8 +4,12 @@ import AgoraRtcEngine, {
   AREA_CODE,
   LOG_LEVEL,
   EngineEvents,
-  VideoSourceEvents,
-  VIDEO_PROFILE_TYPE,
+  VideoSourceType,
+  CLIENT_ROLE_TYPE,
+  CHANNEL_PROFILE_TYPE,
+ 
+  //VideoSourceEvents,
+  //VIDEO_PROFILE_TYPE,
 } from 'agora-electron-sdk';
 import { Card, message, Radio, Space } from 'antd';
 import config from '../../config/agora.config';
@@ -15,7 +19,9 @@ import screenStyle from './ScreenShare.scss';
 import JoinChannelBar from '../../component/JoinChannelBar';
 import Window from '../../component/Window';
 import { readImage } from '../../util/base64';
-
+import { release } from 'os';
+import { randomInt } from 'crypto';
+import { throws } from 'assert';
 interface State {
   /**
    * 1: don't register
@@ -30,6 +36,7 @@ interface State {
   windowInfoList: any[];
   localVideoSourceUid?: number;
   selectedShareInfo?: { type: 'screen' | 'window'; info: any };
+  shared : Boolean;
 }
 
 const SCREEN_SHARE_ID = 99;
@@ -47,6 +54,7 @@ export default class ScreenShare extends Component<{}, State, any> {
     pluginState: 1,
     screenInfoList: [],
     windowInfoList: [],
+    shared: false,
   };
 
   componentDidMount = async () => {
@@ -99,14 +107,14 @@ export default class ScreenShare extends Component<{}, State, any> {
       // @ts-ignore:next-line
       window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
-      const res = this.rtcEngine.initializeWithContext({
-        appId: config.appID,
+      const res = this.rtcEngine?.initialize( {
+        appId : config.appID,
         areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
+        logConfig : {
           level: LOG_LEVEL.LOG_LEVEL_INFO,
           filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
+          fileSize: 2000
+        }
       });
       this.rtcEngine.setAddonLogFile(config.addonLogPath);
       console.log('initialize:', res);
@@ -120,33 +128,22 @@ export default class ScreenShare extends Component<{}, State, any> {
     if (!config.pluginPath) {
       message.error('Please set plugin path');
     }
-
-    const registerRes = rtcEngine.videoSourceRegisterPlugin({
-      pluginId,
-      pluginPath: config.pluginPath,
-      order: 1,
-    });
-    console.log(
-      `registerPlugin: videoSourceRegisterPlugin  result: ${registerRes}`
-    );
-    const enabledRes = rtcEngine.videoSourceEnablePlugin(pluginId, true);
-    console.log('registerPlugin:videoSourceEnablePlugin ', enabledRes);
-    console.log('----------registerPlugin--------');
   };
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on(EngineEvents.JOINED_CHANNEL, (channel, uid, elapsed) => {
+    rtcEngine.on(EngineEvents.JOINED_CHANNEL, ( connection, elapsed) => {
       console.log(
-        `onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(
+        `onJoinChannel channel: ${connection.channelId}  uid: ${connection.localUid}  version: ${JSON.stringify(
           rtcEngine.getVersion()
         )})`
       );
+
+      console.log('localVideoSourceUid', connection.localUid);
+      this.setState({
+        localVideoSourceUid : connection.localUid,
+      });
     });
     rtcEngine.on(EngineEvents.USER_JOINED, (uid, elapsed) => {
-      if (uid === SCREEN_SHARE_ID) {
-        console.log(`screen share join ---- ${SCREEN_SHARE_ID}`);
-        return;
-      }
       console.log(`userJoined ---- ${uid}`);
     });
     rtcEngine.on(EngineEvents.USER_OFFLINE, (uid, reason) => {});
@@ -160,67 +157,44 @@ export default class ScreenShare extends Component<{}, State, any> {
         console.log(`firstLocalVideoFrame width: ${width}, ${height}`);
       }
     );
-    rtcEngine.on(VideoSourceEvents.VIDEO_SOURCE_API_CALL_EXECUTED, (api, err) =>
-      console.log(`videoSourceApiCallExecuted ${api} ${err}`)
-    );
   };
 
-  initializeVideoSource = () => {
+  startScreenOrWindowCapture = (type: string, screenSymbol: any) => {
     const rtcEngine = this.getRtcEngine();
-    rtcEngine.videoSourceInitializeWithContext({
-      appId: config.appID,
-      areaCode: AREA_CODE.AREA_CODE_GLOB,
-      logConfig: {
-        level: LOG_LEVEL.LOG_LEVEL_INFO,
-        filePath: config.nativeSDKVideoSourceLogPath,
-        fileSize: 2000,
-      },
-    });
-    rtcEngine.videoSourceEnableVideo();
-    rtcEngine.videoSourceEnableAudio();
-  };
-
-  startScreenOrWindowCapture = (type: string, screenSymbol: ScreenSymbol) => {
-    const rtcEngine = this.getRtcEngine();
-    // rtcEngine.startScreenCapture2(windowId, captureFreq, rect, bitrate);
-    // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
-    // note although it's called, it's not taking any effect, to control the screenshare dimension, use captureParam instead
     console.log(`start sharing display ${JSON.stringify(screenSymbol)}`);
-    rtcEngine.videoSourceSetVideoProfile(43, false);
-
     const excludeList = new Array<number>();
+    var res = -1;
     if (type === 'screen') {
-      rtcEngine.videoSourceStartScreenCaptureByScreen(
-        screenSymbol,
-        { x: 0, y: 0, width: 0, height: 0 },
-        {
-          dimensions: { width: 0, height: 0 },
-          bitrate: 500,
-          frameRate: 5,
-          captureMouseCursor: true,
-          windowFocus: false,
-          excludeWindowList: excludeList,
-          excludeWindowCount: excludeList.length,
-        }
-      );
-      rtcEngine.videoSourceStartPreview();
+     
+      const res = rtcEngine.startScreenCaptureByScreen(
+          screenSymbol,
+          { x: screenSymbol.x, y: screenSymbol.y, width: screenSymbol.width, height: screenSymbol.height },
+          {
+            dimensions: { width: screenSymbol.width, height: screenSymbol.height },
+            bitrate: 2000,
+            frameRate: 5,
+            captureMouseCursor: true,
+            windowFocus: false,
+            excludeWindowList: excludeList,
+            excludeWindowCount: excludeList.length,
+          });
+      console.log('startScreenCaptureByScreen:', res);
     } else {
-      // window
-
-      // const pix = window.devicePixelRatio;
-      // const value = 100;
-      // const resultValue = pix * value;
-      rtcEngine.videoSourceStartScreenCaptureByWindow(
+      const info = this.state.windowInfoList.find((obj) => {
+        if(obj.windowId == screenSymbol)
+          return obj;
+      });
+      const res = rtcEngine.startScreenCaptureByWindow(
         screenSymbol,
         {
-          x: 0,
-          y: 0,
-          width: 0,
-          height: 0,
+          x: info.x,
+          y: info.y,
+          width: info.originWidth,
+          height: info.originHeight,
         },
         {
-          dimensions: { width: 0, height: 0 },
-          bitrate: 500,
+          dimensions: { width: info.originWidth, height: info.originHeight },
+          bitrate: 2000,
           frameRate: 15,
           captureMouseCursor: true,
           windowFocus: false,
@@ -228,77 +202,62 @@ export default class ScreenShare extends Component<{}, State, any> {
           excludeWindowCount: excludeList.length,
         }
       );
-      rtcEngine.videoSourceStartPreview();
+      console.log('startScreenCaptureByWindow:', res);
     }
+
+    if(res != 0)
+      this.setState({shared: false});
+    else
+      this.setState({shared: true});
   };
 
-  startWindowShare = (windowId = 0) => {
-    const rtcEngine = this.getRtcEngine();
-    // rtcEngine.startScreenCapture2(windowId, captureFreq, rect, bitrate);
-    // there's a known limitation that, videosourcesetvideoprofile has to be called at least once
-    // note although it's called, it's not taking any effect, to control the screenshare dimension, use captureParam instead
-    rtcEngine.videoSourceSetVideoProfile(
-      VIDEO_PROFILE_TYPE.VIDEO_PROFILE_LANDSCAPE_480P_4,
-      false
-    );
-    const pix = window.devicePixelRatio;
-    const value = 100;
-    const resultValue = pix * value;
-    const excludeList = new Array<number>();
-    rtcEngine.videoSourceStartScreenCaptureByWindow(
-      windowId,
-      {
-        x: resultValue,
-        y: resultValue,
-        width: resultValue,
-        height: resultValue,
-      },
-      {
-        dimensions: { width: 0, height: 0 },
-        bitrate: 500,
-        frameRate: 15,
-        captureMouseCursor: false,
-        windowFocus: false,
-        excludeWindowList: excludeList,
-        excludeWindowCount: excludeList.length,
-      }
-    );
-    rtcEngine.videoSourceStartPreview();
-  };
-
-  videoSourceJoinChannel = (
+  JoinChannel =  (
     channelId: string,
     info = '',
     timeout = 5000
-  ): Promise<number> =>
+  ): Promise<boolean> =>
     new Promise((resolve, reject) => {
+      const localUid = randomInt(1, 9999999);
       const timer = setTimeout(() => {
         reject(new Error('Join Channel Timeout'));
       }, timeout);
       const rtcEngine = this.getRtcEngine();
       rtcEngine.once(
-        VideoSourceEvents.VIDEO_SOURCE_JOIN_CHANNEL_SUCCESS,
-        (uid) => {
+        EngineEvents.JOINED_CHANNEL,
+        ( connection, elapsed) => {
           clearTimeout(timer);
-          console.log(`videoSourceJoinChannelSuccess`);
-          resolve(uid);
+          if (localUid!==connection.localUid) {
+            return;
+          }
+          resolve(true);
+          console.log(
+            `onJoinChannel channel: ${connection.channelId}  uid: ${connection.localUid}  version: ${JSON.stringify(
+              rtcEngine.getVersion()
+            )})`
+          );
         }
       );
 
-      rtcEngine.once(VideoSourceEvents.VIDEO_SOURCE_LEAVE_CHANNEL, () => {
-        console.log(`videoSourceLeaveChannel`);
+      rtcEngine.once(EngineEvents.LEAVE_CHANNEL, () => {
+        console.log(`LeaveChannel`);
       });
       try {
-        rtcEngine.videoSourceJoinChannel(
+        console.log(`localUid: ${localUid}`);
+        this.rtcEngine?.joinChannelEx(
           config.token,
-          channelId,
-          info,
-          SCREEN_SHARE_ID,
+          {
+            channelId,
+            localUid
+          },
           {
             autoSubscribeAudio: false,
             autoSubscribeVideo: false,
-            publishLocalAudio: false,
-            publishLocalVideo: true,
+            publishAudioTrack: false,
+            publishCameraTrack: false,
+            publishScreenTrack: true,
+            clientRoleType: CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER,
+            channelProfile: CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING,
+            encodedVideoTrackOption: { targetBitrate: 2000 },
           }
         );
       } catch (err) {
@@ -320,36 +279,26 @@ export default class ScreenShare extends Component<{}, State, any> {
       type,
     } = selectedShareInfo;
 
-    this.initializeVideoSource();
-    if (pluginState === 2) {
-      this.registerPlugin();
-    }
     try {
-      const localVideoSourceUid = await this.videoSourceJoinChannel(channelId);
-      this.setState({
-        localVideoSourceUid,
-      });
       await this.startScreenOrWindowCapture(type, displayId || windowId);
-      if (pluginState === 3) {
-        this.registerPlugin();
-      }
+      const res = await this.JoinChannel(channelId);
+      return false;
     } catch (error) {
-      message.error(error);
+      console.error(error);
+    
     }
+    console.log('----4');
+    return true;
   };
 
   onPressStopSharing = () => {
-    const rtcEngine = this.getRtcEngine();
-    rtcEngine.setView({
-      user: 'videoSource',
-      view: undefined,
-    });
-    rtcEngine.videoSourceUnregisterPlugin(pluginId);
-    rtcEngine.videoSourceStopScreenCapture();
-    rtcEngine.videoSourceLeaveChannel();
-    rtcEngine.videoSourceRelease();
-
-    this.setState({ localVideoSourceUid: undefined });
+    const shared = this.state;
+    if(shared){
+      const rtcEngine = this.getRtcEngine();
+      rtcEngine.stopScreenCapture();
+      rtcEngine.leaveChannel();
+      this.setState({ localVideoSourceUid: undefined, shared:false });
+    }
   };
 
   renderPopup = (item: { image: string }) => {
@@ -423,26 +372,10 @@ export default class ScreenShare extends Component<{}, State, any> {
               )}
             </div>
           </div>
-
-          <div className={styles.selectedItem}>
-            (Optional) Register custom plugin
-          </div>
-          <Radio.Group
-            onChange={({ target: { value } }) => {
-              this.setState({ pluginState: value });
-            }}
-            value={pluginState}
-          >
-            <Space direction="vertical">
-              <Radio value={1}>Don&apos;t register plugin</Radio>
-              <Radio value={2}>Plugin register before join</Radio>
-              <Radio value={3}>Plugin register after join</Radio>
-            </Space>
-          </Radio.Group>
         </div>
         <JoinChannelBar
           buttonTitle="Start Share"
-          buttonTitleDisable="Stop"
+          buttonTitleDisable="Stop Share"
           onPressJoin={this.onPressStartShare}
           onPressLeave={this.onPressStopSharing}
         />
@@ -457,7 +390,13 @@ export default class ScreenShare extends Component<{}, State, any> {
         <div className={styles.content}>
           {localVideoSourceUid && (
             <Card title="Local Share" className={styles.card}>
-              <Window rtcEngine={this.rtcEngine!} role="localVideoSource" />
+              <Window
+                uid={localVideoSourceUid}
+                rtcEngine={this.rtcEngine!}
+                videoSourceType = {VideoSourceType.kVideoSourceTypeScreenPrimary}
+               //role={isMyself ? 'local' : 'remote'}
+                 channelId={config.defaultChannelId}
+              />
             </Card>
           )}
         </div>

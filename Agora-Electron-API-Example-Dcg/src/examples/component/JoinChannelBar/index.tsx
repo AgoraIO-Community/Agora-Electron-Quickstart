@@ -30,7 +30,8 @@ const JoinChannelBar = ({
           } else {
             isBlock = await onPressJoin(values.channel);
           }
-
+          console.log('onFinish isblock',isBlock);
+          
           if (!isBlock) {
             setIsClicked(!isClicked);
           }

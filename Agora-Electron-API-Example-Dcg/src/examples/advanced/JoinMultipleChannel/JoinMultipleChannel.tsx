@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import AgoraRtcEngine, {
+import AgoraRtcEngine,  {
   AREA_CODE,
   LOG_LEVEL,
-  AgoraRtcChannel,
-  ChannelEvents,
+  CLIENT_ROLE_TYPE,
+  CHANNEL_PROFILE_TYPE,
+  RtcConnection, 
+  EngineEvents,
 } from 'agora-electron-sdk';
 import { List, Card, Button } from 'antd';
 import config from '../../config/agora.config';
@@ -11,17 +13,15 @@ import config from '../../config/agora.config';
 import styles from '../../config/public.scss';
 
 interface State {
-  channels: AgoraRtcChannel[];
+  connections: RtcConnection[];
 }
 
 export default class JoinMultipleChannel extends Component<{}, State, any> {
   rtcEngine?: AgoraRtcEngine;
 
   state: State = {
-    channels: [],
+    connections: [],
   };
-
-  componentDidMount() {}
 
   componentWillUnmount() {
     this.rtcEngine?.release();
@@ -33,66 +33,76 @@ export default class JoinMultipleChannel extends Component<{}, State, any> {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore:next-line
       window.rtcEngine = this.rtcEngine;
-      const res = this.rtcEngine.initializeWithContext({
-        appId: config.appID,
+      const res = this.rtcEngine?.initialize( {
+        appId : config.appID,
         areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
+        logConfig : {
           level: LOG_LEVEL.LOG_LEVEL_INFO,
           filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
+          fileSize: 2000
+        }
       });
+      console.log('initialize', res);
       this.rtcEngine.setAddonLogFile(config.addonLogPath);
-      console.log('initialize:', res);
     }
 
     return this.rtcEngine;
   }
 
-  subscribeEvents = (channel: AgoraRtcChannel) => {
-    channel.on(
-      ChannelEvents.JOIN_CHANNEL_SUCCESS,
-      (channelId, uid, elapsed) => {
-        console.log(
-          `joinChannelSuccess: ${channelId} uid:${uid},elapsed:${elapsed}`
-        );
-      }
-    );
-    channel.on(ChannelEvents.LEAVE_CHANNEL, (channelId, stats) => {
-      const { channels } = this.state;
-      console.log(`leaveChannel: ${channelId}`, stats);
+  subscribeEvents = (rtcEngine: AgoraRtcEngine, connection : RtcConnection) => {
+    const channelId = connection.channelId;
+    const { connections } = this.state;
+    rtcEngine.on(EngineEvents.JOIN_CHANNEL_SUCCESS, ( connection, elapsed) => {
+      this.setState({ connections: [...connections,  {
+        channelId,
+        localUid:connection.localUid,
+      }] });
+      console.log(
+        `onJoinChannelSuccess channel: ${connection.channelId}  uid: ${connection.localUid}  version: ${JSON.stringify(
+          rtcEngine.getVersion()
+        )})`
+      );
+    });
+   
+    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (connection, rtcStats) => {
+      const { connections: oldAllConnection } = this.state;
+      const newAllConnections = [...oldAllConnection.filter((obj) => obj.localUid !== connection.localUid)];
       this.setState({
-        channels: channels.filter((c) => c.channelId() !== channelId),
+        connections: newAllConnections,
       });
+      console.log(`leaveChannel: ${channelId} ${connection.localUid}`, channelId, connection.localUid, rtcStats);
     });
-    channel.on(ChannelEvents.CHANNEL_ERROR, (channelId, err, msg) => {
-      console.log(`channelError: ${channelId}`, channelId, err, msg);
-    });
-    channel.on(ChannelEvents.CHANNEL_WARNING, (channelId, warn, msg) => {
-      console.log(`channelError: ${channelId}`, channelId, warn, msg);
-    });
-    channel.on(ChannelEvents.USER_JOINED, (channelId, uid, elapsed) => {
-      console.log(`userJoined: ${channelId}`, uid, elapsed);
-    });
-    channel.on(ChannelEvents.RTC_STATS, (channelId, stats) => {
-      console.log(`rtcStats: ${channelId}`, stats);
+    rtcEngine.on(EngineEvents.ERROR, (err, msg) => {
+      console.error(err);
     });
   };
 
   onPressCreateChannel = () => {
     const channelId = `channel_${Math.round(Math.random() * 100)}`;
-    const { channels } = this.state;
+    const localUid = Math.round(Math.random() * 1000000);
     const rtcEngine = this.getRtcEngine();
 
-    const channel = rtcEngine.createChannel(channelId)!;
-    this.subscribeEvents(channel);
-    this.setState({ channels: [...channels, channel] });
-    // auto subscribe options after join channel
-    channel.joinChannel(config.token, '', 0, {
-      autoSubscribeAudio: false,
-      autoSubscribeVideo: false,
-      publishLocalAudio: false,
-      publishLocalVideo: false,
+    rtcEngine?.joinChannelEx(
+      config.token,
+      {
+        channelId,
+        localUid
+      },
+      {
+        autoSubscribeAudio: false,
+        autoSubscribeVideo: false,
+        publishAudioTrack: false,
+        publishCameraTrack: false,
+        publishScreenTrack: false,
+        clientRoleType: CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER,
+        channelProfile: CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING,
+        encodedVideoTrackOption: { targetBitrate: 600 },
+      }
+    );
+   // const channel = rtcEngine.createChannel(channelId)!;
+    this.subscribeEvents(rtcEngine, {
+      channelId,
+      localUid
     });
   };
 
@@ -104,26 +114,24 @@ export default class JoinMultipleChannel extends Component<{}, State, any> {
     );
   };
 
-  renderItem = (channel: AgoraRtcChannel, index: number) => {
-    return (
-      <List.Item>
-        <Card title={`order: ${index}`}>
-          <p>{`ChannelId:\n${channel.channelId()}`}</p>
-          <a onClick={() => channel.leaveChannel()}>Leave</a>
-        </Card>
-      </List.Item>
-    );
-  };
+  renderItem = (connection: RtcConnection, index: number) => (
+    <List.Item>
+      <Card title={`order: ${index}`}>
+        <p>{`ChannelId:\n${connection.channelId}`}</p>
+        <a onClick={() => this.getRtcEngine().leaveChannelEx(connection)}>Leave</a>
+      </Card>
+    </List.Item>
+  );
 
   render() {
-    const { channels } = this.state;
+    const { connections } = this.state;
     return (
       <div className={styles.screen}>
         <div className={styles.content}>
           <List
             style={{ width: '100%' }}
             grid={{ gutter: 16, column: 4 }}
-            dataSource={channels}
+            dataSource={connections}
             renderItem={this.renderItem}
           />
         </div>

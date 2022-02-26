@@ -1,33 +1,27 @@
 import React, { Component } from 'react';
-import AgoraRtcEngine, {
+import AgoraRtcEngine,{
   AREA_CODE,
   LOG_LEVEL,
-  CHANNEL_PROFILE_TYPE,
-  AUDIO_PROFILE_TYPE,
-  AUDIO_SCENARIO_TYPE,
-  RENDER_MODE,
-  EngineEvents,
   VIDEO_CODEC_TYPE,
-  ORIENTATION_MODE,
-  DEGRADATION_PREFERENCE,
-  VIDEO_MIRROR_MODE_TYPE,
   VIDEO_SOURCE_TYPE,
-  FRAME_RATE,
   CLIENT_ROLE_TYPE,
+  CHANNEL_PROFILE_TYPE,
+  EngineEvents,
 } from 'agora-electron-sdk';
-import { List, Card } from 'antd';
-import config from '../config/agora.config';
-import DropDownButton from '../component/DropDownButton';
-import styles from '../config/public.scss';
-import JoinChannelBar from '../component/JoinChannelBar';
-import { RoleTypeMap, ResolutionMap, FpsMap } from '../config';
-import { configMapToOptions } from '../util';
-import Window from '../component/Window';
-import { randomInt } from 'crypto';
-interface Device {
-  devicename: string;
-  deviceid: string;
-}
+import { List, Card, Input } from 'antd';
+import config from '../../config/agora.config';
+import DropDownButton from '../../component/DropDownButton';
+import styles from '../../config/public.scss';
+import JoinChannelBar from '../../component/JoinChannelBar';
+import {
+  RoleTypeMap,
+  ResolutionMap,
+  FpsMap,
+  EncryptionMap,
+} from '../../config';
+import { configMapToOptions } from '../../util';
+import Window from '../../component/Window';
+
 interface User {
   isMyself: boolean;
   uid: number;
@@ -37,30 +31,24 @@ interface State {
   isJoined: boolean;
   channelId: string;
   allUser: User[];
-  audioRecordDevices: Device[];
-  cameraDevices: Device[];
   currentFps?: number;
+  encryptionMode?: number;
+  encryptionKey?: string;
   currentResolution?: { width: number; height: number };
 }
 
-export default class JoinChannelVideo extends Component<{}, State, any> {
+export default class SetEncryption extends Component<{}, State, any> {
   rtcEngine?: AgoraRtcEngine;
 
   state: State = {
     channelId: '',
     allUser: [],
     isJoined: false,
-    audioRecordDevices: [],
-    cameraDevices: [],
   };
 
   componentDidMount() {
     this.getRtcEngine().enableVideo();
     this.getRtcEngine().enableAudio();
-    this.setState({
-      audioRecordDevices: this.getRtcEngine().getAudioRecordingDevices(),
-      cameraDevices: this.getRtcEngine().getVideoDevices(),
-    });
   }
 
   componentWillUnmount() {
@@ -86,6 +74,8 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       });
       this.rtcEngine.setAddonLogFile(config.addonLogPath);
       console.log('initialize:', res);
+      console.log('initialize:', res);
+      this.rtcEngine.setAddonLogFile(config.addonLogPath);
     }
 
     return this.rtcEngine;
@@ -135,34 +125,34 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
     rtcEngine.on(EngineEvents.ERROR, (err, msg) => {
       console.error(err);
     });
-
-    rtcEngine.on(EngineEvents.FIRST_LOCAL_VIDEO_FRAME_PUBLISHED, (connection, elapsed) => {
-      console.log(`firstLocalVideoFramePublished ---- ${connection.channelId} ${connection.localUid}`);
+    rtcEngine.on(EngineEvents.LASTMILE_PROBE_RESULT, (result) => {
+      console.log(`lastmileproberesult: ${JSON.stringify(result)}`);
     });
+    rtcEngine.on(EngineEvents.LASTMILE_QUALITY, (quality) => {
+      console.log(`lastmilequality: ${JSON.stringify(quality)}`);
+    });
+    rtcEngine.on(
+      EngineEvents.AUDIO_VOLUME_INDICATION,
+      (uid, volume, speakerNumber, totalVolume) => {
+        console.log(
+          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
+        );
+      }
+    );
+    
   };
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId });
-    this.rtcEngine?.setChannelProfile(
-      CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_COMMUNICATION
-    );
-    this.rtcEngine?.setAudioProfile(
-      AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT,
-      AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_ENTERTAINMENT
-    );
+   
+    this.rtcEngine?.setAudioProfile(0, 1);
+    this.rtcEngine?.setRenderMode(1);
 
-    // this.rtcEngine?.enableDualStreamMode(true);
-    // this.rtcEngine?.enableAudioVolumeIndication(1000, 3, false);
-
-    this.rtcEngine?.setRenderMode(RENDER_MODE.SOFTWARE);
-
-    const localUid = randomInt(1, 9999999);
-    console.log(`localUid: ${localUid}`);
     this.rtcEngine?.joinChannelEx(
       config.token,
       {
         channelId,
-        localUid
+        localUid: Number(`${new Date().getTime()}`.slice(7))
       },
       {
         autoSubscribeAudio: true,
@@ -182,57 +172,43 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
     if (!currentResolution || !currentFps) {
       return;
     }
-    /*this.getRtcEngine().setVideoEncoderConfiguration({
-      codecType: VIDEO_CODEC_TYPE.VIDEO_CODEC_H264,
-      dimensions: currentResolution!,
+    const { width, height } = currentResolution;
+    this.getRtcEngine().setVideoEncoderConfiguration({
+      codecType : VIDEO_CODEC_TYPE.VIDEO_CODEC_H264,
+      dimensions:{
+        width,
+        height,
+      },
       frameRate: currentFps!,
-      bitrate: 540,
-      minBitrate: 100,
-      orientationMode: ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE,
-      degradationPreference: DEGRADATION_PREFERENCE.MAINTAIN_BALANCED,
-      mirrorMode: VIDEO_MIRROR_MODE_TYPE.AUTO,
-    });*/
+      minFrameRate: 10,
+      bitrate: 65,
+      minBitrate: 65,
+      orientationMode: 0,
+      degradationPreference: 2,
+      mirrorMode: 0,
+    });
+  };
+
+  setEncryption = () => {
+    const { encryptionKey, encryptionMode } = this.state;
+    console.log(
+      'encryptionKey, encryptionMode ',
+      encryptionKey,
+      encryptionMode
+    );
+    this.getRtcEngine().enableEncryption(true, {
+      encryptionKey: encryptionKey! || '',
+      encryptionMode: encryptionMode!,
+      encryptionKdfSalt: new Uint8Array().buffer,
+    });
   };
 
   renderRightBar = () => {
-    const { audioRecordDevices, cameraDevices } = this.state;
+    // const {  } = this.state;
+
     return (
       <div className={styles.rightBar}>
         <div>
-          <DropDownButton
-            options={cameraDevices.map((obj) => {
-              const { deviceid, devicename } = obj;
-              return { dropId: deviceid, dropText: devicename, ...obj };
-            })}
-            onPress={(res) => {
-              this.getRtcEngine().startPrimaryCameraCapture({
-                deviceId: res.dropId,
-                format: {
-                  width: 1080,
-                  height: 720,
-                  fps: FRAME_RATE.FRAME_RATE_FPS_60,
-                },
-              });
-            }}
-            title="Camera"
-          />
-          <DropDownButton
-            title="Microphone"
-            options={audioRecordDevices.map((obj) => {
-              const { deviceid, devicename } = obj;
-              return { dropId: deviceid, dropText: devicename, ...obj };
-            })}
-            onPress={(res) => {
-              this.getRtcEngine().setAudioRecordingDevice(res.dropId);
-            }}
-          />
-          <DropDownButton
-            title="Role"
-            options={configMapToOptions(RoleTypeMap)}
-            onPress={(res) => {
-              this.getRtcEngine().setClientRole(res.dropId);
-            }}
-          />
           <DropDownButton
             title="Resolution"
             options={configMapToOptions(ResolutionMap)}
@@ -250,6 +226,23 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
               this.setState({ currentFps: res.dropId }, this.setVideoConfig);
             }}
           />
+          <DropDownButton
+            title="Encryption Mode"
+            options={configMapToOptions(EncryptionMap)}
+            onPress={(res) => {
+              this.setState({ encryptionMode: res.dropId }, this.setEncryption);
+            }}
+          />
+          <p>Encryption Secret</p>
+          <Input
+            placeholder="Input Encryption Secret"
+            onChange={(res) => {
+              this.setState(
+                { encryptionKey: res.nativeEvent.target.value as string },
+                this.setEncryption
+              );
+            }}
+          />
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
@@ -264,8 +257,8 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   renderItem = ({ isMyself, uid }: User) => {
     const { channelId } = this.state;
     const videoSourceType = isMyself
-      ? VIDEO_SOURCE_TYPE.VIDEO_SOURCE_CAMERA_PRIMARY
-      : VIDEO_SOURCE_TYPE.VIDEO_SOURCE_REMOTE;
+    ? VIDEO_SOURCE_TYPE.VIDEO_SOURCE_CAMERA_PRIMARY
+    : VIDEO_SOURCE_TYPE.VIDEO_SOURCE_REMOTE;
     return (
       <List.Item>
         <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>

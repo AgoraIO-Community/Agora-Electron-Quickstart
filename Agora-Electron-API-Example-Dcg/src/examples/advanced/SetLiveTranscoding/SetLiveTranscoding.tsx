@@ -1,33 +1,18 @@
 import React, { Component } from 'react';
-import AgoraRtcEngine, {
+import AgoraRtcEngine,{
   AREA_CODE,
   LOG_LEVEL,
-  CHANNEL_PROFILE_TYPE,
-  AUDIO_PROFILE_TYPE,
-  AUDIO_SCENARIO_TYPE,
-  RENDER_MODE,
   EngineEvents,
-  VIDEO_CODEC_TYPE,
-  ORIENTATION_MODE,
-  DEGRADATION_PREFERENCE,
-  VIDEO_MIRROR_MODE_TYPE,
   VIDEO_SOURCE_TYPE,
-  FRAME_RATE,
   CLIENT_ROLE_TYPE,
+  CHANNEL_PROFILE_TYPE,
 } from 'agora-electron-sdk';
-import { List, Card } from 'antd';
-import config from '../config/agora.config';
-import DropDownButton from '../component/DropDownButton';
-import styles from '../config/public.scss';
-import JoinChannelBar from '../component/JoinChannelBar';
-import { RoleTypeMap, ResolutionMap, FpsMap } from '../config';
-import { configMapToOptions } from '../util';
-import Window from '../component/Window';
-import { randomInt } from 'crypto';
-interface Device {
-  devicename: string;
-  deviceid: string;
-}
+import { List, Card, Input, Checkbox, Button, message } from 'antd';
+import config from '../../config/agora.config';
+import styles from '../../config/public.scss';
+import JoinChannelBar from '../../component/JoinChannelBar';
+import Window from '../../component/Window';
+
 interface User {
   isMyself: boolean;
   uid: number;
@@ -37,30 +22,25 @@ interface State {
   isJoined: boolean;
   channelId: string;
   allUser: User[];
-  audioRecordDevices: Device[];
-  cameraDevices: Device[];
-  currentFps?: number;
+  isTranscoding: boolean;
+  url: string;
   currentResolution?: { width: number; height: number };
 }
 
-export default class JoinChannelVideo extends Component<{}, State, any> {
+export default class SetLiveTranscoding extends Component<{}, State, any> {
   rtcEngine?: AgoraRtcEngine;
 
   state: State = {
     channelId: '',
+    url: '',
     allUser: [],
     isJoined: false,
-    audioRecordDevices: [],
-    cameraDevices: [],
+    isTranscoding: false,
   };
 
   componentDidMount() {
     this.getRtcEngine().enableVideo();
     this.getRtcEngine().enableAudio();
-    this.setState({
-      audioRecordDevices: this.getRtcEngine().getAudioRecordingDevices(),
-      cameraDevices: this.getRtcEngine().getVideoDevices(),
-    });
   }
 
   componentWillUnmount() {
@@ -84,8 +64,8 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
           fileSize: 2000,
         },
       });
-      this.rtcEngine.setAddonLogFile(config.addonLogPath);
       console.log('initialize:', res);
+      this.rtcEngine.setAddonLogFile(config.addonLogPath);
     }
 
     return this.rtcEngine;
@@ -135,34 +115,35 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
     rtcEngine.on(EngineEvents.ERROR, (err, msg) => {
       console.error(err);
     });
-
-    rtcEngine.on(EngineEvents.FIRST_LOCAL_VIDEO_FRAME_PUBLISHED, (connection, elapsed) => {
-      console.log(`firstLocalVideoFramePublished ---- ${connection.channelId} ${connection.localUid}`);
+    rtcEngine.on(EngineEvents.LASTMILE_PROBE_RESULT, (result) => {
+      console.log(`lastmileproberesult: ${JSON.stringify(result)}`);
     });
+    rtcEngine.on(EngineEvents.LASTMILE_QUALITY, (quality) => {
+      console.log(`lastmilequality: ${JSON.stringify(quality)}`);
+    });
+    rtcEngine.on(
+      EngineEvents.AUDIO_VOLUME_INDICATION,
+      (uid, volume, speakerNumber, totalVolume) => {
+        console.log(
+          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
+        );
+      }
+    );
   };
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId });
-    this.rtcEngine?.setChannelProfile(
-      CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_COMMUNICATION
-    );
-    this.rtcEngine?.setAudioProfile(
-      AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT,
-      AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_ENTERTAINMENT
-    );
+    this.rtcEngine?.setChannelProfile(1);
+    this.rtcEngine?.setClientRole(1);
+    this.rtcEngine?.setAudioProfile(0, 1);
 
-    // this.rtcEngine?.enableDualStreamMode(true);
-    // this.rtcEngine?.enableAudioVolumeIndication(1000, 3, false);
+    this.rtcEngine?.setRenderMode(1);
 
-    this.rtcEngine?.setRenderMode(RENDER_MODE.SOFTWARE);
-
-    const localUid = randomInt(1, 9999999);
-    console.log(`localUid: ${localUid}`);
     this.rtcEngine?.joinChannelEx(
       config.token,
       {
         channelId,
-        localUid
+        localUid: Number(`${new Date().getTime()}`.slice(7))
       },
       {
         autoSubscribeAudio: true,
@@ -175,81 +156,88 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
         encodedVideoTrackOption: { targetBitrate: 600 },
       }
     );
+
+    this.rtcEngine?.joinChannel(
+      config.token,
+      channelId,
+      '',
+      Number(`${new Date().getTime()}`.slice(7))
+    );
   };
 
-  setVideoConfig = () => {
-    const { currentFps, currentResolution } = this.state;
-    if (!currentResolution || !currentFps) {
+  onPressStart = () => {
+    const { url, isTranscoding } = this.state;
+    if (!url || !url.startsWith('rtmp://') || url === 'rtmp://') {
+      message.error("RTMP URL cannot be empty or not start with 'rtmp://'");
       return;
     }
-    /*this.getRtcEngine().setVideoEncoderConfiguration({
-      codecType: VIDEO_CODEC_TYPE.VIDEO_CODEC_H264,
-      dimensions: currentResolution!,
-      frameRate: currentFps!,
-      bitrate: 540,
-      minBitrate: 100,
-      orientationMode: ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE,
-      degradationPreference: DEGRADATION_PREFERENCE.MAINTAIN_BALANCED,
-      mirrorMode: VIDEO_MIRROR_MODE_TYPE.AUTO,
-    });*/
+    let res;
+    if (isTranscoding) {
+      const transcoding = {
+        audioBitrate: 48,
+        audioChannels: 1,
+        audioCodecProfile: 1,
+        audioSampleRate: 44100,
+        backgroundColor: 12632256,
+        backgroundImage: [],
+        height: 720,
+        lowLatency: false,
+        transcodingExtraInfo: '',
+        watermark: [],
+        videoBitrate: 1130,
+        videoCodecProfile: 100,
+        videoFrameRate: 15,
+        videoGop: 30,
+        width: 1280,
+        transcodingUsers: [],
+      };
+      res = this.getRtcEngine().updateRtmpTranscoding(transcoding);
+      console.log('updateRtmpTranscoding', res);
+      res = this.getRtcEngine().startRtmpStreamWithTranscoding(
+        url,
+        transcoding
+      );
+      console.log('startRtmpStreamWithTranscoding', res);
+      return;
+    }
+    res = this.getRtcEngine().startRtmpStreamWithoutTranscoding(url);
+    console.log('startRtmpStreamWithoutTranscoding', res);
+  };
+
+  onPressStop = () => {
+    const { url } = this.state;
+    const res = this.getRtcEngine().stopRtmpStream(url);
+    console.log('stopRtmpStream', res);
   };
 
   renderRightBar = () => {
-    const { audioRecordDevices, cameraDevices } = this.state;
+    const { isTranscoding } = this.state;
+
     return (
       <div className={styles.rightBar}>
         <div>
-          <DropDownButton
-            options={cameraDevices.map((obj) => {
-              const { deviceid, devicename } = obj;
-              return { dropId: deviceid, dropText: devicename, ...obj };
-            })}
-            onPress={(res) => {
-              this.getRtcEngine().startPrimaryCameraCapture({
-                deviceId: res.dropId,
-                format: {
-                  width: 1080,
-                  height: 720,
-                  fps: FRAME_RATE.FRAME_RATE_FPS_60,
-                },
+          <p>rtmp</p>
+          <Input
+            placeholder="rtmp://"
+            defaultValue="rtmp://"
+            onChange={(res) => {
+              this.setState({
+                url: res.nativeEvent.target.value as string,
               });
             }}
-            title="Camera"
           />
-          <DropDownButton
-            title="Microphone"
-            options={audioRecordDevices.map((obj) => {
-              const { deviceid, devicename } = obj;
-              return { dropId: deviceid, dropText: devicename, ...obj };
-            })}
-            onPress={(res) => {
-              this.getRtcEngine().setAudioRecordingDevice(res.dropId);
+          <Checkbox
+            onChange={() => {
+              this.setState({ isTranscoding: !isTranscoding });
             }}
-          />
-          <DropDownButton
-            title="Role"
-            options={configMapToOptions(RoleTypeMap)}
-            onPress={(res) => {
-              this.getRtcEngine().setClientRole(res.dropId);
-            }}
-          />
-          <DropDownButton
-            title="Resolution"
-            options={configMapToOptions(ResolutionMap)}
-            onPress={(res) => {
-              this.setState(
-                { currentResolution: res.dropId },
-                this.setVideoConfig
-              );
-            }}
-          />
-          <DropDownButton
-            title="FPS"
-            options={configMapToOptions(FpsMap)}
-            onPress={(res) => {
-              this.setState({ currentFps: res.dropId }, this.setVideoConfig);
-            }}
-          />
+            checked={isTranscoding}
+          >
+            Transcoding
+          </Checkbox>
+          <br />
+          <Button onClick={this.onPressStart}>Start Rtmp Stream</Button>
+          <br />
+          <Button onClick={this.onPressStart}>Stop Rtmp Stream</Button>
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
@@ -264,8 +252,8 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   renderItem = ({ isMyself, uid }: User) => {
     const { channelId } = this.state;
     const videoSourceType = isMyself
-      ? VIDEO_SOURCE_TYPE.VIDEO_SOURCE_CAMERA_PRIMARY
-      : VIDEO_SOURCE_TYPE.VIDEO_SOURCE_REMOTE;
+    ? VIDEO_SOURCE_TYPE.VIDEO_SOURCE_CAMERA_PRIMARY
+    : VIDEO_SOURCE_TYPE.VIDEO_SOURCE_REMOTE;
     return (
       <List.Item>
         <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>

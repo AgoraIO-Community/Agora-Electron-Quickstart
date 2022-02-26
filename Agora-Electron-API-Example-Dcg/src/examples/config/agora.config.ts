@@ -7,7 +7,7 @@ try {
 const config = {
   appID: localAppId,
   token: '',
-  defaultChannelId: 'test',
+  defaultChannelId: 'testdcg',
   pluginPath: '',
   nativeSDKLogPath: './Agora_SDK.log',
   addonLogPath: './Agora_SDK_Addon.log',

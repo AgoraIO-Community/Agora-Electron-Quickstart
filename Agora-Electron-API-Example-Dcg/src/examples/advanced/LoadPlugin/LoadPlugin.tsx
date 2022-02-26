@@ -7,6 +7,8 @@ import AgoraRtcEngine, {
   AUDIO_SCENARIO_TYPE,
   RENDER_MODE,
   EngineEvents,
+  VIDEO_CODEC_TYPE,
+  VideoSourceType,
 } from 'agora-electron-sdk';
 import { List, Card, Radio, Space, message } from 'antd';
 import config from '../../config/agora.config';
@@ -82,14 +84,14 @@ export default class LoadPlugin extends Component<{}, State, any> {
       // @ts-ignore:next-line
       window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
-      const res = this.rtcEngine.initializeWithContext({
-        appId: config.appID,
+      const res = this.rtcEngine?.initialize( {
+        appId : config.appID,
         areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
+        logConfig : {
           level: LOG_LEVEL.LOG_LEVEL_INFO,
           filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
+          fileSize: 2000
+        }
       });
       this.rtcEngine.setAddonLogFile(config.addonLogPath);
       console.log('initialize:', res);
@@ -117,35 +119,35 @@ export default class LoadPlugin extends Component<{}, State, any> {
   };
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on(EngineEvents.JOINED_CHANNEL, (channel, uid, elapsed) => {
+    rtcEngine.on(EngineEvents.JOINED_CHANNEL, ( connection, elapsed) => {
       console.log(
-        `onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(
+        `onJoinChannel channel: ${connection.channelId}  uid: ${connection.localUid}  version: ${JSON.stringify(
           rtcEngine.getVersion()
         )})`
       );
       const { allUser: oldAllUser } = this.state;
       const newAllUser = [...oldAllUser];
-      newAllUser.push({ isMyself: true, uid });
+      newAllUser.push({ isMyself: true,  uid:connection.localUid });
       this.setState({
         isJoined: true,
         allUser: newAllUser,
       });
     });
-    rtcEngine.on(EngineEvents.USER_JOINED, (uid, elapsed) => {
-      console.log(`userJoined ---- ${uid}`);
+    rtcEngine.on(EngineEvents.USER_JOINED, (connection, remoteUid, elapsed) => {
+      console.log(`userJoined ---- ${remoteUid}`);
 
       const { allUser: oldAllUser } = this.state;
       const newAllUser = [...oldAllUser];
-      newAllUser.push({ isMyself: false, uid });
+      newAllUser.push({ isMyself: false, uid:remoteUid });
       this.setState({
         allUser: newAllUser,
       });
     });
-    rtcEngine.on(EngineEvents.USER_OFFLINE, (uid, reason) => {
-      console.log(`userOffline ---- ${uid}`);
+    rtcEngine.on(EngineEvents.USER_OFFLINE, (connection, remoteUid, reason) => {
+      console.log(`userOffline ---- ${remoteUid}`);
 
       const { allUser: oldAllUser } = this.state;
-      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)];
+      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== remoteUid)];
       this.setState({
         allUser: newAllUser,
       });
@@ -198,6 +200,7 @@ export default class LoadPlugin extends Component<{}, State, any> {
       return;
     }
     this.getRtcEngine().setVideoEncoderConfiguration({
+      codecType: VIDEO_CODEC_TYPE.VIDEO_CODEC_E264,
       dimensions: currentResolution!,
       frameRate: currentFps!,
       bitrate: 30,
@@ -293,7 +296,7 @@ export default class LoadPlugin extends Component<{}, State, any> {
           <Window
             uid={uid}
             rtcEngine={this.rtcEngine!}
-            role={isMyself ? 'local' : 'remote'}
+            videoSourceType = {VideoSourceType.kVideoSourceTypeCameraPrimary}
             channelId={channelId}
           />
         </Card>

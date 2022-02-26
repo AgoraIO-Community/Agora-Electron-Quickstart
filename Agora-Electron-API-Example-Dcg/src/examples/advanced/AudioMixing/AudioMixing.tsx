@@ -1,20 +1,23 @@
 import React, { Component } from 'react';
 import AgoraRtcEngine, {
-  LOG_LEVEL,
   AREA_CODE,
-  CLIENT_ROLE_TYPE,
+  LOG_LEVEL,
   EngineEvents,
-  CHANNEL_PROFILE_TYPE,
+  CLIENT_ROLE_TYPE,
+  CHANNEL_PROFILE_TYPE
 } from 'agora-electron-sdk';
-import { List, Card } from 'antd';
-import config from '../config/agora.config';
-import DropDownButton from '../component/DropDownButton';
-import styles from '../config/public.scss';
-import { AudioScenarioList, AudioProfileList } from '../config';
-import { configMapToOptions } from '../util';
-import SliderBar from '../component/SliderBar';
-import JoinChannelBar from '../component/JoinChannelBar';
 
+import { List, Card, Input, Button } from 'antd';
+import config from '../../config/agora.config';
+import styles from '../../config/public.scss';
+import JoinChannelBar from '../../component/JoinChannelBar';
+import Window from '../../component/Window';
+import SliderBar from '../../component/SliderBar';
+import { AudioProfileList, AudioScenarioList } from '../../config';
+import DropDownButton from '../../component/DropDownButton';
+import { configMapToOptions, getResourcePath } from '../../util';
+
+const EFFECT_ID = 1;
 interface User {
   isMyself: boolean;
   uid: number;
@@ -46,6 +49,12 @@ export default class JoinChannelAudio extends Component<State> {
   componentDidMount() {
     const audioRecordDevices =
       this.getRtcEngine().getAudioRecordingDevices() as Device[];
+
+    console.log(
+      'audioRecordDevices',
+      this.getRtcEngine().getAudioRecordingDevices()
+    );
+
     this.setState({ audioRecordDevices });
   }
 
@@ -61,7 +70,7 @@ export default class JoinChannelAudio extends Component<State> {
       // @ts-ignore:next-line
       window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
-      const res = this.rtcEngine?.initialize({
+      const res = this.rtcEngine.initialize({
         appId: config.appID,
         areaCode: AREA_CODE.AREA_CODE_GLOB,
         logConfig: {
@@ -70,7 +79,9 @@ export default class JoinChannelAudio extends Component<State> {
           fileSize: 2000,
         },
       });
+      this.rtcEngine.setAddonLogFile(config.addonLogPath);
       console.log('initialize:', res);
+      this.rtcEngine.enableAudio();
     }
 
     return this.rtcEngine;
@@ -120,14 +131,19 @@ export default class JoinChannelAudio extends Component<State> {
     rtcEngine.on(EngineEvents.ERROR, (err, msg) => {
       console.error(err);
     });
+
+    rtcEngine.on(EngineEvents.FIRST_LOCAL_VIDEO_FRAME_PUBLISHED, (connection, elapsed) => {
+      console.log(`firstLocalVideoFramePublished ---- ${connection.channelId} ${connection.localUid}`);
+    });
   };
+
 
   setAudioProfile = () => {
     const { audioProfile, audioScenario } = this.state;
     this.rtcEngine?.setAudioProfile(audioProfile, audioScenario);
   };
 
-  renderItem = ({ isMyself, uid }) => {
+  renderItem = ({ isMyself, uid } : User) => {
     return (
       <List.Item>
         <Card title={`${isMyself ? 'Local' : 'Remote'} `}>Uid: {uid}</Card>
@@ -138,8 +154,8 @@ export default class JoinChannelAudio extends Component<State> {
   renderRightBar = () => {
     const { audioRecordDevices: audioDevices } = this.state;
     return (
-      <div className={styles.rightBar}>
-        <div>
+      <div className={styles.rightBar} style={{ width: '60%' }}>
+        <div style={{ overflow: 'auto' }}>
           <DropDownButton
             options={configMapToOptions(AudioProfileList)}
             onPress={(res) =>
@@ -164,36 +180,105 @@ export default class JoinChannelAudio extends Component<State> {
               this.rtcEngine?.setAudioRecordingDevice(res.dropId);
             }}
           />
-
           <SliderBar
             max={100}
-            title="SDK Recording Volume"
+            title="Mixing Volume"
             onChange={(value) => {
-              this.rtcEngine?.adjustRecordingSignalVolume(value);
+              this.rtcEngine?.adjustAudioMixingVolume(value);
             }}
           />
           <SliderBar
             max={100}
-            title="Device Playout Volume"
+            title="Mixing Playback Volume"
             onChange={(value) => {
               this.rtcEngine?.adjustAudioMixingPlayoutVolume(value);
             }}
           />
           <SliderBar
             max={100}
-            title="SDK Playout Volume SDK"
+            title="Mixing Publish Volume"
             onChange={(value) => {
-              this.rtcEngine?.adjustPlaybackSignalVolume(value);
+              this.rtcEngine?.adjustAudioMixingPublishVolume(value);
             }}
           />
+          <p>Audio Effect Controls</p>
+          <Button
+            htmlType="button"
+            onClick={() => {
+              this.getRtcEngine().playEffect(
+                EFFECT_ID,
+                getResourcePath('audioEffect.mp3'),
+                -1,
+                1,
+                0,
+                100,
+                true,
+                0
+              );
+            }}
+          >
+            Play
+          </Button>
+          <Button
+            htmlType="button"
+            onClick={() => {
+              this.getRtcEngine().resumeEffect(EFFECT_ID);
+            }}
+          >
+            Resume
+          </Button>
+          <Button
+            htmlType="button"
+            onClick={() => {
+              this.getRtcEngine().pauseEffect(EFFECT_ID);
+            }}
+          >
+            Pause
+          </Button>
+          <Button
+            htmlType="button"
+            onClick={() => {
+              this.getRtcEngine().stopEffect(EFFECT_ID);
+            }}
+          >
+            Stop
+          </Button>
+          <SliderBar
+            max={100}
+            title="Effect Volume"
+            onChange={(value) => {
+              this.getRtcEngine().setEffectsVolume(value);
+            }}
+          />
+          <SliderBar
+            max={100}
+            title="Loopback Recording Volume"
+            onChange={(value) => {
+              this.rtcEngine?.adjustLoopbackRecordingVolume(value);
+            }}
+          />
+          <Button
+            htmlType="button"
+            onClick={() => {
+              this.getRtcEngine().enableLoopbackRecording(true);
+            }}
+          >
+            enable
+          </Button>
+          <Button
+            htmlType="button"
+            onClick={() => {
+              this.getRtcEngine().enableLoopbackRecording(false);
+            }}
+          >
+            disable
+          </Button>
         </div>
         <JoinChannelBar
           onPressJoin={(channelId) => {
             const rtcEngine = this.getRtcEngine();
             rtcEngine.disableVideo();
             rtcEngine.enableAudio();
-            rtcEngine.setClientRole(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
-
             this.rtcEngine?.joinChannelEx(
               config.token,
               {
@@ -201,7 +286,7 @@ export default class JoinChannelAudio extends Component<State> {
                 localUid : Number(`${new Date().getTime()}`.slice(7))
               },
               {
-                autoSubscribeAudio: true,
+                autoSubscribeAudio: false,
                 autoSubscribeVideo: false,
                 publishAudioTrack: true,
                 publishCameraTrack: false,
@@ -222,7 +307,6 @@ export default class JoinChannelAudio extends Component<State> {
 
   render() {
     const { isJoined, allUser } = this.state;
-
     return (
       <div className={styles.screen}>
         <div className={styles.content}>

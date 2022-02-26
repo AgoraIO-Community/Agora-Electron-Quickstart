@@ -10,7 +10,6 @@ import config from '../../config/agora.config';
 import styles from '../../config/public.scss';
 import JoinChannelBar from '../../component/JoinChannelBar';
 import createDataStreamStyle from './CreateDataStream.scss';
-
 const { Search } = Input;
 interface User {
   isMyself: boolean;
@@ -55,7 +54,7 @@ export default class CreateDataStream extends Component<State> {
       // @ts-ignore:next-line
       window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
-      const res = this.rtcEngine?.initializeWithContext({
+      const res = this.rtcEngine?.initialize({
         appId: config.appID,
         areaCode: AREA_CODE.AREA_CODE_GLOB,
         logConfig: {
@@ -73,41 +72,41 @@ export default class CreateDataStream extends Component<State> {
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
     console.log('---subscribeEvents');
 
-    rtcEngine.on(EngineEvents.JOINED_CHANNEL, (channel, uid, elapsed) => {
+    rtcEngine.on(EngineEvents.JOINED_CHANNEL, ( connection, elapsed) => {
       console.log(
-        `onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(
+        `onJoinChannel channel: ${connection.channelId}  uid: ${connection.localUid}  version: ${JSON.stringify(
           rtcEngine.getVersion()
         )})`
       );
       const { allUser: oldAllUser } = this.state;
       const newAllUser = [...oldAllUser];
-      newAllUser.push({ isMyself: true, uid });
+      newAllUser.push({ isMyself: true, uid:connection.localUid });
       this.setState({
         isJoined: true,
         allUser: newAllUser,
       });
     });
-    rtcEngine.on(EngineEvents.USER_JOINED, (uid, elapsed) => {
-      console.log(`userJoined ---- ${uid}`);
+    rtcEngine.on(EngineEvents.USER_JOINED, (connection, remoteUid, elapsed) => {
+      console.log(`userJoined ---- ${remoteUid}`);
 
       const { allUser: oldAllUser } = this.state;
       const newAllUser = [...oldAllUser];
-      newAllUser.push({ isMyself: false, uid });
+      newAllUser.push({ isMyself: false, uid:remoteUid });
       this.setState({
         allUser: newAllUser,
       });
     });
-    rtcEngine.on(EngineEvents.USER_OFFLINE, (uid, reason) => {
-      console.log(`userOffline ---- ${uid}`);
+    rtcEngine.on(EngineEvents.USER_OFFLINE, (connection, remoteUid, reason) => {
+      console.log(`userOffline ---- ${remoteUid}`);
 
       const { allUser: oldAllUser } = this.state;
-      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)];
+      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== remoteUid)];
       this.setState({
         allUser: newAllUser,
       });
     });
 
-    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (rtcStats) => {
+    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (connection, rtcStats) => {
       this.setState({
         isJoined: false,
         allUser: [],
