@@ -214,21 +214,36 @@ export default class App extends Component {
     rtcEngine.enableAudioVolumeIndication(1000, 3, false)
 
     rtcEngine.setRenderMode(2)
-    rtcEngine.joinChannel(
-      this.state.token || null,
-      this.state.channel,
+    const res = rtcEngine.joinChannelEx(
       '',
-      LOCAL_USER_ID
+      {
+        localUid: Math.round(Math.random() * 1000),
+        channelId: this.state.channel,
+      },
+      {
+        publishCameraTrack: true,
+        publishAudioTrack: false,
+        publishScreenTrack: false,
+        publishCustomAudioTrack: false,
+        publishCustomVideoTrack: false,
+        publishEncodedVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
+        publishMediaPlayerVideoTrack: false,
+        autoSubscribeAudio: true,
+        autoSubscribeVideo: true,
+        clientRoleType: 1,
+      }
     )
+    console.log('joinChannelEx', res)
   }
 
   handleLeave = () => {
     let rtcEngine = this.getRtcEngine()
     rtcEngine.leaveChannel()
-    rtcEngine.leaveChannelEx(
-      this.state.channel,
-      this.state.screenShareConnectionId
-    )
+    rtcEngine.leaveChannelEx({
+      localUid: this.state.screenShareConnectionId,
+      channelId: this.state.channel,
+    })
   }
 
   handleCameraChange = (e) => {
@@ -375,8 +390,10 @@ export default class App extends Component {
     )
     this.state.screenShareConnectionId = rtcEngine.joinChannelEx(
       '',
-      this.state.channel,
-      SHARE_ID,
+      {
+        localUid: SHARE_ID,
+        channelId: this.state.channel,
+      },
       {
         publishCameraTrack: false,
         publishAudioTrack: false,
@@ -460,20 +477,19 @@ export default class App extends Component {
       assistLine: 2,
       resetDragPoints: 3,
     }
-    let res;
+    let res
     // engine.setLocalTrapezoidCorrectionOptions(opt)
     // res = engine.getLocalTrapezoidCorrectionOptions()
     // console.log('getLocalTrapezoidCorrectionOptions', res)
 
-    res = engine.enableRemoteTrapezoidCorrection(1,true)
+    res = engine.enableRemoteTrapezoidCorrection(1, true)
     console.log('enableRemoteTrapezoidCorrection 1', res)
 
-    res = engine.enableRemoteTrapezoidCorrection(2,true, {
+    res = engine.enableRemoteTrapezoidCorrection(2, true, {
       localUid: 3,
       channelId: 'enableRemoteTrapezoidCorrection',
     })
     console.log('enableRemoteTrapezoidCorrection 2', res)
-
 
     res = engine.setRemoteTrapezoidCorrectionOptions(4, opt)
     console.log('setRemoteTrapezoidCorrectionOptions 1', res)
