@@ -6,7 +6,6 @@ import DropDownButton from '../component/DropDownButton';
 import styles from '../config/public.scss';
 import { AudioScenarioList, AudioProfileList } from '../config';
 import { configMapToOptions } from '../util';
-import SliderBar from '../component/SliderBar';
 import JoinChannelBar from '../component/JoinChannelBar';
 
 interface User {
@@ -26,7 +25,7 @@ interface State {
   isJoined: boolean;
 }
 
-export default class JoinChannelAudio extends Component<State> {
+export default class StringUid extends Component<State> {
   rtcEngine?: AgoraRtcEngine;
 
   state: State = {
@@ -40,7 +39,6 @@ export default class JoinChannelAudio extends Component<State> {
   componentDidMount() {
     const audioRecordDevices =
       this.getRtcEngine().getAudioRecordingDevices() as Device[];
-
     this.setState({ audioRecordDevices });
   }
 
@@ -105,7 +103,7 @@ export default class JoinChannelAudio extends Component<State> {
       });
     });
 
-    rtcEngine.on('leaveChannel', (rtcStats) => {
+    rtcEngine.on('leaveChannel', () => {
       this.setState({
         isJoined: false,
         allUser: [],
@@ -159,34 +157,6 @@ export default class JoinChannelAudio extends Component<State> {
               // this.rtcEngine?.enableLoopbackRecording(true, res.dropText);
             }}
           />
-          <SliderBar
-            max={100}
-            title="Device Recording Volume"
-            onChange={(value) => {
-              this.rtcEngine?.adjustRecordingSignalVolume(value);
-            }}
-          />
-          <SliderBar
-            max={100}
-            title="SDK Recording Volume"
-            onChange={(value) => {
-              this.rtcEngine?.adjustLoopbackRecordingSignalVolume(value);
-            }}
-          />
-          <SliderBar
-            max={100}
-            title="Device Playout Volume"
-            onChange={(value) => {
-              this.rtcEngine?.adjustAudioMixingPlayoutVolume(value);
-            }}
-          />
-          <SliderBar
-            max={100}
-            title="SDK Playout Volume SDK"
-            onChange={(value) => {
-              this.rtcEngine?.adjustPlaybackSignalVolume(value);
-            }}
-          />
         </div>
         <JoinChannelBar
           onPressJoin={(channelId) => {
@@ -194,12 +164,10 @@ export default class JoinChannelAudio extends Component<State> {
             rtcEngine.disableVideo();
             rtcEngine.enableAudio();
             rtcEngine.setClientRole(1);
-
-            rtcEngine.joinChannel(
+            rtcEngine.joinChannelWithUserAccount(
               config.token,
               channelId,
-              '',
-              Number(`${new Date().getTime()}`.slice(7))
+              `test-${Number(`${new Date().getTime()}`.slice(7))}}`
             );
           }}
           onPressLeave={() => {
