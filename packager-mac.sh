@@ -21,6 +21,7 @@ packExample() {
   rm -rf node_modules
   rm -rf src/node_modules
   yarn
+  rm -rf src/node_modules/agora-electron-sdk/build
   cp -P -R ../Electron-*/* src/node_modules/agora-electron-sdk/
   yarn package-mac
 
