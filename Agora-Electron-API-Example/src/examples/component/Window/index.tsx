@@ -1,45 +1,34 @@
 import React, { Component } from 'react';
-import AgoraRtcEngine from 'agora-electron-sdk';
-import styles from './index.scss';
 
-interface WindowProps {
-  rtcEngine: AgoraRtcEngine;
-  uid?: string | number;
-  role: 'localVideoSource' | 'local' | 'remote';
-  channelId?: string;
-}
-class Window extends Component<WindowProps> {
+export default class Window extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   componentDidMount() {
-    const { uid, role, rtcEngine, channelId } = this.props;
+    const { role, uid, channelId, rtcEngine } = this.props;
 
     const dom = document.querySelector(`#video-${uid}`);
-    console.log('Window', role);
-    // CROPPED = 0, FIT = 1
+    if (!dom || !rtcEngine) {
+      return;
+    }
     if (role === 'local') {
-      rtcEngine.setupLocalVideo(dom!);
-
-      rtcEngine.setupViewContentMode('local', 1, channelId);
-      console.log('local', uid, dom, channelId);
+      rtcEngine.setupLocalView(0, 0, dom);
+      rtcEngine.setupLocalViewContentMode(0, 0, 1);
     } else if (role === 'localVideoSource') {
-      rtcEngine.setupLocalVideoSource(dom!);
-      rtcEngine.setupViewContentMode('videosource', 1, channelId);
+      rtcEngine.setupLocalView(3, 0, dom);
+      rtcEngine.setupLocalViewContentMode(3, 0, 1);
     } else if (role === 'remote') {
-      rtcEngine.subscribe(uid as number, dom!);
-      rtcEngine.setupViewContentMode(uid as number, 1, undefined);
-      console.log('remote', uid, dom, channelId);
-    } else if (role === 'remoteVideoSource') {
-      rtcEngine.subscribe(uid as number, dom!);
-      rtcEngine.setupViewContentMode(uid, 1);
+      rtcEngine.setupRemoteView(uid, channelId, dom);
+      rtcEngine.setupRemoteViewContentMode(uid, 0, 1);
     }
   }
 
   render() {
     return (
-      <div className={styles['window-item']}>
-        <div className={styles['video-item']} id={'video-' + this.props.uid} />
+      <div className="window-item">
+        <div className="video-item" id={'video-' + this.props.uid}></div>
       </div>
     );
   }
 }
-
-export default Window;

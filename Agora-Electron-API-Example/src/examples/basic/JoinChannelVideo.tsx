@@ -57,9 +57,9 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       window.rtcEngine = this.rtcEngine;
       this.subscribeEvents(this.rtcEngine);
       const res = this.rtcEngine.initialize(config.appID, 0xffffffff, {
+        fileSizeInKB: 2048,
         level: 0x0001,
         filePath: config.nativeSDKLogPath,
-        fileSize: 2000,
       });
       console.log('initialize:', res);
       this.rtcEngine.setAddonLogFile(config.addonLogPath);
@@ -69,22 +69,22 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   }
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on('joinedChannel', (channel, uid, elapsed) => {
+    rtcEngine.on('joinedChannel', ({ channelId, localUid }, elapsed) => {
       console.log(
-        `onJoinChannel channel: ${channel}  uid: ${uid}  version: ${JSON.stringify(
+        `onJoinChannel channel: ${channelId}  uid: ${localUid}  version: ${JSON.stringify(
           rtcEngine.getVersion()
         )})`
       );
       const { allUser: oldAllUser } = this.state;
       const newAllUser = [...oldAllUser];
-      newAllUser.push({ isMyself: true, uid });
+      newAllUser.push({ isMyself: true, uid: localUid });
       this.setState({
         isJoined: true,
         allUser: newAllUser,
       });
     });
 
-    rtcEngine.on('userJoined', (uid, elapsed) => {
+    rtcEngine.on('userJoined', (connection, uid, elapsed) => {
       console.log(`userJoined ---- ${uid}`);
 
       const { allUser: oldAllUser } = this.state;
@@ -94,7 +94,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
         allUser: newAllUser,
       });
     });
-    rtcEngine.on('userOffline', (uid, reason) => {
+    rtcEngine.on('userOffline', (connection, uid, reason) => {
       console.log(`userOffline ---- ${uid}`);
 
       const { allUser: oldAllUser } = this.state;
@@ -104,7 +104,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       });
     });
 
-    rtcEngine.on('leavechannel', (rtcStats) => {
+    rtcEngine.on('leavechannel', (_connection, rtcStats) => {
       console.log('leavechannel', rtcStats);
 
       this.setState({
@@ -112,20 +112,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
         allUser: [],
       });
     });
-    rtcEngine.on('lastmileProbeResult', (result) => {
-      console.log(`lastmileproberesult: ${JSON.stringify(result)}`);
-    });
-    rtcEngine.on('lastMileQuality', (quality) => {
-      console.log(`lastmilequality: ${JSON.stringify(quality)}`);
-    });
-    rtcEngine.on(
-      'audiovolumeindication',
-      (uid, volume, speakerNumber, totalVolume) => {
-        console.log(
-          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
-        );
-      }
-    );
+
     rtcEngine.on('error', (err) => {
       console.error(err);
     });
@@ -134,15 +121,43 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId });
     this.rtcEngine?.setChannelProfile(1);
-    this.rtcEngine?.setClientRole(1);
-    this.rtcEngine?.setAudioProfile(0, 1);
+    this.rtcEngine?.setAudioProfile(0);
+    this.rtcEngine?.joinChannel(
+      config.token,
+      channelId,
+      '',
+      Number(`${new Date().getTime()}`.slice(7))
+    );
+    const res = this.rtcEngine?.joinChannelEx(
+      '',
+      {
+        localUid: Number(`${new Date().getTime()}`.slice(7)),
+        channelId,
+      },
+      {
+        publishCameraTrack: true,
+        publishAudioTrack: false,
+        publishScreenTrack: false,
+        publishCustomAudioTrack: false,
+        publishCustomVideoTrack: false,
+        publishEncodedVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
+        publishMediaPlayerVideoTrack: false,
+        autoSubscribeAudio: true,
+        autoSubscribeVideo: true,
+        clientRoleType: 1,
+        publishSecondaryCameraTrack: false,
+        publishMediaPlayerId: 0,
+        enableAudioRecordingOrPlayout: false,
+        defaultVideoStreamType: 0,
+        channelProfile: 1,
+      }
+    );
 
-    this.rtcEngine?.enableDualStreamMode(true);
-    this.rtcEngine?.enableAudioVolumeIndication(1000, 3, false);
-    this.rtcEngine?.setRenderMode(1);
-    this.rtcEngine?.enableVideo();
-    this.rtcEngine?.enableLocalVideo(true);
-
+    if (res === 0) {
+      return;
+    }
+    console.warn('joinChannelEx res', res);
     this.rtcEngine?.joinChannel(
       config.token,
       channelId,
