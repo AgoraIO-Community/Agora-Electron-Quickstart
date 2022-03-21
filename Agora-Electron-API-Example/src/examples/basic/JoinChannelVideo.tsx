@@ -9,6 +9,7 @@ import { RoleTypeMap, ResolutionMap, FpsMap } from '../config';
 import { configMapToOptions } from '../util';
 import Window from '../component/Window';
 
+let currentLocalUid: number;
 interface User {
   isMyself: boolean;
   uid: number;
@@ -122,16 +123,12 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
     this.setState({ channelId });
     this.rtcEngine?.setChannelProfile(1);
     this.rtcEngine?.setAudioProfile(0);
-    this.rtcEngine?.joinChannel(
-      config.token,
-      channelId,
-      '',
-      Number(`${new Date().getTime()}`.slice(7))
-    );
+    
+    currentLocalUid = Number(`${new Date().getTime()}`.slice(7));
     const res = this.rtcEngine?.joinChannelEx(
       '',
       {
-        localUid: Number(`${new Date().getTime()}`.slice(7)),
+        localUid: currentLocalUid,
         channelId,
       },
       {
@@ -242,10 +239,12 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
 
   renderItem = ({ isMyself, uid }: User) => {
     const { channelId } = this.state;
+    const title = `${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`;
     return (
       <List.Item>
-        <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>
+        <Card title={title}>
           <Window
+            key={title}
             uid={uid}
             rtcEngine={this.rtcEngine!}
             role={isMyself ? 'local' : 'remote'}
