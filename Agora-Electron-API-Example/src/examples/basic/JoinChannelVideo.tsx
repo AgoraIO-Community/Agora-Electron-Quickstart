@@ -136,7 +136,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       },
       {
         publishCameraTrack: true,
-        publishAudioTrack: false,
+        publishAudioTrack: true,
         publishScreenTrack: false,
         publishCustomAudioTrack: false,
         publishCustomVideoTrack: false,
@@ -148,21 +148,10 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
         clientRoleType: 1,
         publishSecondaryCameraTrack: false,
         publishMediaPlayerId: 0,
-        enableAudioRecordingOrPlayout: false,
+        enableAudioRecordingOrPlayout: true,
         defaultVideoStreamType: 0,
         channelProfile: 1,
       }
-    );
-
-    if (res === 0) {
-      return;
-    }
-    console.warn('joinChannelEx res', res);
-    this.rtcEngine?.joinChannel(
-      config.token,
-      channelId,
-      '',
-      Number(`${new Date().getTime()}`.slice(7))
     );
   };
 

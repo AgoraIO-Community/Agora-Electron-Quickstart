@@ -222,21 +222,10 @@ export default class JoinChannelAudio extends Component<State> {
                 clientRoleType: 1,
                 publishSecondaryCameraTrack: false,
                 publishMediaPlayerId: 0,
-                enableAudioRecordingOrPlayout: false,
+                enableAudioRecordingOrPlayout: true,
                 defaultVideoStreamType: 0,
                 channelProfile: 1,
               }
-            );
-
-            if (res === 0) {
-              return;
-            }
-            console.warn('joinChannelEx res', res);
-            rtcEngine.joinChannel(
-              config.token,
-              channelId,
-              '',
-              Number(`${new Date().getTime()}`.slice(7))
             );
           }}
           onPressLeave={() => {
