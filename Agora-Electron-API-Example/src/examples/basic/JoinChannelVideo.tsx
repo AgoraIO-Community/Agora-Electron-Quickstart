@@ -203,13 +203,6 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
             }}
           />
           <DropDownButton
-            title="Role"
-            options={configMapToOptions(RoleTypeMap)}
-            onPress={(res) => {
-              this.getRtcEngine().setClientRole(res.dropId);
-            }}
-          />
-          <DropDownButton
             title="Resolution"
             options={configMapToOptions(ResolutionMap)}
             onPress={(res) => {

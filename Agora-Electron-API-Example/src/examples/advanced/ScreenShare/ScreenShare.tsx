@@ -121,35 +121,55 @@ export default class ScreenShare extends Component<{}, State, any> {
     const excludeList = new Array<number>();
 
     if (type === 'screen') {
-      const res = rtcEngine.startScreenCaptureByDisplayId(
-        screenSymbol.id,
-        { x: 0, y: 0, width: 0, height: 0 },
-        {
-          width: 1920,
-          height: 1080,
-          bitrate: 1000,
-          frameRate: 15,
-          captureMouseCursor: false,
-          windowFocus: false,
-          excludeWindowList: [],
-        }
-      );
-      console.log('startScreenCaptureByDisplayId:', res);
+      try {
+        rtcEngine.startScreenCaptureByDisplayId(
+          screenSymbol.id,
+          { x: 0, y: 0, width: 0, height: 0 },
+          {
+            width: 480,
+            height: 360,
+            bitrate: 1000,
+            frameRate: 15,
+            captureMouseCursor: false,
+            windowFocus: false,
+            excludeWindowList: [],
+          }
+        );
+        console.log('startScreenCaptureByDisplayId');
+      } catch (error) {
+        rtcEngine.startScreenCaptureByScreen(
+          screenSymbol,
+          { x: 0, y: 0, width: 0, height: 0 },
+          {
+            width: 480,
+            height: 360,
+            bitrate: 1000,
+            frameRate: 15,
+            captureMouseCursor: false,
+            windowFocus: false,
+            excludeWindowList: [],
+          }
+        );
+        console.log('startScreenCaptureByScreen');
+      }
+      
     } else {
       const info = this.state.windowInfoList.find((obj) => {
         if (obj.windowId === screenSymbol) return obj;
       });
+      console.log('startScreenCaptureByWindow',info);
+      
       const res = rtcEngine.startScreenCaptureByWindow(
         screenSymbol,
         {
-          x: info.x,
-          y: info.y,
-          width: info.originWidth,
-          height: info.originHeight,
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
         },
         {
-          width: info.originWidth,
-          height: info.originHeight,
+          width: 480,
+          height: 360,
           bitrate: 2000,
           frameRate: 15,
           captureMouseCursor: true,
