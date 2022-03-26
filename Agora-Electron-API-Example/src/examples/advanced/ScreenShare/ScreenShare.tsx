@@ -125,7 +125,7 @@ export default class ScreenShare extends Component<{}, State, any> {
     console.log('config.appID', config.appID);
 
     rtcEngine.videoSourceInitialize(config.appID);
-    rtcEngine.videoSourceSetLogFile(config.nativeSDKLogPath);
+    rtcEngine.videoSourceSetLogFile(config.nativeSDKVideoSourceLogPath);
     rtcEngine.videoSourceSetAddonLogFile(config.videoSourceAddonLogPath);
     rtcEngine.videoSourceEnableAudio();
   };
