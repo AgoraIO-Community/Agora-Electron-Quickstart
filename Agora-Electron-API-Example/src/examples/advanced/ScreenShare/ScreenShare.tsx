@@ -42,7 +42,16 @@ export default class ScreenShare extends Component<{}, State, any> {
   }
 
   getScreenInfoList = async () => {
-    const list = this.getRtcEngine().getScreenDisplaysInfo();
+    let myResolve: any;
+    const promise = new Promise((resolve, reject) => {
+      myResolve = resolve;
+    });
+    this.getRtcEngine().getScreenDisplaysInfo((list) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore:next-line
+      myResolve(list);
+    });
+    const list = (await promise) as { image: Uint8Array; displayId: number }[];
     const imageListPromise = list.map((item) => readImage(item.image));
     const imageList = await Promise.all(imageListPromise);
     const screenInfoList = list.map(({ displayId }, index) => ({
@@ -55,8 +64,19 @@ export default class ScreenShare extends Component<{}, State, any> {
   };
 
   getWindowInfoList = async () => {
-    const list = this.getRtcEngine().getScreenWindowsInfo();
-
+    let myResolve: any;
+    const promise = new Promise((resolve, reject) => {
+      myResolve = resolve;
+    });
+    this.getRtcEngine().getScreenWindowsInfo((list) => {
+      myResolve(list);
+    });
+    const list = (await promise) as {
+      ownerName: string;
+      name: string;
+      windowId: number;
+      image: Uint8Array;
+    }[];
     const imageListPromise = list.map((item) => readImage(item.image));
     const imageList = await Promise.all(imageListPromise);
 
@@ -72,6 +92,7 @@ export default class ScreenShare extends Component<{}, State, any> {
           : name.replace(/\s+/g, '').substr(0, 20) + '...',
     }));
     this.setState({ windowInfoList });
+    return windowInfoList;
   };
 
   getRtcEngine() {
@@ -230,7 +251,7 @@ export default class ScreenShare extends Component<{}, State, any> {
       message.error('Must select a window/screen to share');
       return true;
     }
-    const windows = this.getRtcEngine().getScreenWindowsInfo();
+    const windows = await this.getWindowInfoList();
     const windowIds = windows.map(({ windowId }) => windowId);
     let excludeWindows = [];
     const isCancel = !(await this.modal.showModal(windowIds, (res) => {
