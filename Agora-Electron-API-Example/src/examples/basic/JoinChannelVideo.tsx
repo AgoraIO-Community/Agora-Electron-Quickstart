@@ -123,7 +123,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
     this.setState({ channelId });
     this.rtcEngine?.setChannelProfile(1);
     this.rtcEngine?.setAudioProfile(0);
-    
+
     currentLocalUid = Number(`${new Date().getTime()}`.slice(7));
     const res = this.rtcEngine?.joinChannelEx(
       '',
@@ -159,8 +159,6 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
     }
     const { width, height } = currentResolution;
     this.getRtcEngine().setVideoEncoderConfiguration({
-      width,
-      height,
       frameRate: currentFps!,
       minFrameRate: 10,
       bitrate: 65,
@@ -168,6 +166,10 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       orientationMode: 0,
       degradationPreference: 2,
       mirrorMode: 0,
+      codecType: 2,
+      dimensions: { width, height },
+      width,
+      height,
     });
   };
 
