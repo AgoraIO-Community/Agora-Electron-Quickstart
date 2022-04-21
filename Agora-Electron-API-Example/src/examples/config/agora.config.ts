@@ -12,7 +12,7 @@ const config = {
   nativeSDKLogPath: './Agora_SDK.log',
   addonLogPath: './Agora_SDK_Addon.log',
   nativeSDKVideoSourceLogPath: './Agora_SDK_Video_Source.log',
-  videoSourceAddonLogPath: './Agora_SDK_Addon.log',
+  videoSourceAddonLogPath: './Agora_SDK_Video_Source_Addon.log',
 };
 
 export default config;
