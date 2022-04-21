@@ -132,22 +132,14 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
         channelId,
       },
       {
-        publishCameraTrack: true,
-        publishAudioTrack: true,
-        publishScreenTrack: false,
-        publishCustomAudioTrack: false,
-        publishCustomVideoTrack: false,
-        publishEncodedVideoTrack: false,
-        publishMediaPlayerAudioTrack: false,
-        publishMediaPlayerVideoTrack: false,
         autoSubscribeAudio: true,
         autoSubscribeVideo: true,
+        publishAudioTrack: true,
+        publishCameraTrack: true,
+        publishScreenTrack: false,
         clientRoleType: 1,
-        publishSecondaryCameraTrack: false,
-        publishMediaPlayerId: 0,
-        enableAudioRecordingOrPlayout: true,
-        defaultVideoStreamType: 0,
         channelProfile: 1,
+        encodedVideoTrackOption: { targetBitrate: 600 },
       }
     );
   };
