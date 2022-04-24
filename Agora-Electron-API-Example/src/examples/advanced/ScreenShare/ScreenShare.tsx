@@ -30,7 +30,6 @@ export default class ScreenShare extends Component<{}, State, any> {
   };
 
   componentDidMount = async () => {
-    this.getRtcEngine().enableVideo();
 
     await this.getWindowInfoList();
     await this.getScreenInfoList();
