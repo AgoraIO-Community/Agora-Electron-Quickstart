@@ -121,27 +121,30 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId });
+    this.rtcEngine?.enableVideo();
     this.rtcEngine?.setChannelProfile(1);
-    this.rtcEngine?.setAudioProfile(0);
-
+    this.rtcEngine?.setClientRole(1);
+    this.rtcEngine?.setAudioProfile(0, 1);
     currentLocalUid = Number(`${new Date().getTime()}`.slice(7));
-    const res = this.rtcEngine?.joinChannelEx(
-      '',
-      {
-        localUid: currentLocalUid,
-        channelId,
-      },
-      {
-        autoSubscribeAudio: true,
-        autoSubscribeVideo: true,
-        publishAudioTrack: true,
-        publishCameraTrack: true,
-        publishScreenTrack: false,
-        clientRoleType: 1,
-        channelProfile: 1,
-        encodedVideoTrackOption: { targetBitrate: 600 },
-      }
-    );
+    this.rtcEngine?.joinChannel('', channelId, '', currentLocalUid);
+    // currentLocalUid = Number(`${new Date().getTime()}`.slice(7));
+    // const res = this.rtcEngine?.joinChannelEx(
+    //   '',
+    //   {
+    //     localUid: 12312,
+    //     channelId:'13123',
+    //   },
+    //   {
+    //     autoSubscribeAudio: true,
+    //     autoSubscribeVideo: true,
+    //     publishAudioTrack: true,
+    //     publishCameraTrack: true,
+    //     publishScreenTrack: false,
+    //     clientRoleType: 1,
+    //     channelProfile: 1,
+    //     encodedVideoTrackOption: { targetBitrate: 600 },
+    //   }
+    // );
   };
 
   setVideoConfig = () => {
