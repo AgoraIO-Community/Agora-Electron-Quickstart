@@ -11,10 +11,13 @@
     max-height: 630px;
     padding: 0 16px;
     display: flex;
+    flex-direction: column;
+    height: 100%;
     width: 100%;
     background-color: rgb(238, 240, 243);
   }
   .rightBar {
+    overflow: auto;
     max-height: 630px;
     display: flex;
     width: 40%;

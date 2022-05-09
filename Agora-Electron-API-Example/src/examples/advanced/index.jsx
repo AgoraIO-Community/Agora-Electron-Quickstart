@@ -1,4 +1,5 @@
 import ScreenShare from './ScreenShare/ScreenShare';
+import CameraAndScreenShare from './CameraAndScreenShare/CameraAndScreenShare';
 import LoadPlugin from './LoadPlugin/LoadPlugin';
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay';
 import CreateDataStream from './CreateDataStream/CreateDataStream';
@@ -14,6 +15,11 @@ const advanceRoute = [
     path: '/ScreenShare',
     component: ScreenShare,
     title: 'ScreenShare',
+  },
+  {
+    path: '/CameraAndScreenShare',
+    component: CameraAndScreenShare,
+    title: 'CameraAndScreenShare',
   },
   {
     path: '/LoadPlugin',
