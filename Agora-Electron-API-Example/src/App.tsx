@@ -62,7 +62,7 @@ class App extends React.Component {
             </Menu>
           </Sider>
           <Layout className="site-layout">
-            <Content>
+            <Content style={{ flex: 1 }}>
               <Switch>
                 <Route path="/" children={<AuthInfoScreen />} exact={true} />
 

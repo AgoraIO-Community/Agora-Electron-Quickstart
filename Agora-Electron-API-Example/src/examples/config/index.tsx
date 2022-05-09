@@ -22,9 +22,22 @@ export const RoleTypeMap = {
   Audience: 2,
 };
 export const ResolutionMap = {
+  '120x120': { width: 120, height: 120 },
+  '160x120': { width: 160, height: 120 },
+  '180x180': { width: 180, height: 180 },
+  '240x180': { width: 240, height: 180 },
+  '240x240': { width: 240, height: 240 },
+  '320x180': { width: 320, height: 180 },
   '320x240': { width: 320, height: 240 },
+  '360x360': { width: 360, height: 360 },
+  '424x240': { width: 424, height: 240 },
+  '480x360': { width: 480, height: 360 },
+  '480x480': { width: 480, height: 480 },
+  '640x360': { width: 640, height: 360 },
   '640x480': { width: 640, height: 480 },
+  '848x480': { width: 848, height: 480 },
   '960x720': { width: 960, height: 720 },
+  '1280x720': { width: 1280, height: 720 },
   '1920x1080': { width: 1920, height: 1080 },
 };
 export const FpsMap = {

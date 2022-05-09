@@ -7,6 +7,7 @@ import styles from '../config/public.scss';
 import JoinChannelBar from '../component/JoinChannelBar';
 import { RoleTypeMap, ResolutionMap, FpsMap } from '../config';
 import { configMapToOptions } from '../util';
+import SliderBar from '../component/SliderBar';
 import Window from '../component/Window';
 
 interface User {
@@ -22,17 +23,19 @@ interface State {
   cameraDevices: Object[];
   currentFps?: number;
   currentResolution?: { width: number; height: number };
+  bitrate: number;
 }
 
 export default class JoinChannelVideo extends Component<{}, State, any> {
   rtcEngine?: AgoraRtcEngine;
 
   state: State = {
+    isJoined: false,
     channelId: '',
     allUser: [],
-    isJoined: false,
     audioRecordDevices: [],
     cameraDevices: [],
+    bitrate: 50,
   };
 
   componentDidMount() {
@@ -62,6 +65,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
         fileSize: 2000,
       });
       console.log('initialize:', res);
+      this.rtcEngine.setLogFile(config.nativeSDKLogPath);
       this.rtcEngine.setAddonLogFile(config.addonLogPath);
     }
 
@@ -152,7 +156,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   };
 
   setVideoConfig = () => {
-    const { currentFps, currentResolution } = this.state;
+    const { currentFps, currentResolution, bitrate } = this.state;
     if (!currentResolution || !currentFps) {
       return;
     }
@@ -161,9 +165,9 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       width,
       height,
       frameRate: currentFps!,
-      minFrameRate: 10,
-      bitrate: 65,
-      minBitrate: 65,
+      minFrameRate: -1,
+      bitrate,
+      minBitrate: 1,
       orientationMode: 0,
       degradationPreference: 2,
       mirrorMode: 0,
@@ -223,6 +227,15 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
             options={configMapToOptions(FpsMap)}
             onPress={(res) => {
               this.setState({ currentFps: res.dropId }, this.setVideoConfig);
+            }}
+          />
+          <SliderBar
+            min={50}
+            max={2750}
+            step={10}
+            title="Bitrate"
+            onChange={(value) => {
+              this.setState({ bitrate: value }, this.setVideoConfig);
             }}
           />
         </div>
