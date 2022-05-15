@@ -1,33 +1,31 @@
 {
+  "root": true,
+  "extends": "./node_modules/electron-webpack/tsconfig-base.json",
+  "include": ["src"],
   "compilerOptions": {
-    "target": "ES2018",
-    "module": "CommonJS",
-    "lib": ["dom", "esnext"],
-    "declaration": true,
-    "declarationMap": true,
-    "noEmit": true,
-    "jsx": "react",
-    "strict": true,
-    "pretty": true,
-    "sourceMap": true,
-    /* Additional Checks */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    /* Module Resolution Options */
-    "moduleResolution": "node",
+    "allowJs": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
     "resolveJsonModule": true,
-    "allowJs": true
-  },
-  "exclude": [
-    "test",
-    "release",
-    "src/main.prod.js",
-    "src/renderer.prod.js",
-    "src/dist",
-    ".erb/dll"
-  ]
+    "isolatedModules": true,
+    "noEmit": false,
+    "jsx": "react-jsx",
+    "target": "ES2018",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "declaration": false,
+    "declarationMap": false,
+    "pretty": true,
+    /* Additional Checks */
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "noImplicitAny": false,
+    /* Module Resolution Options */
+    "outDir": "./dist"
+  }
 }

@@ -1,71 +1,46 @@
-# Agora-Electron-API-Example-Iris
+# electron-webpack-quick-start
+> A bare minimum project structure to get started developing with [`electron-webpack`](https://github.com/electron-userland/electron-webpack).
 
-_**其他语言版本：** [**简体中文**](README.zh.md)_
+Thanks to the power of `electron-webpack` this template comes packed with...
 
-## Overview
+* Use of [`webpack-dev-server`](https://github.com/webpack/webpack-dev-server) for development
+* HMR for both `renderer` and `main` processes
+* Use of [`babel-preset-env`](https://github.com/babel/babel-preset-env) that is automatically configured based on your `electron` version
+* Use of [`electron-builder`](https://github.com/electron-userland/electron-builder) to package and build a distributable electron application
 
-The Agora-Electron-API-Example-Iris project is an open-source demo that will show you different scenes on how to integrate Agora SDK APIs into your project.
+Make sure to check out [`electron-webpack`'s documentation](https://webpack.electron.build/) for more details.
 
-Any scene of this project can run successfully alone.
+## Getting Started
+Simply clone down this repository, install dependencies, and get started on your application.
 
-## Project structure
+The use of the [yarn](https://yarnpkg.com/) package manager is **strongly** recommended, as opposed to using `npm`.
 
-- **Basic demos:**
+```bash
+# create a directory of your choice, and copy template using curl
+mkdir new-electron-webpack-project && cd new-electron-webpack-project
+curl -fsSL https://github.com/electron-userland/electron-webpack-quick-start/archive/master.tar.gz | tar -xz --strip-components 1
 
-| Demo                                                                                                                                                              | Description                                        | APIs                                                                                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [JoinChannelAudio](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/tree/master/Agora-Electron-API-Example-Iris/src/examples/basic/JoinChannelAudio.tsx) | basic demo to show audio call                      | getAudioRecordingDevices, ,adjustLoopbackRecordingSignalVolume, adjustRecordingSignalVolume, adjustAudioMixingPlayoutVolume, adjustPlaybackSignalVolume |
-| [JoinChannelVideo](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/examples/basic/JoinChannelVideo.tsx) | video demo with role selection in Editor Inspector | enableVideo, getVideoDevices,setChannelProfile, setClientRole, setAudioProfile, setVideoEncoderConfiguration                                            |
+# or copy template using git clone
+git clone https://github.com/electron-userland/electron-webpack-quick-start.git
+cd electron-webpack-quick-start
+rm -rf .git
 
-- **Advanced demos:**
-
-| Demo                                                                                                                                                                                           | Description                                                    | APIs                                                                                                                                                                                                                                 |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [ScreenShare](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/examples/advanced/ScreenShare/ScreenShare.tsx)                         | sharing application screen view from Unity camera              | getWindowInfoList, getScreenInfoList, videoSourceSetVideoProfile, videoSourceStartScreenCaptureByScreen, startScreenCapturePreview, videoSourceStartScreenCaptureByWindow, stopScreenCapture2 , videoSourceLeave, videoSourceRelease |
-| [LoadPlugin](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/examples/advanced/LoadPlugin/LoadPlugin.tsx)                                       | Load the cpp plug-in to process audio and video data           | initializePluginManager, enablePlugin, getPlugins                                                                                                                                                                                    |
-| [ChannelMediaRelay](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/examples/advanced/ChannelMediaRelay/ChannelMediaRelay.tsx)                         | audioMixing and play audio effect in the channel               | startChannelMediaRelay, stopChannelMediaRelay                                                                                                                                                                                        |
-| [CreateDataStream](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/examples/advanced/CreateDataStream/CreateDataStream.tsx)          | use AudioSource to play raw data received in the Agora channel | createDataStreamWithConfig, sendStreamMessage                                                                                                                                                                                        |
-| [JoinMultipleChannel](https://github.com/AgoraIO-Community/Agora-Electron-Quickstart/blob/master/Agora-Electron-API-Example-Iris/src/examples/advanced/JoinMultipleChannel/JoinMultipleChannel.tsx) | Sending raw data from AudioSource into the Agora channel       | createChannel                                                                                                                                                                                                                        |
-
-## How to run the sample project
-
-#### Developer Environment Requirements
-
-- Agora.io [Developer Account](https://dashboard.agora.io/signin/)
-- [Node.js](https://nodejs.org/en/download/) 6.9.1+ with C++11 support
-- [Yarn](https://yarnpkg.com/)  package manager
-
-#### Steps to run
-
-First, create a developer account at [Agora.io](https://dashboard.agora.io/signin/), and obtain an App ID.
-
-Then do the following:
-
-```shell 
-$ git clone https://github.com/AgoraIO-Community/Agora-Electron-Quickstart
-$ cd Agora-Electron-API-Example-Iris
-$ yarn
-$ yarn start
-
+# install dependencies
+yarn
 ```
 
-## Feedback
+### Development Scripts
 
-If you have any problems or suggestions regarding the sample projects, feel free to file an issue.
+```bash
+# run application in development mode
+yarn dev
 
-## Reference
+# compile source code and create webpack output
+yarn compile
 
-- You can find full API document at [Document Center](https://docs.agora.io/en/Video/API%20Reference/electron/index.html)
-- You can file issues about this demo at [issue](https://github.com/AgoraIO/Electron-SDK/issues)
+# `yarn compile` & create build with electron-builder
+yarn dist
 
-## Related resources
-
-- Check our [FAQ](https://docs.agora.io/en/faq) to see if your issue has been recorded.
-- Dive into [Agora SDK Samples](https://github.com/AgoraIO) to see more tutorials
-- Take a look at [Agora Use Case](https://github.com/AgoraIO-usecase) for more complicated real use case
-- Repositories managed by developer communities can be found at [Agora Community](https://github.com/AgoraIO-Community)
-- If you encounter problems during integration, feel free to ask questions in [Stack Overflow](https://stackoverflow.com/questions/tagged/agora.io)
-
-## License
-
-The sample projects are under the MIT license.
+# `yarn compile` & create unpacked build with electron-builder
+yarn dist:dir
+```
