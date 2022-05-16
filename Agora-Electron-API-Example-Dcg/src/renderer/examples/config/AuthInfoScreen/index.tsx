@@ -19,7 +19,6 @@ const tailLayout = {
 }
 const onFinish = (values: any) => {
   console.log('Success:', values)
-  config.isCustomElement = values.isCustomElement
 
   config.appID = values.appID
   config.defaultChannelId = values.defaultChannelId
@@ -136,13 +135,6 @@ const AuthInfoScreen = () => {
               ]}
             >
               <Input />
-            </Form.Item>
-            <Form.Item
-              label='Custom Element'
-              name='isCustomElement'
-              valuePropName='checked'
-            >
-              <Checkbox defaultChecked={config.isCustomElement}></Checkbox>
             </Form.Item>
             <Form.Item {...tailLayout}>
               <Button type='primary' htmlType='submit'>

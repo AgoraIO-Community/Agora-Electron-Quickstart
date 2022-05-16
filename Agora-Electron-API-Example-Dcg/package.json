@@ -8,6 +8,58 @@
     "dist": "yarn compile && electron-builder",
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
+  "build": {
+    "asar": false,
+    "productName": "ElectronReact",
+    "appId": "org.erb.ElectronReact",
+    "files": [
+      "dist/",
+      "release/",
+      "node_modules/",
+      "package.json"
+    ],
+    "mac": {
+      "target": [
+        "dir"
+      ],
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist",
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "zip"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Development"
+    },
+    "directories": {
+      "buildResources": "assets"
+    },
+    "extraResources": [
+      "./assets/**"
+    ]
+  },
   "dependencies": {
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.3",
