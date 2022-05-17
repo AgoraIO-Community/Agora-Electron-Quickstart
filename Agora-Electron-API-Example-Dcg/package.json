@@ -6,17 +6,16 @@
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "dist": "yarn compile && electron-builder",
-    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
+    "dist:win32":"yarn compile && electron-builder --publish never --win --x32",
+    "dist:win64":"yarn compile && electron-builder --publish never --win --x64"
   },
   "build": {
     "asar": false,
     "productName": "ElectronReact",
     "appId": "org.erb.ElectronReact",
     "files": [
-      "dist/",
-      "release/",
-      "node_modules/",
-      "package.json"
+      "!*.log"
     ],
     "mac": {
       "target": [

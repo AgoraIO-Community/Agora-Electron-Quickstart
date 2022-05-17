@@ -52,22 +52,21 @@ switch -Regex ($chooseExampleType)
       Break
     }
     2 {
-      pushd Agora-Electron-API-Example-Iris
+      pushd Agora-Electron-API-Example-Dcg
       # choose arch
       ChooseArch -type $args[1]
       # remove node_modules
       Remove-Item -Path node_modules -Recurse -Force -ErrorAction Ignore;
-      # remove node_modules
-      Remove-Item -Path src/node_modules -Recurse -Force -ErrorAction Ignore;
+      
       # remove dist
-      Remove-Item -Path release -Recurse -Force -ErrorAction Ignore;
+      Remove-Item -Path dist -Recurse -Force -ErrorAction Ignore;
       yarn
       # copy native sdk
       Copy-Item -Path ../Electron-*/* -Destination src/node_modules/agora-electron-sdk/ -Recurse -Force
       # dist start
       DistByArch -type $args[1]
       # move zip
-      Copy-Item -Path release/ElectronReact-*.zip -Destination ../$outterZipName -Recurse -Force
+      Copy-Item -Path dist/ElectronReact-*.zip -Destination ../$outterZipName -Recurse -Force
       popd;
       Break
     }
