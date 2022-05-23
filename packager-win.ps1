@@ -15,7 +15,7 @@ function ChooseArch($type)
   }
 }
 
-function distByArch($type)
+function DistByArch($type)
 {
   
   if($type -eq 1){
@@ -28,64 +28,42 @@ function distByArch($type)
     write-host("not set arch type")
   }
 }
+function Package($archNum){
+  # remove zip
+  Remove-Item -Path $outterZipName -Recurse -Force -ErrorAction Ignore;
+  pushd Agora-Electron-API-Example
+  # choose arch
+  ChooseArch -type $archNum
+  # remove node_modules
+  Remove-Item -Path node_modules -Recurse -Force -ErrorAction Ignore;
+  
+  # remove dist
+  Remove-Item -Path dist -Recurse -Force -ErrorAction Ignore;
+  yarn
+  # copy native sdk
+  Copy-Item -Path ../Electron-*/* -Destination src/node_modules/agora-electron-sdk/ -Recurse -Force
+  # dist start
+  DistByArch -type $archNum
+  # move zip
+  Copy-Item -Path dist/ElectronReact-*.zip -Destination ../$outterZipName -Recurse -Force
+  popd;
+}
 
 switch -Regex ($chooseExampleType)
 {
     1 {
-      pushd Agora-Electron-API-Example
-      # choose arch
-      ChooseArch -type $args[1]
-      # remove node_modules
-      Remove-Item -Path node_modules -Recurse -Force -ErrorAction Ignore;
-      # remove node_modules
-      Remove-Item -Path src/node_modules -Recurse -Force -ErrorAction Ignore;
-      # remove dist
-      Remove-Item -Path release -Recurse -Force -ErrorAction Ignore;
-      yarn
-      # copy native sdk
-      Copy-Item -Path ../Electron-*/* -Destination src/node_modules/agora-electron-sdk/ -Recurse -Force
-      # dist start
-      DistByArch -type $args[1]
-      # move zip
-      Copy-Item -Path release/ElectronReact-*.zip -Destination ../$outterZipName -Recurse -Force
-      popd;
+      write-host("Package win:1")
+      Package -archNum $args[1]
       Break
     }
     2 {
-      pushd Agora-Electron-API-Example-Dcg
-      # choose arch
-      ChooseArch -type $args[1]
-      # remove node_modules
-      Remove-Item -Path node_modules -Recurse -Force -ErrorAction Ignore;
-      
-      # remove dist
-      Remove-Item -Path dist -Recurse -Force -ErrorAction Ignore;
-      yarn
-      # copy native sdk
-      Copy-Item -Path ../Electron-*/* -Destination src/node_modules/agora-electron-sdk/ -Recurse -Force
-      # dist start
-      DistByArch -type $args[1]
-      # move zip
-      Copy-Item -Path dist/ElectronReact-*.zip -Destination ../$outterZipName -Recurse -Force
-      popd;
+      write-host("Package win:2")
+      Package -archNum $args[1]
       Break
     }
     3 {
-      pushd Agora-Electron-Premium
-      # choose arch
-      ChooseArch -type $args[1]
-      # remove node_modules
-      Remove-Item -Path node_modules -Recurse -Force -ErrorAction Ignore;
-      # remove dist
-      Remove-Item -Path dist -Recurse -Force -ErrorAction Ignore;
-      yarn
-      # copy native sdk
-      Copy-Item -Path ../Electron-*/* -Destination ./node_modules/agora-electron-sdk/ -Recurse -Force
-      # dist start
-      DistByArch -type $args[1]
-      # move zip
-      Copy-Item -Path dist/agora-electron-*.zip -Destination ../$outterZipName -Recurse -Force
-      popd;
+      write-host("Package win:3")
+      Package -archNum $args[1]
       Break
     }
     4 {"It is four."; Break}
