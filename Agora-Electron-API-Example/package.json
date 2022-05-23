@@ -6,7 +6,7 @@
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "dist": "yarn compile && electron-builder",
-    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
+    "dist:mac": "yarn dist --dir -c.compression=store -c.mac.identity=null",
     "dist:win32":"yarn compile && electron-builder --publish never --win --x32",
     "dist:win64":"yarn compile && electron-builder --publish never --win --x64"
   },
