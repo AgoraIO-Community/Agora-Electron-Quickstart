@@ -24,28 +24,15 @@ coverage
 build/Release
 .eslintcache
 
-# Dependency directory
-# https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
-node_modules
-
 # OSX
 .DS_Store
 
 # App packaged
 release
-src/main.prod.js
-src/main.prod.js.map
-src/renderer.prod.js
-src/renderer.prod.js.map
-src/style.css
-src/style.css.map
-dist
-dll
-main.js
-main.js.map
 
-.idea
-npm-debug.log.*
-*.css.d.ts
-*.sass.d.ts
-*.scss.d.ts
+.DS_Store
+dist/
+node_modules/
+thumbs.db
+.idea/
+appId.*

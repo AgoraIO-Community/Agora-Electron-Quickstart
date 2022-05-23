@@ -1,30 +1,28 @@
 module.exports = {
-  extends: 'erb',
-  rules: {
-    // A temporary hack related to IDE not resolving correct package.json
-    'import/no-extraneous-dependencies': 'off',
-    'react/require-default-props': 'off',
-    'react/no-array-index-key': 'off',
-    'react/state-in-constructor': 'off',
-    'max-classes-per-file': 'off',
-  },
+  root: true,
   parserOptions: {
-    ecmaVersion: 2020,
     sourceType: 'module',
     project: './tsconfig.json',
-    tsconfigRootDir: __dirname,
-    createDefaultProgram: true,
   },
-  settings: {
-    'import/resolver': {
-      // See https://github.com/benmosher/eslint-plugin-import/issues/1396#issuecomment-575727774 for line below
-      node: {},
-      webpack: {
-        config: require.resolve('./.erb/configs/webpack.config.eslint.js'),
-      },
-    },
-    'import/parsers': {
-      '@typescript-eslint/parser': ['.ts', '.tsx'],
-    },
+  ignorePatterns: ['.eslintrc.js', 'webpack.renderer.additions.js'],
+  env: {
+    browser: true,
+    node: true,
   },
-};
+  globals: {
+    __static: true,
+  },
+
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  extends: [
+    'airbnb-typescript',
+    'plugin:react/jsx-runtime',
+    'plugin:import/recommended',
+  ],
+  rules: {
+    '@typescript-eslint/semi': 0,
+    '@typescript-eslint/comma-dangle': 0,
+    'import/no-extraneous-dependencies': 0,
+  },
+}
