@@ -1,32 +1,30 @@
 import {
-  AUDIO_PROFILE_TYPE,
-  AUDIO_SCENARIO_TYPE,
-  CLIENT_ROLE_TYPE,
-  FRAME_RATE,
+  AudioProfileType,
+  AudioScenarioType,
+  ClientRoleType,
+  FrameRate,
 } from 'agora-electron-sdk'
 
 export const AudioProfileList = {
-  Default: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT, //0
-  SpeechStandard: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_SPEECH_STANDARD, //1
-  MusicStandard: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_STANDARD, //2
-  MusicStandardStereo: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_STANDARD_STEREO, //3
-  MusicHigh: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_HIGH_QUALITY, //4
-  MusicHighStereo: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_HIGH_QUALITY_STEREO, //5
-  IOT: AUDIO_PROFILE_TYPE.AUDIO_PROFILE_IOT, //6
+  Default: AudioProfileType.AudioProfileDefault, //0
+  SpeechStandard: AudioProfileType.AudioProfileSpeechStandard, //1
+  MusicStandard: AudioProfileType.AudioProfileMusicStandard, //2
+  MusicStandardStereo: AudioProfileType.AudioProfileMusicStandardStereo, //3
+  MusicHigh: AudioProfileType.AudioProfileMusicHighQuality, //4
+  MusicHighStereo: AudioProfileType.AudioProfileMusicHighQualityStereo, //5
+  IOT: AudioProfileType.AudioProfileIot, //6
+  NUM: AudioProfileType.AudioProfileNum,
 }
 export const AudioScenarioList = {
-  Standard: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_DEFAULT, //0
-  Entertainment: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_ENTERTAINMENT, //1
-  Education: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_EDUCATION, //2
-  HighQuality: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_GAME_STREAMING, //3
-  Showroom: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_SHOWROOM, //4
-  Gaming: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_GAMING, //5
-  Meeting: AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_MEETING, //8
+  Standard: AudioScenarioType.AudioScenarioDefault, //0
+  HighQuality: AudioScenarioType.AudioScenarioGameStreaming, //3
+  Chatroom: AudioScenarioType.AudioScenarioChatroom, //5
+  Num: AudioScenarioType.AudioScenarioNum, //8
 }
 
 export const RoleTypeMap = {
-  Broadcaster: CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER, //1
-  Audience: CLIENT_ROLE_TYPE.CLIENT_ROLE_AUDIENCE, //2
+  Broadcaster: ClientRoleType.ClientRoleBroadcaster, //1
+  Audience: ClientRoleType.ClientRoleAudience, //2
 }
 export const ResolutionMap = {
   '120x120': { width: 120, height: 120 },
@@ -48,8 +46,8 @@ export const ResolutionMap = {
   '1920x1080': { width: 1920, height: 1080 },
 }
 export const FpsMap = {
-  '15fps': FRAME_RATE.FRAME_RATE_FPS_15,
-  '30fps': FRAME_RATE.FRAME_RATE_FPS_30,
+  '15fps': FrameRate.FrameRateFps15,
+  '30fps': FrameRate.FrameRateFps30,
 }
 
 export const EncryptionMap = {

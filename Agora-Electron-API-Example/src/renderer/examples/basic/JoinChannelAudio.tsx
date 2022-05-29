@@ -1,10 +1,7 @@
 import { Component } from 'react'
 import AgoraRtcEngine, {
-  LOG_LEVEL,
-  AREA_CODE,
-  CLIENT_ROLE_TYPE,
-  EngineEvents,
-  CHANNEL_PROFILE_TYPE,
+  ClientRoleType,
+  ChannelProfileType,
 } from 'agora-electron-sdk'
 import { List, Card } from 'antd'
 import config from '../config/agora.config'
@@ -60,15 +57,8 @@ export default class JoinChannelAudio extends Component<State> {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore:next-line
       window.rtcEngine = this.rtcEngine
-      this.subscribeEvents(this.rtcEngine)
       const res = this.rtcEngine?.initialize({
         appId: config.appID,
-        areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
-          level: LOG_LEVEL.LOG_LEVEL_INFO,
-          filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
       })
       console.log('initialize:', res)
     }
@@ -77,49 +67,49 @@ export default class JoinChannelAudio extends Component<State> {
   }
 
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on(EngineEvents.JOINED_CHANNEL, ({ channelId }, uid) => {
-      console.log(
-        `onJoinChannel channel: ${channelId}  uid: ${uid}  version: ${JSON.stringify(
-          rtcEngine.getVersion()
-        )})`
-      )
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: true, uid })
-      this.setState({
-        isJoined: true,
-        allUser: newAllUser,
-      })
-    })
-    rtcEngine.on(EngineEvents.USER_JOINED, (connection, uid, elapsed) => {
-      console.log(`userJoined ---- ${uid}`)
+    // rtcEngine.on(EngineEvents.JOINED_CHANNEL, ({ channelId }, uid) => {
+    //   console.log(
+    //     `onJoinChannel channel: ${channelId}  uid: ${uid}  version: ${JSON.stringify(
+    //       rtcEngine.getVersion()
+    //     )})`
+    //   )
+    //   const { allUser: oldAllUser } = this.state
+    //   const newAllUser = [...oldAllUser]
+    //   newAllUser.push({ isMyself: true, uid })
+    //   this.setState({
+    //     isJoined: true,
+    //     allUser: newAllUser,
+    //   })
+    // })
+    // rtcEngine.on(EngineEvents.USER_JOINED, (connection, uid, elapsed) => {
+    //   console.log(`userJoined ---- ${uid}`)
 
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: false, uid })
-      this.setState({
-        allUser: newAllUser,
-      })
-    })
-    rtcEngine.on(EngineEvents.USER_OFFLINE, (connection, uid, reason) => {
-      console.log(`userOffline ---- ${uid}`)
+    //   const { allUser: oldAllUser } = this.state
+    //   const newAllUser = [...oldAllUser]
+    //   newAllUser.push({ isMyself: false, uid })
+    //   this.setState({
+    //     allUser: newAllUser,
+    //   })
+    // })
+    // rtcEngine.on(EngineEvents.USER_OFFLINE, (connection, uid, reason) => {
+    //   console.log(`userOffline ---- ${uid}`)
 
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
-      this.setState({
-        allUser: newAllUser,
-      })
-    })
+    //   const { allUser: oldAllUser } = this.state
+    //   const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
+    //   this.setState({
+    //     allUser: newAllUser,
+    //   })
+    // })
 
-    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (connection, rtcStats) => {
-      this.setState({
-        isJoined: false,
-        allUser: [],
-      })
-    })
-    rtcEngine.on(EngineEvents.ERROR, (err, msg) => {
-      console.error(err)
-    })
+    // rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (connection, rtcStats) => {
+    //   this.setState({
+    //     isJoined: false,
+    //     allUser: [],
+    //   })
+    // })
+    // rtcEngine.on(EngineEvents.ERROR, (err, msg) => {
+    //   console.error(err)
+    // })
   }
 
   setAudioProfile = () => {

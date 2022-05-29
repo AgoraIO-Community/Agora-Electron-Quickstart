@@ -1,9 +1,14 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, systemPreferences } from 'electron'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 app.allowRendererProcessReuse = false
+
+if (systemPreferences.askForMediaAccess) {
+  systemPreferences.askForMediaAccess('camera')
+  systemPreferences.askForMediaAccess('microphone')
+}
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow
