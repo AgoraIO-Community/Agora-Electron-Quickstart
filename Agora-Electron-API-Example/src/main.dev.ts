@@ -11,9 +11,14 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, systemPreferences } from 'electron';
 import log from 'electron-log';
 import MenuBuilder from './menu';
+
+if (systemPreferences.askForMediaAccess) {
+  systemPreferences.askForMediaAccess('camera');
+  systemPreferences.askForMediaAccess('microphone');
+}
 
 export default class AppUpdater {
   constructor() {
