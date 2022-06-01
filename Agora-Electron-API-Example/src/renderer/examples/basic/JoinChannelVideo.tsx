@@ -1,35 +1,32 @@
-import { Component } from 'react'
 import AgoraRtcEngine, {
-  AREA_CODE,
-  LOG_LEVEL,
-  CHANNEL_PROFILE_TYPE,
-  AUDIO_PROFILE_TYPE,
-  AUDIO_SCENARIO_TYPE,
-  RENDER_MODE,
-  EngineEvents,
-  FRAME_RATE,
-  CLIENT_ROLE_TYPE,
+  AudioProfileType,
+  AudioScenarioType,
+  ChannelProfileType,
+  DegradationPreference,
+  IRtcEngineEventHandlerEx,
+  OrientationMode,
+  RtcConnection,
+  RtcStats,
+  UserOfflineReasonType,
+  VideoCodecType,
+  VideoMirrorModeType,
   VideoSourceType,
-  CONTENT_MODE,
-  VIDEO_CODEC_TYPE,
-  ORIENTATION_MODE,
-  DEGRADATION_PREFERENCE,
-  VIDEO_MIRROR_MODE_TYPE,
 } from 'agora-electron-sdk'
-import { List, Card } from 'antd'
-import config from '../config/agora.config'
+import { Card, List } from 'antd'
+import { Component } from 'react'
 import DropDownButton from '../component/DropDownButton'
-import styles from '../config/public.scss'
 import JoinChannelBar from '../component/JoinChannelBar'
-import { RoleTypeMap, ResolutionMap, FpsMap } from '../config'
-import { configMapToOptions, getRandomInt } from '../util'
 import Window from '../component/Window'
-// import Window from '../component/Window'
+import { FpsMap, ResolutionMap, RoleTypeMap } from '../config'
+import config from '../config/agora.config'
+import styles from '../config/public.scss'
+import { configMapToOptions, getRandomInt } from '../util'
 
 interface Device {
-  devicename: string
-  deviceid: string
+  deviceId: string
+  deviceName: string
 }
+
 interface User {
   isMyself: boolean
   uid: number
@@ -45,7 +42,10 @@ interface State {
   currentResolution?: { width: number; height: number }
 }
 
-export default class JoinChannelVideo extends Component<{}, State, any> {
+export default class JoinChannelVideo
+  extends Component<{}, State, any>
+  implements IRtcEngineEventHandlerEx
+{
   rtcEngine?: AgoraRtcEngine
 
   state: State = {
@@ -63,6 +63,7 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       audioRecordDevices: this.getRtcEngine().getAudioRecordingDevices(),
       cameraDevices: this.getRtcEngine().getVideoDevices(),
     })
+    this.getRtcEngine().registerEventHandler(this)
   }
 
   componentWillUnmount() {
@@ -76,109 +77,70 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore:next-line
       window.rtcEngine = this.rtcEngine
-      this.subscribeEvents(this.rtcEngine)
-      const res = this.rtcEngine.initialize({
-        appId: config.appID,
-        areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
-          level: LOG_LEVEL.LOG_LEVEL_INFO,
-          filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
-      })
-      this.rtcEngine.setAddonLogFile(config.addonLogPath)
+      const res = this.rtcEngine.initialize({ appId: config.appID })
       console.log('initialize:', res)
     }
 
     return this.rtcEngine
   }
 
-  subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on(EngineEvents.JOINED_CHANNEL, ({ channelId }, uid) => {
-      console.log(
-        `onJoinChannel channel: ${channelId}  uid: ${uid}  version: ${JSON.stringify(
-          rtcEngine.getVersion()
-        )})`
-      )
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: true, uid })
-      this.setState({
-        isJoined: true,
-        allUser: newAllUser,
-      })
+  onJoinChannelSuccessEx(
+    { channelId, localUid }: RtcConnection,
+    elapsed: number
+  ): void {
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: true, uid: localUid })
+    this.setState({
+      isJoined: true,
+      allUser: newAllUser,
     })
-    rtcEngine.on(EngineEvents.USER_JOINED, (connection, uid, elapsed) => {
-      console.log(`userJoined ---- ${uid}`)
+  }
 
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: false, uid })
-      this.setState({
-        allUser: newAllUser,
-      })
-    })
-    rtcEngine.on(EngineEvents.USER_OFFLINE, (connection, uid, reason) => {
-      console.log(`userOffline ---- ${uid}`)
+  onUserJoined(uid: number, elapsed: number): void {
+    console.log(`userJoined ---- ${uid}`)
 
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
-      this.setState({
-        allUser: newAllUser,
-      })
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: false, uid })
+    this.setState({
+      allUser: newAllUser,
     })
+  }
 
-    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (connection, rtcStats) => {
-      this.setState({
-        isJoined: false,
-        allUser: [],
-      })
-    })
-    rtcEngine.on(EngineEvents.ERROR, (err, msg) => {
-      console.error(err)
-    })
+  onUserOffline(uid: number, reason: UserOfflineReasonType): void {
+    console.log(`userOffline ---- ${uid}`)
 
-    rtcEngine.on(
-      EngineEvents.FIRST_LOCAL_VIDEO_FRAME_PUBLISHED,
-      (connection, elapsed) => {
-        console.log(
-          `firstLocalVideoFramePublished ---- ${connection.channelId} ${connection.localUid}`
-        )
-      }
-    )
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
+    this.setState({
+      allUser: newAllUser,
+    })
+  }
+  onLeaveChannelEx(connection: RtcConnection, stats: RtcStats): void {
+    this.setState({
+      isJoined: false,
+      allUser: [],
+    })
+  }
+
+  onError(err: number, msg: string): void {
+    console.error(err, msg)
   }
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
     this.rtcEngine?.setChannelProfile(
-      CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_COMMUNICATION
+      ChannelProfileType.ChannelProfileLiveBroadcasting
     )
     this.rtcEngine?.setAudioProfile(
-      AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT,
-      AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_ENTERTAINMENT
+      AudioProfileType.AudioProfileDefault,
+      AudioScenarioType.AudioScenarioChatroom
     )
-
-    this.rtcEngine?.setRenderMode(RENDER_MODE.SOFTWARE)
 
     const localUid = getRandomInt(1, 9999999)
     console.log(`localUid: ${localUid}`)
-    this.rtcEngine?.joinChannelEx(
-      config.token,
-      {
-        channelId,
-        localUid,
-      },
-      {
-        autoSubscribeAudio: true,
-        autoSubscribeVideo: true,
-        publishAudioTrack: true,
-        publishCameraTrack: true,
-        publishScreenTrack: false,
-        clientRoleType: CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER,
-        channelProfile: CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING,
-        encodedVideoTrackOption: { targetBitrate: 600 },
-      }
-    )
+    this.rtcEngine?.joinChannel('', channelId, '', localUid)
   }
 
   setVideoConfig = () => {
@@ -186,46 +148,41 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
     if (!currentResolution || !currentFps) {
       return
     }
+
     this.getRtcEngine().setVideoEncoderConfiguration({
-      codecType: VIDEO_CODEC_TYPE.VIDEO_CODEC_H264,
+      codecType: VideoCodecType.VideoCodecH264,
       dimensions: currentResolution!,
-      frameRate: currentFps!,
-      minFrameRate: 0,
-      bitrate: 540,
-      minBitrate: 50,
-      orientationMode: ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE,
-      degradationPreference: DEGRADATION_PREFERENCE.MAINTAIN_BALANCED,
-      mirrorMode: VIDEO_MIRROR_MODE_TYPE.AUTO,
+      frameRate: currentFps,
+      bitrate: 65,
+      minBitrate: 1,
+      orientationMode: OrientationMode.OrientationModeAdaptive,
+      degradationPreference: DegradationPreference.MaintainBalanced,
+      mirrorMode: VideoMirrorModeType.VideoMirrorModeAuto,
     })
   }
 
   renderRightBar = () => {
     const { audioRecordDevices, cameraDevices } = this.state
+
     return (
       <div className={styles.rightBar}>
         <div>
           <DropDownButton
             options={cameraDevices.map((obj) => {
-              const { deviceid, devicename } = obj
-              return { dropId: deviceid, dropText: devicename, ...obj }
+              const { deviceId, deviceName } = obj
+              console.log('cameraDevices', obj)
+              return { dropId: deviceId, dropText: deviceName, ...obj }
             })}
             onPress={(res) => {
-              this.getRtcEngine().startPrimaryCameraCapture({
-                deviceId: res.dropId,
-                format: {
-                  width: 1080,
-                  height: 720,
-                  fps: FRAME_RATE.FRAME_RATE_FPS_60,
-                },
-              })
+              this.getRtcEngine().setVideoDevice(res.dropId)
             }}
             title='Camera'
           />
           <DropDownButton
             title='Microphone'
             options={audioRecordDevices.map((obj) => {
-              const { deviceid, devicename } = obj
-              return { dropId: deviceid, dropText: devicename, ...obj }
+              const { deviceId, deviceName } = obj
+              return { dropId: deviceId, dropText: deviceName, ...obj }
             })}
             onPress={(res) => {
               this.getRtcEngine().setAudioRecordingDevice(res.dropId)
@@ -269,8 +226,8 @@ export default class JoinChannelVideo extends Component<{}, State, any> {
   renderItem = ({ isMyself, uid }: User) => {
     const { channelId } = this.state
     const videoSourceType = isMyself
-      ? VideoSourceType.kVideoSourceTypeCameraPrimary
-      : VideoSourceType.kVideoSourceTypeRemote
+      ? VideoSourceType.VideoSourceCameraPrimary
+      : VideoSourceType.VideoSourceRemote
     return (
       <List.Item>
         <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>

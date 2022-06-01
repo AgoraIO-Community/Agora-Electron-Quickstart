@@ -1,5 +1,5 @@
 import JoinChannelVideo from './JoinChannelVideo'
-import JoinChannelAudio from './JoinChannelAudio'
+// import JoinChannelAudio from './JoinChannelAudio'
 
 const basicRoutes = [
   {
@@ -7,11 +7,11 @@ const basicRoutes = [
     component: JoinChannelVideo,
     title: 'JoinChannelVideo',
   },
-  {
-    path: '/JoinChannelAudio',
-    component: JoinChannelAudio,
-    title: 'JoinChannelAudio',
-  },
+  // {
+  //   path: '/JoinChannelAudio',
+  //   component: JoinChannelAudio,
+  //   title: 'JoinChannelAudio',
+  // },
 ]
 
 export default basicRoutes

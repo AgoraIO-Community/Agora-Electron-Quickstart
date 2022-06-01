@@ -18,7 +18,7 @@ class Window extends Component<WindowProps> {
       `Window:  VideoSourceType: ${videoSourceType}, channelId:${channelId}, uid:${uid}, view: ${dom}`
     )
 
-    rtcEngine.setView({
+    rtcEngine.setupVideo({
       videoSourceType,
       uid,
       channelId,
