@@ -1,4 +1,5 @@
 import { Input, Row, Card, Form, Button, Checkbox } from 'antd'
+import { AgoraEnv } from 'agora-electron-sdk'
 import config from '../agora.config'
 
 console.log('config', config)
@@ -26,8 +27,9 @@ const onFinish = (values: any) => {
   config.pluginPath = values.pluginPath
 
   config.addonLogPath = values.addonLogPath
-  config.nativeSDKVideoSourceLogPath = values.nativeSDKVideoSourceLogPath
   config.nativeSDKLogPath = values.nativeSDKLogPath
+  AgoraEnv.enableDebugLogging = values.enableSDKDebugLogging
+  AgoraEnv.enableLogging = values.enableSDKLogging
 }
 
 const onFinishFailed = (errorInfo: any) => {
@@ -125,16 +127,20 @@ const AuthInfoScreen = () => {
               <Input />
             </Form.Item>
             <Form.Item
-              label='Native SDK Video Source Log Path'
-              name='nativeSDKVideoSourceLogPath'
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input log path',
-                },
-              ]}
+              label='Enable SDK Logging'
+              name='enableSDKLogging'
+              valuePropName='checked'
             >
-              <Input />
+              <Checkbox defaultChecked={config.enableSDKLogging}></Checkbox>
+            </Form.Item>
+            <Form.Item
+              label='Enable SDK Debug Logging'
+              name='enableSDKDebugLogging'
+              valuePropName='checked'
+            >
+              <Checkbox
+                defaultChecked={config.enableSDKDebugLogging}
+              ></Checkbox>
             </Form.Item>
             <Form.Item {...tailLayout}>
               <Button type='primary' htmlType='submit'>

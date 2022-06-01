@@ -5,14 +5,14 @@ try {
 } catch (error) {}
 
 const config = {
-  isCustomElement: true,
+  enableSDKLogging: true,
+  enableSDKDebugLogging: false,
   appID: localAppId,
   token: '',
   defaultChannelId: 'testdcg',
   pluginPath: '',
   nativeSDKLogPath: './Agora_SDK.log',
   addonLogPath: './Agora_SDK_Addon.log',
-  nativeSDKVideoSourceLogPath: './Agora_SDK_Video_Source.log',
 }
 
 export default config
