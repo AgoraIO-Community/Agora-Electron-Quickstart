@@ -1,20 +1,24 @@
-import { Component } from 'react'
-import AgoraRtcEngine, {
-  LOG_LEVEL,
-  AREA_CODE,
-  CLIENT_ROLE_TYPE,
-  EngineEvents,
-  CHANNEL_PROFILE_TYPE,
-  AUDIO_PROFILE_TYPE,
-  AUDIO_SCENARIO_TYPE,
-  RENDER_MODE,
+import creteAgoraRtcEngine, {
+  AudioProfileType,
+  AudioScenarioType,
+  ChannelProfileType,
+  ClientRoleType,
+  IRtcEngine,
+  IRtcEngineEventHandlerEx,
+  IRtcEngineEx,
+  RtcConnection,
+  RtcEngineExImplInternal,
+  RtcStats,
+  UserOfflineReasonType,
   VideoSourceType,
 } from 'agora-electron-sdk'
-import { List, Card, Input } from 'antd'
-import config from '../../config/agora.config'
-import styles from '../../config/public.scss'
+import { Card, Input, List } from 'antd'
+import { Component } from 'react'
 import JoinChannelBar from '../../component/JoinChannelBar'
 import Window from '../../component/Window'
+import config from '../../config/agora.config'
+import styles from '../../config/public.scss'
+import { getRandomInt } from '../../util'
 const { Search } = Input
 
 interface User {
@@ -31,8 +35,11 @@ interface State {
   currentResolution?: { width: number; height: number }
 }
 
-export default class ChannelMediaRelay extends Component<{}, State, any> {
-  rtcEngine?: AgoraRtcEngine
+export default class ChannelMediaRelay
+  extends Component<{}, State, any>
+  implements IRtcEngineEventHandlerEx
+{
+  rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
   state: State = {
     channelId: '',
@@ -42,8 +49,9 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
   }
 
   componentDidMount() {
-    this.getRtcEngine().enableVideo() // enableVideo();
+    this.getRtcEngine().enableVideo()
     this.getRtcEngine().enableAudio()
+    this.getRtcEngine().registerEventHandler(this)
   }
 
   componentWillUnmount() {
@@ -53,123 +61,98 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
 
   getRtcEngine() {
     if (!this.rtcEngine) {
-      this.rtcEngine = new AgoraRtcEngine()
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore:next-line
+      this.rtcEngine = creteAgoraRtcEngine()
+      //@ts-ignore
       window.rtcEngine = this.rtcEngine
-
-      this.subscribeEvents(this.rtcEngine)
-      const res = this.rtcEngine?.initialize({
-        appId: config.appID,
-        areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
-          level: LOG_LEVEL.LOG_LEVEL_INFO,
-          filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
-      })
+      const res = this.rtcEngine.initialize({ appId: config.appID })
       console.log('initialize:', res)
-      this.rtcEngine.setAddonLogFile(config.addonLogPath)
     }
 
     return this.rtcEngine
   }
 
-  subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on(EngineEvents.JOINED_CHANNEL, (connection, elapsed) => {
-      console.log(
-        `onJoinChannel channel: ${connection.channelId}  uid: ${
-          connection.localUid
-        }  version: ${JSON.stringify(rtcEngine.getVersion())})`
-      )
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: true, uid: connection.localUid })
-      this.setState({
-        isJoined: true,
-        allUser: newAllUser,
-      })
+  onJoinChannelSuccessEx(
+    { channelId, localUid }: RtcConnection,
+    elapsed: number
+  ): void {
+    console.log(
+      `onJoinChannelSuccessEx channelId:${channelId} localUid:${localUid}`
+    )
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: true, uid: localUid })
+    this.setState({
+      isJoined: true,
+      allUser: newAllUser,
     })
+  }
 
-    rtcEngine.on(EngineEvents.USER_JOINED, (connection, remoteUid, elapsed) => {
-      console.log(`userJoined ---- ${remoteUid}`)
+  onUserJoinedEx(
+    connection: RtcConnection,
+    remoteUid: number,
+    elapsed: number
+  ): void {
+    console.log(
+      'onUserJoinedEx',
+      'connection',
+      connection,
+      'remoteUid',
+      remoteUid
+    )
 
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: false, uid: remoteUid })
-      this.setState({
-        allUser: newAllUser,
-      })
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: false, uid: remoteUid })
+    this.setState({
+      allUser: newAllUser,
     })
-    rtcEngine.on(EngineEvents.USER_OFFLINE, (connection, remoteUid, reason) => {
-      console.log(`userOffline ---- ${remoteUid}`)
+  }
 
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== remoteUid)]
-      this.setState({
-        allUser: newAllUser,
-      })
-    })
+  onUserOffline(uid: number, reason: UserOfflineReasonType): void {
+    console.log(`userOffline ---- ${uid}`)
 
-    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (connection, rtcStats) => {
-      console.log(
-        'leavechannel',
-        connection.channelId,
-        connection.localUid,
-        rtcStats
-      )
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
+    this.setState({
+      allUser: newAllUser,
+    })
+  }
 
-      this.setState({
-        isJoined: false,
-        allUser: [],
-      })
+  onLeaveChannelEx(connection: RtcConnection, stats: RtcStats): void {
+    this.setState({
+      isJoined: false,
+      allUser: [],
     })
-    rtcEngine.on(EngineEvents.LASTMILE_PROBE_RESULT, (result) => {
-      console.log(`lastmileproberesult: ${JSON.stringify(result)}`)
-    })
-    rtcEngine.on(EngineEvents.LASTMILE_QUALITY, (quality) => {
-      console.log(`lastmilequality: ${JSON.stringify(quality)}`)
-    })
+  }
 
-    rtcEngine.on(EngineEvents.CHANNEL_MEDIA_RELAY_STATE, (state, code) => {
-      console.log('channelMediaRelayState: state', state, 'code', code)
-    })
-    rtcEngine.on(EngineEvents.CHANNEL_MEDIA_RELAY_EVENT, (event) => {
-      console.log('channelMediaRelayEvent: event', event)
-    })
-    rtcEngine.on(EngineEvents.ERROR, (err) => {
-      console.error(err)
-    })
+  onError(err: number, msg: string): void {
+    console.error(err, msg)
+  }
+
+  onChannelMediaRelayEvent(code: number): void {
+    console.log('onChannelMediaRelayEvent', code)
+  }
+
+  onChannelMediaRelayStateChanged(state: number, code: number): void {
+    console.log(`onChannelMediaRelayStateChanged state:${state}, code${code}`)
   }
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
     this.rtcEngine?.setChannelProfile(
-      CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING
+      ChannelProfileType.ChannelProfileLiveBroadcasting
     )
-    this.rtcEngine?.setClientRole(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER)
     this.rtcEngine?.setAudioProfile(
-      AUDIO_PROFILE_TYPE.AUDIO_PROFILE_DEFAULT,
-      AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_CHATROOM_ENTERTAINMENT
+      AudioProfileType.AudioProfileDefault,
+      AudioScenarioType.AudioScenarioChatroom
     )
+    this.rtcEngine?.setClientRole(ClientRoleType.ClientRoleBroadcaster)
 
-    this.rtcEngine?.enableDualStreamMode(true)
-    this.rtcEngine?.enableAudioVolumeIndication(1000, 3, false)
-
-    this.rtcEngine?.setRenderMode(RENDER_MODE.SOFTWARE)
     this.rtcEngine?.enableVideo()
-    this.rtcEngine?.enableLocalVideo(true)
 
-    this.rtcEngine?.joinChannel(config.token, channelId, '', 123, {
-      autoSubscribeAudio: true,
-      autoSubscribeVideo: true,
-      publishAudioTrack: true,
-      publishCameraTrack: true,
-      publishScreenTrack: false,
-      clientRoleType: CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER,
-      channelProfile: CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING,
-      encodedVideoTrackOption: { targetBitrate: 600 },
-    })
+    const localUid = getRandomInt(1, 9999999)
+    console.log(`localUid: ${localUid}`)
+    this.rtcEngine?.joinChannel('', channelId, '', localUid)
   }
 
   renderRightBar = () => {
@@ -231,8 +214,7 @@ export default class ChannelMediaRelay extends Component<{}, State, any> {
           <Window
             uid={uid}
             rtcEngine={this.rtcEngine!}
-            videoSourceType={VideoSourceType.kVideoSourceTypeCameraPrimary}
-            //role={isMyself ? 'local' : 'remote'}
+            videoSourceType={VideoSourceType.VideoSourceCameraPrimary}
             channelId={channelId}
           />
         </Card>

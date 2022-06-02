@@ -1,5 +1,5 @@
 // import ScreenShare from './ScreenShare/ScreenShare'
-// import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
+import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 // import CreateDataStream from './CreateDataStream/CreateDataStream'
 // import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 // import AudioMixing from './AudioMixing/AudioMixing'
@@ -12,11 +12,11 @@ const advanceRoute = [
   //   component: ScreenShare,
   //   title: 'ScreenShare',
   // },
-  // {
-  //   path: '/ChannelMediaRelay',
-  //   component: ChannelMediaRelay,
-  //   title: 'ChannelMediaRelay',
-  // },
+  {
+    path: '/ChannelMediaRelay',
+    component: ChannelMediaRelay,
+    title: 'ChannelMediaRelay',
+  },
   // {
   //   path: '/CreateDataStream',
   //   component: CreateDataStream,
