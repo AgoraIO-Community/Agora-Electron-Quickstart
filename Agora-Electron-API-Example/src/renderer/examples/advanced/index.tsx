@@ -1,10 +1,10 @@
 // import ScreenShare from './ScreenShare/ScreenShare'
-import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 // import CreateDataStream from './CreateDataStream/CreateDataStream'
 // import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 import AudioMixing from './AudioMixing/AudioMixing'
+import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 // import SetEncryption from './SetEncryption/SetEncryption'
-// import VoiceChanger from './VoiceChanger/VoiceChanger'
+import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
   // {
@@ -37,11 +37,11 @@ const advanceRoute = [
   //   component: SetEncryption,
   //   title: 'SetEncryption',
   // },
-  // {
-  //   path: '/VoiceChanger',
-  //   component: VoiceChanger,
-  //   title: 'VoiceChanger',
-  // },
+  {
+    path: '/VoiceChanger',
+    component: VoiceChanger,
+    title: 'VoiceChanger',
+  },
 ]
 
 export default advanceRoute
