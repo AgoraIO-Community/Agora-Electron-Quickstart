@@ -1,5 +1,6 @@
-import JoinChannelVideo from './JoinChannelVideo'
 import JoinChannelAudio from './JoinChannelAudio'
+import JoinChannelVideo from './JoinChannelVideo'
+import StringUid from './StringUid'
 
 const basicRoutes = [
   {
@@ -11,6 +12,11 @@ const basicRoutes = [
     path: '/JoinChannelAudio',
     component: JoinChannelAudio,
     title: 'JoinChannelAudio',
+  },
+  {
+    path: '/StringUid',
+    component: StringUid,
+    title: 'StringUid',
   },
 ]
 
