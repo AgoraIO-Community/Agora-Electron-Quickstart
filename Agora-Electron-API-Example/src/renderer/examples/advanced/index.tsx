@@ -2,7 +2,7 @@
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 // import CreateDataStream from './CreateDataStream/CreateDataStream'
 // import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
-// import AudioMixing from './AudioMixing/AudioMixing'
+import AudioMixing from './AudioMixing/AudioMixing'
 // import SetEncryption from './SetEncryption/SetEncryption'
 // import VoiceChanger from './VoiceChanger/VoiceChanger'
 
@@ -27,11 +27,11 @@ const advanceRoute = [
   //   component: JoinMultipleChannel,
   //   title: 'JoinMultipleChannel',
   // },
-  // {
-  //   path: '/AudioMixing',
-  //   component: AudioMixing,
-  //   title: 'AudioMixing',
-  // },
+  {
+    path: '/AudioMixing',
+    component: AudioMixing,
+    title: 'AudioMixing',
+  },
   // {
   //   path: '/SetEncryption',
   //   component: SetEncryption,

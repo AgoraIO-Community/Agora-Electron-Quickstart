@@ -14,7 +14,7 @@ export const isDebug = () => {
 
 export const getResourcePath = (filePath = './') => {
   if (isDebug()) {
-    return path.resolve(`${__dirname}`, '../extraResources/', filePath)
+    return path.resolve(`${__dirname}`, '../../../../extraResources/', filePath)
   }
   return path.resolve(`${process.resourcesPath}/extraResources`, filePath)
 }
