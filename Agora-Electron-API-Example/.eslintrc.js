@@ -24,5 +24,7 @@ module.exports = {
     '@typescript-eslint/semi': 0,
     '@typescript-eslint/comma-dangle': 0,
     'import/no-extraneous-dependencies': 0,
+    '@typescript-eslint/no-unused-vars': 0,
+    '@typescript-eslint/brace-style': 0,
   },
 }

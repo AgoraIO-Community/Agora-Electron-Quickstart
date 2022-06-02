@@ -1,10 +1,16 @@
+import {
+  IRtcEngine,
+  IRtcEngineEx,
+  RenderModeType,
+  RtcEngineExImplInternal,
+  VideoMirrorModeType,
+  VideoSourceType,
+} from 'agora-electron-sdk'
 import { Component } from 'react'
-import AgoraRtcEngine, { VideoSourceType } from 'agora-electron-sdk'
 import styles from './index.scss'
-import config from '../../config/agora.config'
 
 interface WindowProps {
-  rtcEngine: AgoraRtcEngine
+  rtcEngine: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
   uid?: number
   videoSourceType: VideoSourceType
   channelId?: string
@@ -17,14 +23,26 @@ class Window extends Component<WindowProps> {
     console.log(
       `Window:  VideoSourceType: ${videoSourceType}, channelId:${channelId}, uid:${uid}, view: ${dom}`
     )
-
-    rtcEngine.setupVideo({
-      videoSourceType,
-      uid,
-      channelId,
-      view: dom,
-      rendererOptions: { mirror: false, contentMode: 1 },
-    })
+    if (videoSourceType === VideoSourceType.VideoSourceRemote) {
+      rtcEngine.setupRemoteVideoEx(
+        {
+          sourceType: videoSourceType,
+          uid,
+          view: dom,
+          mirrorMode: VideoMirrorModeType.VideoMirrorModeDisabled,
+          renderMode: RenderModeType.RenderModeFit,
+        },
+        { channelId }
+      )
+    } else {
+      rtcEngine.setupLocalVideo({
+        sourceType: videoSourceType,
+        uid,
+        view: dom,
+        mirrorMode: VideoMirrorModeType.VideoMirrorModeDisabled,
+        renderMode: RenderModeType.RenderModeFit,
+      })
+    }
   }
 
   componentWillUnmount() {

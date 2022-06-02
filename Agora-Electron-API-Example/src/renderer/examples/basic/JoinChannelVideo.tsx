@@ -1,11 +1,16 @@
-import AgoraRtcEngine, {
+import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
   DegradationPreference,
+  IAudioDeviceManagerImpl,
+  IRtcEngine,
   IRtcEngineEventHandlerEx,
+  IRtcEngineEx,
+  IVideoDeviceManagerImpl,
   OrientationMode,
   RtcConnection,
+  RtcEngineExImplInternal,
   RtcStats,
   UserOfflineReasonType,
   VideoCodecType,
@@ -46,7 +51,11 @@ export default class JoinChannelVideo
   extends Component<{}, State, any>
   implements IRtcEngineEventHandlerEx
 {
-  rtcEngine?: AgoraRtcEngine
+  rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
+
+  videoDeviceManager: IVideoDeviceManagerImpl
+
+  audioDeviceManager: IAudioDeviceManagerImpl
 
   state: State = {
     channelId: '',
@@ -59,9 +68,13 @@ export default class JoinChannelVideo
   componentDidMount() {
     this.getRtcEngine().enableVideo()
     this.getRtcEngine().enableAudio()
+    this.videoDeviceManager = new IVideoDeviceManagerImpl()
+    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+
     this.setState({
-      audioRecordDevices: this.getRtcEngine().getAudioRecordingDevices(),
-      cameraDevices: this.getRtcEngine().getVideoDevices(),
+      audioRecordDevices:
+        this.audioDeviceManager.enumerateRecordingDevices() as any,
+      cameraDevices: this.videoDeviceManager.enumerateVideoDevices() as any,
     })
     this.getRtcEngine().registerEventHandler(this)
   }
@@ -73,9 +86,8 @@ export default class JoinChannelVideo
 
   getRtcEngine() {
     if (!this.rtcEngine) {
-      this.rtcEngine = new AgoraRtcEngine()
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore:next-line
+      this.rtcEngine = creteAgoraRtcEngine()
+      //@ts-ignore
       window.rtcEngine = this.rtcEngine
       const res = this.rtcEngine.initialize({ appId: config.appID })
       console.log('initialize:', res)
@@ -97,12 +109,22 @@ export default class JoinChannelVideo
     })
   }
 
-  onUserJoined(uid: number, elapsed: number): void {
-    console.log(`userJoined ---- ${uid}`)
+  onUserJoinedEx(
+    connection: RtcConnection,
+    remoteUid: number,
+    elapsed: number
+  ): void {
+    console.log(
+      'onUserJoinedEx',
+      'connection',
+      connection,
+      'remoteUid',
+      remoteUid
+    )
 
     const { allUser: oldAllUser } = this.state
     const newAllUser = [...oldAllUser]
-    newAllUser.push({ isMyself: false, uid })
+    newAllUser.push({ isMyself: false, uid: remoteUid })
     this.setState({
       allUser: newAllUser,
     })
@@ -117,6 +139,7 @@ export default class JoinChannelVideo
       allUser: newAllUser,
     })
   }
+
   onLeaveChannelEx(connection: RtcConnection, stats: RtcStats): void {
     this.setState({
       isJoined: false,
@@ -170,11 +193,10 @@ export default class JoinChannelVideo
           <DropDownButton
             options={cameraDevices.map((obj) => {
               const { deviceId, deviceName } = obj
-              console.log('cameraDevices', obj)
               return { dropId: deviceId, dropText: deviceName, ...obj }
             })}
             onPress={(res) => {
-              this.getRtcEngine().setVideoDevice(res.dropId)
+              this.videoDeviceManager.setDevice(res.dropId)
             }}
             title='Camera'
           />
@@ -185,7 +207,7 @@ export default class JoinChannelVideo
               return { dropId: deviceId, dropText: deviceName, ...obj }
             })}
             onPress={(res) => {
-              this.getRtcEngine().setAudioRecordingDevice(res.dropId)
+              this.audioDeviceManager.setRecordingDevice(res.dropId)
             }}
           />
           <DropDownButton
