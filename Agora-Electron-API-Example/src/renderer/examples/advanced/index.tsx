@@ -1,10 +1,11 @@
 // import ScreenShare from './ScreenShare/ScreenShare'
 import CreateDataStream from './CreateDataStream/CreateDataStream'
-// import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
+import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 import AudioMixing from './AudioMixing/AudioMixing'
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 import SetEncryption from './SetEncryption/SetEncryption'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
+import SetLiveTranscoding from './SetLiveTranscoding/SetLiveTranscoding'
 
 const advanceRoute = [
   // {
@@ -22,11 +23,11 @@ const advanceRoute = [
     component: CreateDataStream,
     title: 'CreateDataStream',
   },
-  // {
-  //   path: '/JoinMultipleChannel',
-  //   component: JoinMultipleChannel,
-  //   title: 'JoinMultipleChannel',
-  // },
+  {
+    path: '/JoinMultipleChannel',
+    component: JoinMultipleChannel,
+    title: 'JoinMultipleChannel',
+  },
   {
     path: '/AudioMixing',
     component: AudioMixing,
@@ -41,6 +42,11 @@ const advanceRoute = [
     path: '/VoiceChanger',
     component: VoiceChanger,
     title: 'VoiceChanger',
+  },
+  {
+    path: '/SetLiveTranscoding',
+    component: SetLiveTranscoding,
+    title: 'SetLiveTranscoding',
   },
 ]
 
