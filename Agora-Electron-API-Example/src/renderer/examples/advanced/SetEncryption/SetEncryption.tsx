@@ -1,22 +1,28 @@
-import { Component } from 'react'
-import AgoraRtcEngine, {
-  AREA_CODE,
-  LOG_LEVEL,
-  VIDEO_CODEC_TYPE,
-  VIDEO_SOURCE_TYPE,
-  CLIENT_ROLE_TYPE,
-  CHANNEL_PROFILE_TYPE,
-  EngineEvents,
+import creteAgoraRtcEngine, {
+  AudioProfileType,
+  AudioScenarioType,
+  ChannelProfileType,
+  DegradationPreference,
+  IRtcEngine,
+  IRtcEngineEx,
+  OrientationMode,
+  RtcConnection,
+  RtcEngineExImplInternal,
+  RtcStats,
+  UserOfflineReasonType,
+  VideoCodecType,
+  VideoMirrorModeType,
   VideoSourceType,
 } from 'agora-electron-sdk'
-import { List, Card, Input } from 'antd'
-import config from '../../config/agora.config'
+import { Card, Input, List } from 'antd'
+import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
-import styles from '../../config/public.scss'
 import JoinChannelBar from '../../component/JoinChannelBar'
-import { ResolutionMap, FpsMap, EncryptionMap } from '../../config'
-import { configMapToOptions } from '../../util'
 import Window from '../../component/Window'
+import { EncryptionMap, FpsMap, ResolutionMap } from '../../config'
+import config from '../../config/agora.config'
+import styles from '../../config/public.scss'
+import { configMapToOptions, getRandomInt } from '../../util'
 
 interface User {
   isMyself: boolean
@@ -34,7 +40,7 @@ interface State {
 }
 
 export default class SetEncryption extends Component<{}, State, any> {
-  rtcEngine?: AgoraRtcEngine
+  rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
   state: State = {
     channelId: '',
@@ -45,121 +51,95 @@ export default class SetEncryption extends Component<{}, State, any> {
   componentDidMount() {
     this.getRtcEngine().enableVideo()
     this.getRtcEngine().enableAudio()
+    this.getRtcEngine().registerEventHandler(this)
   }
 
   componentWillUnmount() {
+    this.rtcEngine?.unregisterEventHandler(this)
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
   }
 
   getRtcEngine() {
     if (!this.rtcEngine) {
-      this.rtcEngine = new AgoraRtcEngine()
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore:next-line
+      this.rtcEngine = creteAgoraRtcEngine()
+      //@ts-ignore
       window.rtcEngine = this.rtcEngine
-      this.subscribeEvents(this.rtcEngine)
-      const res = this.rtcEngine.initialize({
-        appId: config.appID,
-        areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
-          level: LOG_LEVEL.LOG_LEVEL_INFO,
-          filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
-      })
-      this.rtcEngine.setAddonLogFile(config.addonLogPath)
+      const res = this.rtcEngine.initialize({ appId: config.appID })
       console.log('initialize:', res)
-      console.log('initialize:', res)
-      this.rtcEngine.setAddonLogFile(config.addonLogPath)
     }
 
     return this.rtcEngine
   }
 
-  subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    rtcEngine.on(EngineEvents.JOINED_CHANNEL, ({ channelId }, uid) => {
-      console.log(
-        `onJoinChannel channel: ${channelId}  uid: ${uid}  version: ${JSON.stringify(
-          rtcEngine.getVersion()
-        )})`
-      )
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: true, uid })
-      this.setState({
-        isJoined: true,
-        allUser: newAllUser,
-      })
+  onJoinChannelSuccessEx(
+    { channelId, localUid }: RtcConnection,
+    elapsed: number
+  ): void {
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: true, uid: localUid })
+    this.setState({
+      isJoined: true,
+      allUser: newAllUser,
     })
-    rtcEngine.on(EngineEvents.USER_JOINED, (connection, uid, elapsed) => {
-      console.log(`userJoined ---- ${uid}`)
+  }
 
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: false, uid })
-      this.setState({
-        allUser: newAllUser,
-      })
-    })
-    rtcEngine.on(EngineEvents.USER_OFFLINE, (connection, uid, reason) => {
-      console.log(`userOffline ---- ${uid}`)
-
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
-      this.setState({
-        allUser: newAllUser,
-      })
-    })
-
-    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (connection, rtcStats) => {
-      this.setState({
-        isJoined: false,
-        allUser: [],
-      })
-    })
-    rtcEngine.on(EngineEvents.ERROR, (err, msg) => {
-      console.error(err)
-    })
-    rtcEngine.on(EngineEvents.LASTMILE_PROBE_RESULT, (result) => {
-      console.log(`lastmileproberesult: ${JSON.stringify(result)}`)
-    })
-    rtcEngine.on(EngineEvents.LASTMILE_QUALITY, (quality) => {
-      console.log(`lastmilequality: ${JSON.stringify(quality)}`)
-    })
-    rtcEngine.on(
-      EngineEvents.AUDIO_VOLUME_INDICATION,
-      (uid, volume, speakerNumber, totalVolume) => {
-        console.log(
-          `uid${uid} volume${volume} speakerNumber${speakerNumber} totalVolume${totalVolume}`
-        )
-      }
+  onUserJoinedEx(
+    connection: RtcConnection,
+    remoteUid: number,
+    elapsed: number
+  ): void {
+    console.log(
+      'onUserJoinedEx',
+      'connection',
+      connection,
+      'remoteUid',
+      remoteUid
     )
+
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: false, uid: remoteUid })
+    this.setState({
+      allUser: newAllUser,
+    })
+  }
+
+  onUserOffline(uid: number, reason: UserOfflineReasonType): void {
+    console.log(`userOffline ---- ${uid}`)
+
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
+    this.setState({
+      allUser: newAllUser,
+    })
+  }
+
+  onLeaveChannelEx(connection: RtcConnection, stats: RtcStats): void {
+    this.setState({
+      isJoined: false,
+      allUser: [],
+    })
+  }
+
+  onError(err: number, msg: string): void {
+    console.error(err, msg)
   }
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
-
-    this.rtcEngine?.setAudioProfile(0, 1)
-    this.rtcEngine?.setRenderMode(1)
-
-    this.rtcEngine?.joinChannelEx(
-      config.token,
-      {
-        channelId,
-        localUid: Number(`${new Date().getTime()}`.slice(7)),
-      },
-      {
-        autoSubscribeAudio: true,
-        autoSubscribeVideo: true,
-        publishAudioTrack: true,
-        publishCameraTrack: true,
-        publishScreenTrack: false,
-        clientRoleType: CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER,
-        channelProfile: CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING,
-        encodedVideoTrackOption: { targetBitrate: 600 },
-      }
+    this.rtcEngine?.setChannelProfile(
+      ChannelProfileType.ChannelProfileLiveBroadcasting
     )
+    this.rtcEngine?.setAudioProfile(
+      AudioProfileType.AudioProfileDefault,
+      AudioScenarioType.AudioScenarioChatroom
+    )
+
+    const localUid = getRandomInt(1, 9999999)
+    console.log(`localUid: ${localUid}`)
+    this.rtcEngine?.joinChannel('', channelId, '', localUid)
   }
 
   setVideoConfig = () => {
@@ -167,20 +147,16 @@ export default class SetEncryption extends Component<{}, State, any> {
     if (!currentResolution || !currentFps) {
       return
     }
-    const { width, height } = currentResolution
+
     this.getRtcEngine().setVideoEncoderConfiguration({
-      codecType: VIDEO_CODEC_TYPE.VIDEO_CODEC_H264,
-      dimensions: {
-        width,
-        height,
-      },
-      frameRate: currentFps!,
-      minFrameRate: 10,
+      codecType: VideoCodecType.VideoCodecH264,
+      dimensions: currentResolution!,
+      frameRate: currentFps,
       bitrate: 65,
-      minBitrate: 65,
-      orientationMode: 0,
-      degradationPreference: 2,
-      mirrorMode: 0,
+      minBitrate: 1,
+      orientationMode: OrientationMode.OrientationModeAdaptive,
+      degradationPreference: DegradationPreference.MaintainBalanced,
+      mirrorMode: VideoMirrorModeType.VideoMirrorModeAuto,
     })
   }
 
@@ -190,7 +166,7 @@ export default class SetEncryption extends Component<{}, State, any> {
     this.getRtcEngine().enableEncryption(true, {
       encryptionKey: encryptionKey! || '',
       encryptionMode: encryptionMode!,
-      encryptionKdfSalt: [],
+      encryptionKdfSalt: [1, 2, 3, 4, 5],
     })
   }
 
@@ -248,8 +224,8 @@ export default class SetEncryption extends Component<{}, State, any> {
   renderItem = ({ isMyself, uid }: User) => {
     const { channelId } = this.state
     const videoSourceType = isMyself
-      ? VideoSourceType.kVideoSourceTypeCameraPrimary
-      : VideoSourceType.kVideoSourceTypeRemote
+      ? VideoSourceType.VideoSourceCamera
+      : VideoSourceType.VideoSourceRemote
     return (
       <List.Item>
         <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>

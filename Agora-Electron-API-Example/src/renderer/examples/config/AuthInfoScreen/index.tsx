@@ -28,6 +28,9 @@ const onFinish = (values: any) => {
 
   config.addonLogPath = values.addonLogPath
   config.nativeSDKLogPath = values.nativeSDKLogPath
+
+  config.enableSDKLogging = values.enableSDKDebugLogging
+  config.enableSDKDebugLogging = values.enableSDKLogging
   AgoraEnv.enableDebugLogging = values.enableSDKDebugLogging
   AgoraEnv.enableLogging = values.enableSDKLogging
 }

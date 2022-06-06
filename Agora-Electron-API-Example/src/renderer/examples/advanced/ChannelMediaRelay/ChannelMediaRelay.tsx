@@ -57,6 +57,7 @@ export default class ChannelMediaRelay
   componentWillUnmount() {
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
+    this.getRtcEngine().unregisterEventHandler(this)
   }
 
   getRtcEngine() {
