@@ -69,7 +69,7 @@ export default class VoiceChanger
   }
 
   componentDidMount() {
-    this.getRtcEngine().enableAudio()
+    this.getRtcEngine().registerEventHandler(this)
 
     this.audioDeviceManager = new IAudioDeviceManagerImpl()
 
@@ -80,6 +80,7 @@ export default class VoiceChanger
   }
 
   componentWillUnmount() {
+    this.rtcEngine?.unregisterEventHandler(this)
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
   }

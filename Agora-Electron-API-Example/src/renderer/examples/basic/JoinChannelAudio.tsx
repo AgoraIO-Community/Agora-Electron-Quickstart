@@ -53,8 +53,7 @@ export default class JoinChannelAudio
   }
 
   componentDidMount() {
-    this.getRtcEngine().disableVideo()
-    this.getRtcEngine().enableAudio()
+    this.getRtcEngine().registerEventHandler(this)
 
     this.audioDeviceManager = new IAudioDeviceManagerImpl()
 
@@ -62,10 +61,10 @@ export default class JoinChannelAudio
       audioRecordDevices:
         this.audioDeviceManager.enumerateRecordingDevices() as any,
     })
-    this.getRtcEngine().registerEventHandler(this)
   }
 
   componentWillUnmount() {
+    this.rtcEngine?.unregisterEventHandler(this)
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
   }
@@ -205,6 +204,7 @@ export default class JoinChannelAudio
         <JoinChannelBar
           onPressJoin={(channelId) => {
             const rtcEngine = this.getRtcEngine()
+
             rtcEngine.disableVideo()
             rtcEngine.enableAudio()
             rtcEngine.setClientRole(ClientRoleType.ClientRoleBroadcaster)

@@ -49,15 +49,13 @@ export default class ChannelMediaRelay
   }
 
   componentDidMount() {
-    this.getRtcEngine().enableVideo()
-    this.getRtcEngine().enableAudio()
     this.getRtcEngine().registerEventHandler(this)
   }
 
   componentWillUnmount() {
+    this.getRtcEngine().unregisterEventHandler(this)
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
-    this.getRtcEngine().unregisterEventHandler(this)
   }
 
   getRtcEngine() {
@@ -140,6 +138,8 @@ export default class ChannelMediaRelay
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
+    this.getRtcEngine().enableVideo()
+    this.getRtcEngine().enableAudio()
     this.rtcEngine?.setChannelProfile(
       ChannelProfileType.ChannelProfileLiveBroadcasting
     )

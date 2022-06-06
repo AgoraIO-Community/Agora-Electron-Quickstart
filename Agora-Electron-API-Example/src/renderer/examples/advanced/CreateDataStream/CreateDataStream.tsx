@@ -1,34 +1,46 @@
 import { Component } from 'react'
-import AgoraRtcEngine, {
-  LOG_LEVEL,
-  AREA_CODE,
-  CLIENT_ROLE_TYPE,
-  EngineEvents,
+import creteAgoraRtcEngine, {
+  AudioProfileType,
+  AudioScenarioType,
+  ChannelProfileType,
+  DegradationPreference,
+  IRtcEngineEventHandlerEx,
+  IRtcEngine,
+  IRtcEngineEx,
+  OrientationMode,
+  RtcConnection,
+  RtcEngineExImplInternal,
+  RtcStats,
+  UserOfflineReasonType,
+  VideoCodecType,
+  VideoMirrorModeType,
+  VideoSourceType,
+  ClientRoleType,
 } from 'agora-electron-sdk'
 import { List, Card, Input } from 'antd'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
 import JoinChannelBar from '../../component/JoinChannelBar'
 import createDataStreamStyle from './CreateDataStream.scss'
+import { getRandomInt } from '../../util'
 const { Search } = Input
 interface User {
   isMyself: boolean
   uid: number
 }
 
-interface Device {
-  devicename: string
-  deviceid: string
-}
 interface State {
   allUser: User[]
   isJoined: boolean
   msgs: string[]
 }
 
-export default class CreateDataStream extends Component<State> {
-  rtcEngine?: AgoraRtcEngine
-  
+export default class CreateDataStream
+  extends Component<State>
+  implements IRtcEngineEventHandlerEx
+{
+  rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
+
   streamId?: number
 
   state: State = {
@@ -37,92 +49,115 @@ export default class CreateDataStream extends Component<State> {
     msgs: [],
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.getRtcEngine().registerEventHandler(this)
+  }
 
   componentWillUnmount() {
+    this.getRtcEngine().unregisterEventHandler(this)
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
   }
 
   getRtcEngine() {
     if (!this.rtcEngine) {
-      this.rtcEngine = new AgoraRtcEngine()
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore:next-line
+      this.rtcEngine = creteAgoraRtcEngine()
+      //@ts-ignore
       window.rtcEngine = this.rtcEngine
-      this.subscribeEvents(this.rtcEngine)
-      const res = this.rtcEngine?.initialize({
-        appId: config.appID,
-        areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
-          level: LOG_LEVEL.LOG_LEVEL_INFO,
-          filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
-      })
+      const res = this.rtcEngine.initialize({ appId: config.appID })
       console.log('initialize:', res)
     }
 
     return this.rtcEngine
   }
 
-  subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
-    console.log('---subscribeEvents')
-
-    rtcEngine.on(EngineEvents.JOINED_CHANNEL, (connection, elapsed) => {
-      console.log(
-        `onJoinChannel channel: ${connection.channelId}  uid: ${
-          connection.localUid
-        }  version: ${JSON.stringify(rtcEngine.getVersion())})`
-      )
+  onJoinChannelSuccessEx(
+    { channelId, localUid }: RtcConnection,
+    elapsed: number
+  ): void {
+    try {
       const { allUser: oldAllUser } = this.state
       const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: true, uid: connection.localUid })
+      newAllUser.push({ isMyself: true, uid: localUid })
       this.setState({
         isJoined: true,
         allUser: newAllUser,
       })
-    })
-    rtcEngine.on(EngineEvents.USER_JOINED, (connection, remoteUid, elapsed) => {
-      console.log(`userJoined ---- ${remoteUid}`)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser]
-      newAllUser.push({ isMyself: false, uid: remoteUid })
-      this.setState({
-        allUser: newAllUser,
-      })
-    })
-    rtcEngine.on(EngineEvents.USER_OFFLINE, (connection, remoteUid, reason) => {
-      console.log(`userOffline ---- ${remoteUid}`)
+  onUserJoinedEx(
+    connection: RtcConnection,
+    remoteUid: number,
+    elapsed: number
+  ): void {
+    console.log(
+      'onUserJoinedEx',
+      'connection',
+      connection,
+      'remoteUid',
+      remoteUid
+    )
 
-      const { allUser: oldAllUser } = this.state
-      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== remoteUid)]
-      this.setState({
-        allUser: newAllUser,
-      })
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: false, uid: remoteUid })
+    this.setState({
+      allUser: newAllUser,
     })
+  }
 
-    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (connection, rtcStats) => {
-      this.setState({
-        isJoined: false,
-        allUser: [],
-      })
+  onUserOffline(uid: number, reason: UserOfflineReasonType): void {
+    console.log(`userOffline ---- ${uid}`)
+
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
+    this.setState({
+      allUser: newAllUser,
     })
-    rtcEngine.on(EngineEvents.ERROR, (err) => {
-      console.error(err)
+  }
+
+  onLeaveChannelEx(connection: RtcConnection, stats: RtcStats): void {
+    this.setState({
+      isJoined: false,
+      allUser: [],
     })
-    rtcEngine.on(EngineEvents.STREAM_MESSAGE, (uid, streamId, msg) => {
-      this.setState({
-        msgs: [...this.state.msgs, `from:${uid} message:${msg}`],
-      })
-      console.log('received message: ', uid, streamId, msg)
+  }
+
+  onError(err: number, msg: string): void {
+    console.error(err, msg)
+  }
+
+  onStreamMessageEx?(
+    connection: RtcConnection,
+    remoteUid: number,
+    streamId: number,
+    data: number[],
+    length: number,
+    sentTs: number
+  ): void {
+    this.setState({
+      msgs: [...this.state.msgs, `from:${remoteUid} message:${data}`],
     })
+    console.log('received message: ', remoteUid, streamId, data)
+  }
+
+  onStreamMessageErrorEx?(
+    connection: RtcConnection,
+    remoteUid: number,
+    streamId: number,
+    code: number,
+    missed: number,
+    cached: number
+  ): void {
+    console.log('onStreamMessageErrorEx')
   }
 
   getStreamId = () => {
     if (!this.streamId) {
-      this.streamId = this.rtcEngine?.createDataStreamWithConfig({
+      this.streamId = this.rtcEngine?.createDataStream2({
         syncWithAudio: false,
         ordered: true,
       })
@@ -133,11 +168,19 @@ export default class CreateDataStream extends Component<State> {
   }
 
   pressSendMsg = (msg: string) => {
+    if (!msg) {
+      return
+    }
     // create the data stream
     // Each user can create up to five data streams during the lifecycle of the agoraKit
-    console.log('this.getStreamId()', this.getStreamId())
-
-    this.rtcEngine?.sendStreamMessage(this.getStreamId(), msg)
+    const streamId = this.getStreamId()
+    console.log('current stream id', streamId)
+    const asciiStringArray = [...msg].map((char) => char.charCodeAt(0))
+    this.rtcEngine?.sendStreamMessage(
+      streamId,
+      new Uint8Array(asciiStringArray),
+      asciiStringArray.length
+    )
     console.log('streamId:', this.streamId, ' content:', msg)
   }
 
@@ -151,6 +194,7 @@ export default class CreateDataStream extends Component<State> {
 
   renderRightBar = () => {
     const { isJoined, msgs } = this.state
+
     return (
       <div className={styles.rightBarBig}>
         <div className={createDataStreamStyle.toolBarContent}>
@@ -177,17 +221,16 @@ export default class CreateDataStream extends Component<State> {
         </div>
         <JoinChannelBar
           onPressJoin={(channelId) => {
-            const rtcEngine = this.getRtcEngine()
-            rtcEngine.disableVideo()
-            rtcEngine.disableAudio()
-            rtcEngine.setClientRole(CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER)
-
-            rtcEngine.joinChannel(
-              config.token,
-              channelId,
-              '',
-              Number(`${new Date().getTime()}`.slice(7))
+            this.setState({ channelId })
+            this.rtcEngine?.setChannelProfile(
+              ChannelProfileType.ChannelProfileLiveBroadcasting
             )
+
+            this.rtcEngine?.setClientRole(ClientRoleType.ClientRoleBroadcaster)
+
+            const localUid = getRandomInt(1, 9999999)
+            console.log(`localUid: ${localUid}`)
+            this.rtcEngine?.joinChannel('', channelId, '', localUid)
           }}
           onPressLeave={() => {
             this.getRtcEngine().leaveChannel()

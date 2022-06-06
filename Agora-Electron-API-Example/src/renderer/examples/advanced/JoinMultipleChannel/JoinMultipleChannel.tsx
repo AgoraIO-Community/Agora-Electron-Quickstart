@@ -1,26 +1,49 @@
 import { Component } from 'react'
-import AgoraRtcEngine, {
-  AREA_CODE,
-  LOG_LEVEL,
-  CLIENT_ROLE_TYPE,
-  CHANNEL_PROFILE_TYPE,
+import creteAgoraRtcEngine, {
+  AudioProfileType,
+  AudioScenarioType,
+  ChannelProfileType,
+  DegradationPreference,
+  IAudioDeviceManagerImpl,
+  IRtcEngine,
+  IRtcEngineEventHandlerEx,
+  IRtcEngineEx,
+  IVideoDeviceManagerImpl,
+  OrientationMode,
   RtcConnection,
-  EngineEvents,
+  RtcEngineExImplInternal,
+  RtcStats,
+  UserOfflineReasonType,
+  VideoCodecType,
+  VideoMirrorModeType,
+  VideoSourceType,
 } from 'agora-electron-sdk'
 import { List, Card, Button } from 'antd'
 import config from '../../config/agora.config'
 
 import styles from '../../config/public.scss'
+import { getRandomInt } from '../../util'
+
+interface User {
+  isMyself: boolean
+  uid: number
+  channelId?: string
+}
 
 interface State {
   connections: RtcConnection[]
+  allUser: User[]
 }
 
-export default class JoinMultipleChannel extends Component<{}, State, any> {
-  rtcEngine?: AgoraRtcEngine
+export default class JoinMultipleChannel
+  extends Component<{}, State, any>
+  implements IRtcEngineEventHandlerEx
+{
+  rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
   state: State = {
     connections: [],
+    allUser: [],
   }
 
   componentWillUnmount() {
@@ -29,95 +52,82 @@ export default class JoinMultipleChannel extends Component<{}, State, any> {
 
   getRtcEngine() {
     if (!this.rtcEngine) {
-      this.rtcEngine = new AgoraRtcEngine()
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore:next-line
+      this.rtcEngine = creteAgoraRtcEngine()
+      //@ts-ignore
       window.rtcEngine = this.rtcEngine
-      const res = this.rtcEngine?.initialize({
-        appId: config.appID,
-        areaCode: AREA_CODE.AREA_CODE_GLOB,
-        logConfig: {
-          level: LOG_LEVEL.LOG_LEVEL_INFO,
-          filePath: config.nativeSDKLogPath,
-          fileSize: 2000,
-        },
-      })
-      console.log('initialize', res)
-      this.rtcEngine.setAddonLogFile(config.addonLogPath)
+      const res = this.rtcEngine.initialize({ appId: config.appID })
+      console.log('initialize:', res)
     }
 
     return this.rtcEngine
   }
 
-  subscribeEvents = (rtcEngine: AgoraRtcEngine, connection: RtcConnection) => {
-    const channelId = connection.channelId
-    const { connections } = this.state
-    rtcEngine.on(EngineEvents.JOIN_CHANNEL_SUCCESS, (connection, elapsed) => {
-      this.setState({
-        connections: [
-          ...connections,
-          {
-            channelId,
-            localUid: connection.localUid,
-          },
-        ],
-      })
-      console.log(
-        `onJoinChannelSuccess channel: ${connection.channelId}  uid: ${
-          connection.localUid
-        }  version: ${JSON.stringify(rtcEngine.getVersion())})`
-      )
-    })
-
-    rtcEngine.on(EngineEvents.LEAVE_CHANNEL, (connection, rtcStats) => {
-      const { connections: oldAllConnection } = this.state
-      const newAllConnections = [
-        ...oldAllConnection.filter(
-          (obj) => obj.localUid !== connection.localUid
-        ),
-      ]
-      this.setState({
-        connections: newAllConnections,
-      })
-      console.log(
-        `leaveChannel: ${channelId} ${connection.localUid}`,
-        channelId,
-        connection.localUid,
-        rtcStats
-      )
-    })
-    rtcEngine.on(EngineEvents.ERROR, (err, msg) => {
-      console.error(err)
+  onJoinChannelSuccessEx(
+    { channelId, localUid }: RtcConnection,
+    elapsed: number
+  ): void {
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: true, uid: localUid, channelId })
+    this.setState({
+      allUser: newAllUser,
     })
   }
 
-  onPressCreateChannel = () => {
-    const channelId = `channel_${Math.round(Math.random() * 100)}`
-    const localUid = Math.round(Math.random() * 1000000)
-    const rtcEngine = this.getRtcEngine()
-
-    rtcEngine?.joinChannelEx(
-      config.token,
-      {
-        channelId,
-        localUid,
-      },
-      {
-        autoSubscribeAudio: false,
-        autoSubscribeVideo: false,
-        publishAudioTrack: false,
-        publishCameraTrack: false,
-        publishScreenTrack: false,
-        clientRoleType: CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER,
-        channelProfile: CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_LIVE_BROADCASTING,
-        encodedVideoTrackOption: { targetBitrate: 600 },
-      }
+  onUserJoinedEx(
+    connection: RtcConnection,
+    remoteUid: number,
+    elapsed: number
+  ): void {
+    console.log(
+      'onUserJoinedEx',
+      'connection',
+      connection,
+      'remoteUid',
+      remoteUid
     )
-    // const channel = rtcEngine.createChannel(channelId)!;
-    this.subscribeEvents(rtcEngine, {
-      channelId,
-      localUid,
+
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: false, uid: remoteUid })
+    this.setState({
+      allUser: newAllUser,
     })
+  }
+
+  onUserOffline(uid: number, reason: UserOfflineReasonType): void {
+    console.log(`userOffline ---- ${uid}`)
+
+    const { allUser: oldAllUser } = this.state
+    const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
+    this.setState({
+      allUser: newAllUser,
+    })
+  }
+
+  onLeaveChannelEx(connection: RtcConnection, stats: RtcStats): void {
+    this.setState({
+      isJoined: false,
+      allUser: [],
+    })
+  }
+
+  onError(err: number, msg: string): void {
+    console.error(err, msg)
+  }
+
+  onPressJoinChannel = (channelId: string) => {
+    this.rtcEngine?.setChannelProfile(
+      ChannelProfileType.ChannelProfileLiveBroadcasting
+    )
+    this.rtcEngine?.setAudioProfile(
+      AudioProfileType.AudioProfileDefault,
+      AudioScenarioType.AudioScenarioChatroom
+    )
+
+    const localUid = getRandomInt(1, 9999999)
+    console.log(`localUid: ${localUid}`)
+    this.rtcEngine?.joinChannel('', channelId, '', localUid)
   }
 
   renderRightBar = () => {

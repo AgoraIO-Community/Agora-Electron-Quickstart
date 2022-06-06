@@ -1,5 +1,5 @@
 // import ScreenShare from './ScreenShare/ScreenShare'
-// import CreateDataStream from './CreateDataStream/CreateDataStream'
+import CreateDataStream from './CreateDataStream/CreateDataStream'
 // import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 import AudioMixing from './AudioMixing/AudioMixing'
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
@@ -17,11 +17,11 @@ const advanceRoute = [
     component: ChannelMediaRelay,
     title: 'ChannelMediaRelay',
   },
-  // {
-  //   path: '/CreateDataStream',
-  //   component: CreateDataStream,
-  //   title: 'CreateDataStream',
-  // },
+  {
+    path: '/CreateDataStream',
+    component: CreateDataStream,
+    title: 'CreateDataStream',
+  },
   // {
   //   path: '/JoinMultipleChannel',
   //   component: JoinMultipleChannel,

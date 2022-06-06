@@ -57,8 +57,7 @@ export default class AudioMixing
   }
 
   componentDidMount() {
-    this.getRtcEngine().enableAudio()
-
+    this.getRtcEngine().registerEventHandler(this)
     this.audioDeviceManager = new IAudioDeviceManagerImpl()
 
     this.setState({
@@ -68,6 +67,7 @@ export default class AudioMixing
   }
 
   componentWillUnmount() {
+    this.getRtcEngine().unregisterEventHandler(this)
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
   }
@@ -279,6 +279,7 @@ export default class AudioMixing
         </div>
         <JoinChannelBar
           onPressJoin={(channelId: string) => {
+            this.getRtcEngine().enableAudio()
             this.rtcEngine?.setChannelProfile(
               ChannelProfileType.ChannelProfileLiveBroadcasting
             )

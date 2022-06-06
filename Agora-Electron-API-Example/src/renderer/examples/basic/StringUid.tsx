@@ -48,18 +48,17 @@ export default class StringUid extends Component<State> {
   }
 
   componentDidMount() {
-    this.getRtcEngine().enableVideo()
-    this.getRtcEngine().enableAudio()
+    this.getRtcEngine().registerEventHandler(this)
     this.audioDeviceManager = new IAudioDeviceManagerImpl()
 
     this.setState({
       audioRecordDevices:
         this.audioDeviceManager.enumerateRecordingDevices() as any,
     })
-    this.getRtcEngine().registerEventHandler(this)
   }
 
   componentWillUnmount() {
+    this.rtcEngine?.unregisterEventHandler(this)
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
   }

@@ -66,8 +66,7 @@ export default class JoinChannelVideo
   }
 
   componentDidMount() {
-    this.getRtcEngine().enableVideo()
-    this.getRtcEngine().enableAudio()
+    this.getRtcEngine().registerEventHandler(this)
     this.videoDeviceManager = new IVideoDeviceManagerImpl()
     this.audioDeviceManager = new IAudioDeviceManagerImpl()
 
@@ -76,10 +75,10 @@ export default class JoinChannelVideo
         this.audioDeviceManager.enumerateRecordingDevices() as any,
       cameraDevices: this.videoDeviceManager.enumerateVideoDevices() as any,
     })
-    this.getRtcEngine().registerEventHandler(this)
   }
 
   componentWillUnmount() {
+    this.rtcEngine?.unregisterEventHandler(this)
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
   }
@@ -153,6 +152,8 @@ export default class JoinChannelVideo
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
+    this.rtcEngine.enableAudio();
+    this.rtcEngine.enableVideo();
     this.rtcEngine?.setChannelProfile(
       ChannelProfileType.ChannelProfileLiveBroadcasting
     )

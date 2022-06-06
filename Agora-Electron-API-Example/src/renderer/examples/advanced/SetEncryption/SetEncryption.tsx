@@ -49,8 +49,6 @@ export default class SetEncryption extends Component<{}, State, any> {
   }
 
   componentDidMount() {
-    this.getRtcEngine().enableVideo()
-    this.getRtcEngine().enableAudio()
     this.getRtcEngine().registerEventHandler(this)
   }
 
@@ -129,6 +127,8 @@ export default class SetEncryption extends Component<{}, State, any> {
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
+    this.getRtcEngine().enableVideo()
+    this.getRtcEngine().enableAudio()
     this.rtcEngine?.setChannelProfile(
       ChannelProfileType.ChannelProfileLiveBroadcasting
     )
@@ -171,8 +171,6 @@ export default class SetEncryption extends Component<{}, State, any> {
   }
 
   renderRightBar = () => {
-    // const {  } = this.state;
-
     return (
       <div className={styles.rightBar}>
         <div>
