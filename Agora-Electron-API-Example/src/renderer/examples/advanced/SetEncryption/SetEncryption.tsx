@@ -2,6 +2,7 @@ import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
+  ClientRoleType,
   DegradationPreference,
   IRtcEngine,
   IRtcEngineEx,
@@ -133,6 +134,7 @@ export default class SetEncryption extends Component<{}, State, any> {
     this.setState({ channelId })
     this.getRtcEngine().enableVideo()
     this.getRtcEngine().enableAudio()
+    this.rtcEngine?.setClientRole(ClientRoleType.ClientRoleBroadcaster)
     this.rtcEngine?.setChannelProfile(
       ChannelProfileType.ChannelProfileLiveBroadcasting
     )
@@ -167,11 +169,12 @@ export default class SetEncryption extends Component<{}, State, any> {
   setEncryption = () => {
     const { encryptionKey, encryptionMode } = this.state
     console.log('encryptionKey, encryptionMode ', encryptionKey, encryptionMode)
-    this.getRtcEngine().enableEncryption(true, {
+    const res = this.getRtcEngine().enableEncryption(true, {
       encryptionKey: encryptionKey! || '',
       encryptionMode: encryptionMode!,
       encryptionKdfSalt: [1, 2, 3, 4, 5],
     })
+    console.log('enableEncryption', res)
   }
 
   renderRightBar = () => {
