@@ -6,6 +6,7 @@ import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 import SetEncryption from './SetEncryption/SetEncryption'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 import SetLiveTranscoding from './SetLiveTranscoding/SetLiveTranscoding'
+import MediaPlayer from './MediaPlayer/MediaPlayer'
 
 const advanceRoute = [
   // {
@@ -47,6 +48,11 @@ const advanceRoute = [
     path: '/SetLiveTranscoding',
     component: SetLiveTranscoding,
     title: 'SetLiveTranscoding',
+  },
+  {
+    path: '/MediaPlayer',
+    component: MediaPlayer,
+    title: 'MediaPlayer',
   },
 ]
 
