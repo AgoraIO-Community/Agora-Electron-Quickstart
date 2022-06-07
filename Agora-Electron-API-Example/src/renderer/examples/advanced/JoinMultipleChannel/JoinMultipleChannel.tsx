@@ -1,28 +1,27 @@
-import { Component } from 'react'
 import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
-  DegradationPreference,
-  IAudioDeviceManagerImpl,
+  ClientRoleType,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
-  IVideoDeviceManagerImpl,
-  OrientationMode,
   RtcConnection,
   RtcEngineExImplInternal,
   RtcStats,
   UserOfflineReasonType,
-  VideoCodecType,
-  VideoMirrorModeType,
   VideoSourceType,
 } from 'agora-electron-sdk'
-import { List, Card, Button } from 'antd'
+import { Button, Card, Input, List } from 'antd'
+import { Component } from 'react'
+import Window from '../../component/Window'
 import config from '../../config/agora.config'
-
 import styles from '../../config/public.scss'
-import { getRandomInt } from '../../util'
+
+const { Search } = Input
+
+const channelUid1 = 1001
+const channelUid2 = 1002
 
 interface User {
   isMyself: boolean
@@ -31,8 +30,12 @@ interface User {
 }
 
 interface State {
-  connections: RtcConnection[]
-  allUser: User[]
+  allUser1: User[]
+  allUser2: User[]
+  channel1: string
+  channel2: string
+  isJoined1: boolean
+  isJoined2: boolean
 }
 
 export default class JoinMultipleChannel
@@ -42,11 +45,21 @@ export default class JoinMultipleChannel
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
   state: State = {
-    connections: [],
-    allUser: [],
+    allUser1: [],
+    allUser2: [],
+    channel1: '',
+    channel2: '',
+    isJoined1: false,
+    isJoined2: false,
+  }
+
+  componentDidMount() {
+    this.getRtcEngine().registerEventHandler(this)
   }
 
   componentWillUnmount() {
+    this.rtcEngine?.unregisterEventHandler(this)
+    this.onPressLeaveAll()
     this.rtcEngine?.release()
   }
 
@@ -66,100 +79,227 @@ export default class JoinMultipleChannel
     { channelId, localUid }: RtcConnection,
     elapsed: number
   ): void {
-    const { allUser: oldAllUser } = this.state
-    const newAllUser = [...oldAllUser]
-    newAllUser.push({ isMyself: true, uid: localUid, channelId })
-    this.setState({
-      allUser: newAllUser,
-    })
+    console.log('onJoinChannelSuccessEx', channelId, localUid)
+    if (localUid === channelUid1) {
+      this.setState({ isJoined1: true })
+    } else if (localUid === channelUid2) {
+      this.setState({ isJoined2: true })
+    }
   }
 
   onUserJoinedEx(
-    connection: RtcConnection,
+    { localUid, channelId }: RtcConnection,
     remoteUid: number,
     elapsed: number
   ): void {
     console.log(
       'onUserJoinedEx',
-      'connection',
-      connection,
+      'channelId',
+      channelId,
       'remoteUid',
       remoteUid
     )
 
-    const { allUser: oldAllUser } = this.state
-    const newAllUser = [...oldAllUser]
-    newAllUser.push({ isMyself: false, uid: remoteUid })
-    this.setState({
-      allUser: newAllUser,
-    })
+    if (localUid === channelUid1) {
+      const { allUser1: oldAllUser } = this.state
+      const newAllUser = [...oldAllUser]
+      newAllUser.push({
+        isMyself: false,
+        uid: remoteUid,
+        channelId,
+      })
+      this.setState({
+        allUser1: newAllUser,
+      })
+    } else if (localUid === channelUid2) {
+      const { allUser2: oldAllUser } = this.state
+      const newAllUser = [...oldAllUser]
+      newAllUser.push({
+        isMyself: false,
+        uid: remoteUid,
+        channelId,
+      })
+      this.setState({
+        allUser2: newAllUser,
+      })
+    }
   }
 
-  onUserOffline(uid: number, reason: UserOfflineReasonType): void {
-    console.log(`userOffline ---- ${uid}`)
-
-    const { allUser: oldAllUser } = this.state
-    const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
-    this.setState({
-      allUser: newAllUser,
-    })
+  onUserOfflineEx(
+    { localUid, channelId }: RtcConnection,
+    remoteUid: number,
+    reason: UserOfflineReasonType
+  ): void {
+    console.log('onUserOfflineEx', channelId, localUid, remoteUid)
+    const { channel1, channel2 } = this.state
+    if (channelId === channel1) {
+      const { allUser1: oldAllUser } = this.state
+      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== remoteUid)]
+      this.setState({
+        allUser1: newAllUser,
+      })
+    } else if (channelId === channel2) {
+      const { allUser2: oldAllUser } = this.state
+      const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== remoteUid)]
+      this.setState({
+        allUser2: newAllUser,
+      })
+    }
   }
 
-  onLeaveChannelEx(connection: RtcConnection, stats: RtcStats): void {
-    this.setState({
-      isJoined: false,
-      allUser: [],
-    })
+  onLeaveChannelEx(
+    { channelId, localUid }: RtcConnection,
+    stats: RtcStats
+  ): void {
+    console.log('onLeaveChannelEx', channelId, localUid)
+    const { channel1, channel2 } = this.state
+    if (channelId === channel1) {
+      this.setState({ isJoined1: false, allUser1: [] })
+    } else if (channelId === channel2) {
+      this.setState({ isJoined2: false, allUser2: [] })
+    }
   }
 
   onError(err: number, msg: string): void {
     console.error(err, msg)
   }
 
-  onPressJoinChannel = (channelId: string) => {
-    this.rtcEngine?.setChannelProfile(
+  onPressJoinChannel1 = (channelId) => {
+    console.log('onPressJoinChannel1', channelId)
+    this.setState({ channel1: channelId })
+    this.getRtcEngine().setChannelProfile(
       ChannelProfileType.ChannelProfileLiveBroadcasting
     )
     this.rtcEngine?.setAudioProfile(
       AudioProfileType.AudioProfileDefault,
       AudioScenarioType.AudioScenarioChatroom
     )
+    this.rtcEngine?.setClientRole(ClientRoleType.ClientRoleBroadcaster)
 
-    const localUid = getRandomInt(1, 9999999)
-    console.log(`localUid: ${localUid}`)
-    this.rtcEngine?.joinChannel('', channelId, '', localUid)
+    const res = this.rtcEngine?.joinChannelEx(
+      '',
+      { localUid: channelUid1, channelId },
+      {
+        autoSubscribeAudio: false,
+        autoSubscribeVideo: true,
+        publishAudioTrack: false,
+        publishCameraTrack: true,
+        publishScreenTrack: false,
+        enableAudioRecordingOrPlayout: false,
+        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+      }
+    )
+    console.log('onPressJoinChannel1', res)
+  }
+
+  onPressJoinChannel2 = (channelId) => {
+    console.log('onPressJoinChannel2', channelId)
+    this.setState({ channel2: channelId })
+    this.getRtcEngine().setChannelProfile(
+      ChannelProfileType.ChannelProfileLiveBroadcasting
+    )
+    this.rtcEngine?.setAudioProfile(
+      AudioProfileType.AudioProfileDefault,
+      AudioScenarioType.AudioScenarioChatroom
+    )
+    this.rtcEngine?.setClientRole(ClientRoleType.ClientRoleBroadcaster)
+
+    const res = this.rtcEngine?.joinChannelEx(
+      '',
+      { localUid: channelUid2, channelId },
+      {
+        autoSubscribeAudio: false,
+        autoSubscribeVideo: true,
+        publishAudioTrack: false,
+        publishCameraTrack: true,
+        publishScreenTrack: false,
+        enableAudioRecordingOrPlayout: false,
+        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+      }
+    )
+    console.log('onPressJoinChannel2', res)
+  }
+
+  onPressLeaveAll = () => {
+    const { channel1, channel2 } = this.state
+    this.rtcEngine.leaveChannelEx({
+      localUid: channelUid1,
+      channelId: channel1,
+    })
+    this.rtcEngine.leaveChannelEx({
+      localUid: channelUid2,
+      channelId: channel2,
+    })
   }
 
   renderRightBar = () => {
+    const { isJoined1, isJoined2 } = this.state
     return (
-      <div className={styles.rightBar}>
-        <Button onClick={this.onPressCreateChannel}>Create Channel</Button>
+      <div className={styles.rightBar} style={{ justifyContent: 'flex-start' }}>
+        <Search
+          value='Channel1'
+          allowClear
+          enterButton={'Join Channel 1'}
+          size='small'
+          disabled={isJoined1}
+          onSearch={this.onPressJoinChannel1}
+        />
+        <br />
+        <Search
+          value='Channel2'
+          allowClear
+          enterButton={'Join Channel 2'}
+          size='small'
+          disabled={isJoined2}
+          onSearch={this.onPressJoinChannel2}
+        />
+        <br />
+        <Button
+          disabled={!isJoined1 && !isJoined2}
+          onClick={this.onPressLeaveAll}
+        >
+          Leave All
+        </Button>
       </div>
     )
   }
 
-  renderItem = (connection: RtcConnection, index: number) => (
-    <List.Item>
-      <Card title={`order: ${index}`}>
-        <p>{`ChannelId:\n${connection.channelId}`}</p>
-        <a onClick={() => this.getRtcEngine().leaveChannelEx(connection)}>
-          Leave
-        </a>
-      </Card>
-    </List.Item>
-  )
+  renderItem = ({ isMyself, uid, channelId }: User) => {
+    return (
+      <List.Item>
+        <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>
+          <Window
+            uid={uid}
+            rtcEngine={this.rtcEngine!}
+            videoSourceType={VideoSourceType.VideoSourceRemote}
+            channelId={channelId}
+          />
+        </Card>
+      </List.Item>
+    )
+  }
 
   render() {
-    const { connections } = this.state
+    const { allUser1, allUser2 } = this.state
+    const hasUser = allUser1.length > 0 || allUser2.length > 0
     return (
       <div className={styles.screen}>
         <div className={styles.content}>
-          <List
-            style={{ width: '100%' }}
-            grid={{ gutter: 16, column: 4 }}
-            dataSource={connections}
-            renderItem={this.renderItem}
-          />
+          {hasUser && (
+            <List
+              grid={{
+                gutter: 16,
+                xs: 1,
+                sm: 1,
+                md: 1,
+                lg: 1,
+                xl: 1,
+                xxl: 2,
+              }}
+              dataSource={[...allUser1, ...allUser2]}
+              renderItem={this.renderItem}
+            />
+          )}
         </div>
         {this.renderRightBar()}
       </div>
