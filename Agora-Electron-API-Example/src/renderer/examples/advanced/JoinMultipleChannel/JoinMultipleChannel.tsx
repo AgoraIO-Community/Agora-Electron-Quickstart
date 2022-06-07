@@ -238,6 +238,8 @@ export default class JoinMultipleChannel
       <div className={styles.rightBar} style={{ justifyContent: 'flex-start' }}>
         <Search
           value='Channel1'
+          placeholder={'please input new channelId1'}
+          defaultValue='Channel1'
           allowClear
           enterButton={'Join Channel 1'}
           size='small'
@@ -246,7 +248,8 @@ export default class JoinMultipleChannel
         />
         <br />
         <Search
-          value='Channel2'
+          placeholder={'please input new channelId2'}
+          defaultValue='Channel2'
           allowClear
           enterButton={'Join Channel 2'}
           size='small'

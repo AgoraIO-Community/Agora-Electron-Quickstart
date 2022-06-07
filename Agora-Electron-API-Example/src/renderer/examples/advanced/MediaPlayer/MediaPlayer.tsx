@@ -167,8 +167,8 @@ export default class MediaPlayer
     return (
       <div className={styles.rightBar} style={{ justifyContent: 'flex-start' }}>
         <Search
-          defaultValue={'please input url for media'}
-          value='https://agora-adc-artifacts.oss-cn-beijing.aliyuncs.com/video/meta_live_mpk.mov'
+          placeholder={'please input url for media'}
+          defaultValue='https://agora-adc-artifacts.oss-cn-beijing.aliyuncs.com/video/meta_live_mpk.mov'
           allowClear
           enterButton={!isPlaying ? 'Play' : 'Stop'}
           size='small'
