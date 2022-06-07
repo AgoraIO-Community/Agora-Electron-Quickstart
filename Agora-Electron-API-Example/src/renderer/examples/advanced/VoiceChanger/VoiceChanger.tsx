@@ -131,11 +131,15 @@ export default class VoiceChanger
     })
   }
 
-  onUserOffline(uid: number, reason: UserOfflineReasonType): void {
-    console.log(`userOffline ---- ${uid}`)
+  onUserOfflineEx(
+    { localUid, channelId }: RtcConnection,
+    remoteUid: number,
+    reason: UserOfflineReasonType
+  ): void {
+    console.log('onUserOfflineEx', channelId, remoteUid)
 
     const { allUser: oldAllUser } = this.state
-    const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== uid)]
+    const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== remoteUid)]
     this.setState({
       allUser: newAllUser,
     })
