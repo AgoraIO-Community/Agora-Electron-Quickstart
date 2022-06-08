@@ -16,7 +16,7 @@ import Window from '../../component/Window'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
 import { getRandomInt } from '../../util'
-import { readImage } from '../../util/base64'
+import { rgbImageBufferToBase64 } from '../../util/base64'
 import screenStyle from './ScreenShare.scss'
 
 const locaScreenlUid1 = getRandomInt(1, 9999999)
@@ -60,13 +60,14 @@ export default class ScreenShare
 
   getScreenCaptureInfo = async () => {
     const list = this.getRtcEngine().getScreenCaptureSources(
-      { width: 300, height: 300 },
-      { width: 300, height: 300 },
+      { width: 500, height: 500 },
+      { width: 500, height: 500 },
       true
     )
 
-    const imageListPromise = list.map((item) => readImage(item.thumbImage))
-    const imageList = await Promise.all(imageListPromise)
+    const imageList = list.map((item) =>
+      rgbImageBufferToBase64(item.thumbImage)
+    )
 
     const formatList = list.map(
       ({ sourceName, sourceTitle, sourceId, type }, index) => ({
@@ -296,6 +297,7 @@ export default class ScreenShare
         dropId: obj,
         dropText: obj.sourceTitle,
       }))
+
 
     return (
       <div className={styles.rightBar}>

@@ -30,14 +30,17 @@ const DropDownButton = ({
     const value = options[key]
     if (value) {
       setSelectIndex(key)
-      console.log(`DropDownButton title: ${title} \nclick:\n`, value)
+      console.log(
+        `DropDownButton title:   ${title} \nclick:                  ${value.dropText}\nvalue:`,
+        value
+      )
       onPress(value)
     }
   }
   const { dropText: currentText } = options[selectIndex] || {}
   useEffect(() => {
     warpOnPress({ key: 0 })
-  }, [])
+  }, [options.length])
   return (
     <div>
       {title && (

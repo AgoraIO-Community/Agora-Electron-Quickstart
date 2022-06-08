@@ -203,6 +203,7 @@ export default class SetLiveTranscoding
             defaultValue='rtmp://'
             onChange={(res) => {
               this.setState({
+                //@ts-ignore
                 url: res.nativeEvent.target.value as string,
               })
             }}
