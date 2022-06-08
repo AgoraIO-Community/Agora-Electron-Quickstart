@@ -138,12 +138,14 @@ export default class CreateDataStream
     connection: RtcConnection,
     remoteUid: number,
     streamId: number,
-    data: number[],
+    data: Uint8Array,
     length: number,
     sentTs: number
   ): void {
+    const string = String.fromCharCode.apply(null, data)
+    const formatStr = decodeURIComponent(string)
     this.setState({
-      msgs: [...this.state.msgs, `from:${remoteUid} message:${data}`],
+      msgs: [...this.state.msgs, `from:${remoteUid} message:${formatStr}`],
     })
     console.log('received message: ', remoteUid, streamId, data)
   }
@@ -179,7 +181,9 @@ export default class CreateDataStream
     // Each user can create up to five data streams during the lifecycle of the agoraKit
     const streamId = this.getStreamId()
     console.log('current stream id', streamId)
-    const asciiStringArray = [...msg].map((char) => char.charCodeAt(0))
+    const asciiStringArray = [...encodeURIComponent(msg)].map((char) =>
+      char.charCodeAt(0)
+    )
     this.rtcEngine?.sendStreamMessage(
       streamId,
       new Uint8Array(asciiStringArray),
