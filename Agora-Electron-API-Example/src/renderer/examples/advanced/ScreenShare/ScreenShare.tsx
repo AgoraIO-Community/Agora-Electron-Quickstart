@@ -1,41 +1,35 @@
-import { Component } from 'react'
 import creteAgoraRtcEngine, {
-  AudioProfileType,
-  AudioScenarioType,
-  ChannelProfileType,
-  DegradationPreference,
-  IAudioDeviceManagerImpl,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
-  IVideoDeviceManagerImpl,
-  OrientationMode,
   RtcConnection,
   RtcEngineExImplInternal,
   RtcStats,
   UserOfflineReasonType,
-  VideoCodecType,
-  VideoMirrorModeType,
   VideoSourceType,
 } from 'agora-electron-sdk'
 import { Card, message } from 'antd'
-import config from '../../config/agora.config'
+import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
-import styles from '../../config/public.scss'
-import screenStyle from './ScreenShare.scss'
 import JoinChannelBar from '../../component/JoinChannelBar'
 import Window from '../../component/Window'
-import { readImage } from '../../util/base64'
+import config from '../../config/agora.config'
+import styles from '../../config/public.scss'
 import { getRandomInt } from '../../util'
+import { readImage } from '../../util/base64'
+import screenStyle from './ScreenShare.scss'
+
+const locaScreenlUid1 = getRandomInt(1, 9999999)
+const locaScreenlUid2 = getRandomInt(1, 9999999)
 
 interface State {
-  currentFps?: number
-  currentResolution?: { width: number; height: number }
-  screenInfoList: any[]
-  windowInfoList: any[]
-  localVideoSourceUid?: number
-  selectedShareInfo?: { type: 'screen' | 'window'; info: any }
-  shared: Boolean
+  // currentFps?: number
+  // currentResolution?: { width: number; height: number }
+  captureInfoList: any[]
+  currentWindowSourceId?: number
+  currentScreenSourceId?: number
+  channelId: string
+  isShared: boolean
 }
 
 const SCREEN_SHARE_ID = 99
@@ -47,12 +41,14 @@ export default class ScreenShare
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
   state: State = {
-    screenInfoList: [],
-    windowInfoList: [],
-    shared: false,
+    captureInfoList: [],
+    channelId: '',
+    isShared: false,
   }
 
   componentDidMount = async () => {
+    this.getScreenCaptureInfo()
+
     this.getRtcEngine().registerEventHandler(this)
   }
 
@@ -68,21 +64,23 @@ export default class ScreenShare
       { width: 300, height: 300 },
       true
     )
-    console.log('list', list)
 
-    // const imageListPromise = list.map((item) => readImage(item.image))
-    // const imageList = await Promise.all(imageListPromise)
+    const imageListPromise = list.map((item) => readImage(item.thumbImage))
+    const imageList = await Promise.all(imageListPromise)
 
-    // const windowInfoList = list.map(({ ownerName, name, windowId }, index) => ({
-    //   ownerName,
-    //   image: imageList[index],
-    //   windowId,
-    //   name:
-    //     name.length < 20
-    //       ? name
-    //       : name.replace(/\s+/g, '').substr(0, 20) + '...',
-    // }))
-    // this.setState({ windowInfoList })
+    const formatList = list.map(
+      ({ sourceName, sourceTitle, sourceId, type }, index) => ({
+        isScreen: type === 1,
+        image: imageList[index],
+        sourceId,
+        sourceName,
+        sourceTitle:
+          sourceTitle.length < 20
+            ? sourceTitle
+            : sourceTitle.replace(/\s+/g, '').substr(0, 20) + '...',
+      })
+    )
+    this.setState({ captureInfoList: formatList })
   }
 
   getRtcEngine() {
@@ -157,91 +155,118 @@ export default class ScreenShare
     console.error(err, msg)
   }
 
-  startScreenOrWindowCapture = (type: string, screenSymbol: any) => {
-    // const rtcEngine = this.getRtcEngine()
-    // console.log(`start sharing display ${JSON.stringify(screenSymbol)}`)
-    // const excludeList = new Array<number>()
-    // var res = -1
-    // if (type === 'screen') {
-    //   const res = rtcEngine.startScreenCaptureByScreen(
-    //     screenSymbol,
-    //     {
-    //       x: screenSymbol.x,
-    //       y: screenSymbol.y,
-    //       width: screenSymbol.width,
-    //       height: screenSymbol.height,
-    //     },
-    //     {
-    //       dimensions: {
-    //         width: screenSymbol.width,
-    //         height: screenSymbol.height,
-    //       },
-    //       bitrate: 2000,
-    //       frameRate: 5,
-    //       captureMouseCursor: true,
-    //       windowFocus: false,
-    //       excludeWindowList: excludeList,
-    //       excludeWindowCount: excludeList.length,
-    //     }
-    //   )
-    //   console.log('startScreenCaptureByScreen:', res)
-    // } else {
-    //   const info = this.state.windowInfoList.find((obj) => {
-    //     if (obj.windowId == screenSymbol) return obj
-    //   })
-    //   const res = rtcEngine.startScreenCaptureByWindow(
-    //     screenSymbol,
-    //     {
-    //       x: info.x,
-    //       y: info.y,
-    //       width: info.originWidth,
-    //       height: info.originHeight,
-    //     },
-    //     {
-    //       dimensions: { width: info.originWidth, height: info.originHeight },
-    //       bitrate: 2000,
-    //       frameRate: 15,
-    //       captureMouseCursor: true,
-    //       windowFocus: false,
-    //       excludeWindowList: excludeList,
-    //       excludeWindowCount: excludeList.length,
-    //     }
-    //   )
-    //   console.log('startScreenCaptureByWindow:', res)
-    // }
-    // if (res != 0) this.setState({ shared: false })
-    // else this.setState({ shared: true })
+  startWindowCapture = (channelId: string) => {
+    const { currentWindowSourceId } = this.state
+
+    const rtcEngine = this.getRtcEngine()
+    rtcEngine.startPrimaryScreenCapture({
+      isCaptureWindow: true,
+      screenRect: { width: 0, height: 0, x: 0, y: 0 },
+      windowId: currentWindowSourceId,
+      params: {
+        dimensions: { width: 1920, height: 1080 },
+        bitrate: 1000,
+        frameRate: 15,
+        captureMouseCursor: false,
+        windowFocus: false,
+        excludeWindowList: [],
+        excludeWindowCount: 0,
+      },
+
+      regionRect: { x: 0, y: 0, width: 0, height: 0 },
+    })
+    rtcEngine.joinChannelEx(
+      '',
+      {
+        localUid: locaScreenlUid1,
+        channelId,
+      },
+      {
+        publishCameraTrack: false,
+        publishAudioTrack: false,
+        publishScreenTrack: true,
+        publishCustomAudioTrack: false,
+        publishCustomVideoTrack: false,
+        publishEncodedVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
+        publishMediaPlayerVideoTrack: false,
+        autoSubscribeAudio: false,
+        autoSubscribeVideo: false,
+        clientRoleType: 1,
+      }
+    )
+  }
+
+  startScreenCapture = (channelId: string) => {
+    const { currentScreenSourceId } = this.state
+
+    const rtcEngine = this.getRtcEngine()
+    rtcEngine.startSecondaryScreenCapture({
+      isCaptureWindow: false,
+      screenRect: { width: 0, height: 0, x: 0, y: 0 },
+      windowId: currentScreenSourceId,
+      params: {
+        dimensions: { width: 1920, height: 1080 },
+        bitrate: 1000,
+        frameRate: 15,
+        captureMouseCursor: false,
+        windowFocus: false,
+        excludeWindowList: [],
+        excludeWindowCount: 0,
+      },
+
+      regionRect: { x: 0, y: 0, width: 0, height: 0 },
+    })
+
+    rtcEngine.joinChannelEx(
+      '',
+      {
+        localUid: locaScreenlUid2,
+        channelId,
+      },
+      {
+        publishCameraTrack: false,
+        publishAudioTrack: false,
+        publishScreenTrack: false,
+        publishSecondaryScreenTrack: true,
+        publishCustomAudioTrack: false,
+        publishCustomVideoTrack: false,
+        publishEncodedVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
+        publishMediaPlayerVideoTrack: false,
+        autoSubscribeAudio: false,
+        autoSubscribeVideo: false,
+        clientRoleType: 1,
+      }
+    )
   }
 
   onPressStartShare = async (channelId: string) => {
-    // const { selectedShareInfo } = this.state
-    // if (!selectedShareInfo) {
-    //   message.error('Must select a window/screen to share')
-    //   return true
-    // }
-    // const {
-    //   info: { displayId, windowId },
-    //   type,
-    // } = selectedShareInfo
-    // try {
-    //   await this.startScreenOrWindowCapture(type, displayId || windowId)
-    //   const res = await this.JoinChannel(channelId)
-    //   return false
-    // } catch (error) {
-    //   console.error(error)
-    // }
-    // console.log('----4')
-    // return true
+    const { currentScreenSourceId, currentWindowSourceId } = this.state
+    if (
+      currentScreenSourceId === undefined ||
+      currentWindowSourceId === undefined
+    ) {
+      message.error(
+        `Must select window:${currentWindowSourceId} and screen:${currentScreenSourceId} to share`
+      )
+      return true
+    }
+    this.setState({ channelId, isShared: true })
+    await this.startWindowCapture(channelId)
+    await this.startScreenCapture(channelId)
+
+    return false
   }
 
   onPressStopSharing = () => {
-    // const shared = this.state
-    // if (shared) {
-    //   const rtcEngine = this.getRtcEngine()
-    //   rtcEngine.stopScreenCapture()
-    //   rtcEngine.leaveChannel()
-    //   this.setState({ localVideoSourceUid: undefined, shared: false })
-    // }
+    this.setState({ isShared: false })
+    const rtcEngine = this.getRtcEngine()
+    rtcEngine.stopPrimaryScreenCapture()
+    rtcEngine.stopSecondaryScreenCapture()
+    const { channelId } = this.state
+    rtcEngine.leaveChannelEx({ channelId, localUid: locaScreenlUid1 })
+    rtcEngine.leaveChannelEx({ channelId, localUid: locaScreenlUid2 })
   }
 
   renderPopup = (item: { image: string }) => {
@@ -257,63 +282,55 @@ export default class ScreenShare
   }
 
   renderRightBar = () => {
-    const { windowInfoList, screenInfoList, selectedShareInfo } = this.state
-    const {
-      type,
-      info: { image, name },
-    } = selectedShareInfo || {
-      type: undefined,
-      info: { image: undefined, name: undefined },
-    }
+    const { captureInfoList } = this.state
+
+    const screenList = captureInfoList
+      .filter((obj) => obj.isScreen)
+      .map((obj) => ({
+        dropId: obj,
+        dropText: obj.sourceName,
+      }))
+    const windowList = captureInfoList
+      .filter((obj) => !obj.isScreen)
+      .map((obj) => ({
+        dropId: obj,
+        dropText: obj.sourceTitle,
+      }))
 
     return (
       <div className={styles.rightBar}>
         <div>
           <div>Please Select a window/scrren to share</div>
           <DropDownButton
+            defaultIndex={0}
             title='Screen Share'
-            options={screenInfoList.map((obj) => ({
-              dropId: obj,
-              dropText: obj.name,
-            }))}
+            options={screenList}
             PopContent={this.renderPopup}
             PopContentTitle='Preview'
             onPress={(res) => {
-              this.setState({
-                selectedShareInfo: { type: 'screen', info: res.dropId },
-              })
+              console.log('Screen Share choose', res.dropId.sourceId)
+              const sourceId = res.dropId.sourceId
+              if (sourceId === undefined) {
+                return
+              }
+              this.setState({ currentScreenSourceId: sourceId })
             }}
           />
           <DropDownButton
+            defaultIndex={0}
             title='Windows Share'
-            options={windowInfoList.map((obj) => ({
-              dropId: obj,
-              dropText: obj.name,
-            }))}
+            options={windowList}
             PopContent={this.renderPopup}
             PopContentTitle='Preview'
             onPress={(res) => {
-              this.setState({
-                selectedShareInfo: { type: 'window', info: res.dropId },
-              })
+              console.log('Windows Share choose', res.dropId.sourceId)
+              const sourceId = res.dropId.sourceId
+              if (sourceId === undefined) {
+                return
+              }
+              this.setState({ currentWindowSourceId: sourceId })
             }}
           />
-          <div className={styles.selectedItem}>
-            <span className={styles.require}>* </span>Current Selected
-          </div>
-          <div>
-            <div>Type: {type}</div>
-            <div>Name: {name}</div>
-            <div>
-              {image && (
-                <img
-                  src={image}
-                  alt='img shot'
-                  className={screenStyle.previewShot}
-                />
-              )}
-            </div>
-          </div>
         </div>
         <JoinChannelBar
           buttonTitle='Start Share'
@@ -326,20 +343,29 @@ export default class ScreenShare
   }
 
   render() {
-    const { localVideoSourceUid } = this.state
+    const { isShared, channelId } = this.state
     return (
       <div className={styles.screen}>
         <div className={styles.content}>
-          {localVideoSourceUid && (
-            <Card title='Local Share' className={styles.card}>
-              <Window
-                uid={localVideoSourceUid}
-                rtcEngine={this.rtcEngine!}
-                videoSourceType={VideoSourceType.kVideoSourceTypeScreenPrimary}
-                //role={isMyself ? 'local' : 'remote'}
-                channelId={config.defaultChannelId}
-              />
-            </Card>
+          {isShared && (
+            <>
+              <Card title='Local Share1' className={styles.card}>
+                <Window
+                  uid={locaScreenlUid1}
+                  rtcEngine={this.rtcEngine!}
+                  videoSourceType={VideoSourceType.VideoSourceScreenPrimary}
+                  channelId={channelId}
+                />
+              </Card>
+              <Card title='Local Share2' className={styles.card}>
+                <Window
+                  uid={locaScreenlUid2}
+                  rtcEngine={this.rtcEngine!}
+                  videoSourceType={VideoSourceType.VideoSourceScreenSecondary}
+                  channelId={channelId}
+                />
+              </Card>
+            </>
           )}
         </div>
         {this.renderRightBar()}
