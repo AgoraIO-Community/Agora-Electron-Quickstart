@@ -1,14 +1,26 @@
 import AudioMixing from './AudioMixing/AudioMixing'
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 import CreateDataStream from './CreateDataStream/CreateDataStream'
+import EnableVirtualBackground from './EnableVirtualBackground/EnableVirtualBackground'
 import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 import MediaPlayer from './MediaPlayer/MediaPlayer'
 import ScreenShare from './ScreenShare/ScreenShare'
 import SetEncryption from './SetEncryption/SetEncryption'
 import SetLiveTranscoding from './SetLiveTranscoding/SetLiveTranscoding'
+import TakeSnapshot from './TakeSnapshot/TakeSnapshot'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
+  {
+    path: '/EnableVirtualBackground',
+    component: EnableVirtualBackground,
+    title: 'EnableVirtualBackground',
+  },
+  {
+    path: '/TakeSnapshot',
+    component: TakeSnapshot,
+    title: 'TakeSnapshot',
+  },
   {
     path: '/ScreenShare',
     component: ScreenShare,
