@@ -88,7 +88,7 @@ class App extends React.Component {
               </Switch>
             </Content>
             <Footer style={{ textAlign: 'center' }}>
-              Agora Design ©2021 Created by Jerry.Luo111
+              {`Agora Design ©2021 Created by Jerry.Luo, App process id is ${process.pid}`}
             </Footer>
           </Layout>
         </Layout>
