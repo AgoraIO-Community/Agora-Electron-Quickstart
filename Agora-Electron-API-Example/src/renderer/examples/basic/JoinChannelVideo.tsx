@@ -2,6 +2,7 @@ import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
+  ClientRoleType,
   DegradationPreference,
   IAudioDeviceManagerImpl,
   IRtcEngine,
@@ -27,6 +28,8 @@ import config from '../config/agora.config'
 import styles from '../config/public.scss'
 import { configMapToOptions, getRandomInt } from '../util'
 
+const localUid1 = getRandomInt(1, 9999999)
+const localUid2 = getRandomInt(1, 9999999)
 interface Device {
   deviceId: string
   deviceName: string
@@ -45,6 +48,8 @@ interface State {
   cameraDevices: Device[]
   currentFps?: number
   currentResolution?: { width: number; height: number }
+  firstCameraId: string
+  secondCameraId: string
 }
 
 export default class JoinChannelVideo
@@ -63,6 +68,8 @@ export default class JoinChannelVideo
     isJoined: false,
     audioRecordDevices: [],
     cameraDevices: [],
+    firstCameraId: '',
+    secondCameraId: '',
   }
 
   componentDidMount() {
@@ -99,6 +106,7 @@ export default class JoinChannelVideo
     { channelId, localUid }: RtcConnection,
     elapsed: number
   ): void {
+    console.log('onJoinChannelSuccessEx', channelId, localUid)
     const { allUser: oldAllUser } = this.state
     const newAllUser = [...oldAllUser]
     newAllUser.push({ isMyself: true, uid: localUid })
@@ -155,9 +163,19 @@ export default class JoinChannelVideo
   }
 
   onPressJoinChannel = (channelId: string) => {
+    const { firstCameraId, secondCameraId } = this.state
     this.setState({ channelId })
     this.rtcEngine.enableAudio()
     this.rtcEngine.enableVideo()
+    console.log('firstCameraId, secondCameraId ', firstCameraId, secondCameraId)
+    const start1Res = this.rtcEngine?.startPrimaryCameraCapture({
+      deviceId: firstCameraId,
+    })
+    console.log('startPrimaryCameraCapture', start1Res)
+    const start2Res = this.rtcEngine?.startSecondaryCameraCapture({
+      deviceId: secondCameraId,
+    })
+    console.log('startSecondaryCameraCapture', start2Res)
     this.rtcEngine?.setChannelProfile(
       ChannelProfileType.ChannelProfileLiveBroadcasting
     )
@@ -166,9 +184,32 @@ export default class JoinChannelVideo
       AudioScenarioType.AudioScenarioChatroom
     )
 
-    const localUid = getRandomInt(1, 9999999)
-    console.log(`localUid: ${localUid}`)
-    this.rtcEngine?.joinChannel('', channelId, '', localUid)
+    const res1 = this.rtcEngine?.joinChannelEx(
+      '',
+      {
+        channelId,
+        localUid: localUid1,
+      },
+      {
+        publishCameraTrack: true,
+        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+        channelProfile: ChannelProfileType.ChannelProfileCommunication,
+      }
+    )
+    console.log(`localUid1: ${localUid1} joinChannel2: ${res1}`)
+    const res2 = this.rtcEngine?.joinChannelEx(
+      '',
+      {
+        channelId,
+        localUid: localUid2,
+      },
+      {
+        publishSecondaryCameraTrack: true,
+        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+        channelProfile: ChannelProfileType.ChannelProfileCommunication,
+      }
+    )
+    console.log(`localUid1: ${localUid2} joinChannel2: ${res2}`)
   }
 
   setVideoConfig = () => {
@@ -201,9 +242,21 @@ export default class JoinChannelVideo
               return { dropId: deviceId, dropText: deviceName, ...obj }
             })}
             onPress={(res) => {
-              this.videoDeviceManager.setDevice(res.dropId)
+              const deviceId = res.dropId
+              this.setState({ firstCameraId: deviceId })
             }}
-            title='Camera'
+            title='First Camera'
+          />
+          <DropDownButton
+            options={cameraDevices.map((obj) => {
+              const { deviceId, deviceName } = obj
+              return { dropId: deviceId, dropText: deviceName, ...obj }
+            })}
+            onPress={(res) => {
+              const deviceId = res.dropId
+              this.setState({ firstCameraId: deviceId })
+            }}
+            title='Second Camera'
           />
           <DropDownButton
             title='Microphone'
@@ -252,9 +305,14 @@ export default class JoinChannelVideo
 
   renderItem = ({ isMyself, uid }: User) => {
     const { channelId } = this.state
-    const videoSourceType = isMyself
-      ? VideoSourceType.VideoSourceCameraPrimary
-      : VideoSourceType.VideoSourceRemote
+    let videoSourceType = VideoSourceType.VideoSourceRemote
+    if (isMyself) {
+      videoSourceType =
+        uid === localUid1
+          ? VideoSourceType.VideoSourceCameraPrimary
+          : VideoSourceType.VideoSourceCameraSecondary
+    }
+    console.log('renderItem', videoSourceType, channelId, uid)
     return (
       <List.Item>
         <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>
