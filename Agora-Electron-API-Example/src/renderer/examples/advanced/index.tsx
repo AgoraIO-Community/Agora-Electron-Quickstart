@@ -1,16 +1,22 @@
 import AudioMixing from './AudioMixing/AudioMixing'
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 import CreateDataStream from './CreateDataStream/CreateDataStream'
-import VirtualBackground from './VirtualBackground/VirtualBackground'
 import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 import MediaPlayer from './MediaPlayer/MediaPlayer'
 import ScreenShare from './ScreenShare/ScreenShare'
 import SetEncryption from './SetEncryption/SetEncryption'
 import SetLiveTranscoding from './SetLiveTranscoding/SetLiveTranscoding'
+import SpatialAudio from './SpatialAudio/SpatialAudio'
 import TakeSnapshot from './TakeSnapshot/TakeSnapshot'
+import VirtualBackground from './VirtualBackground/VirtualBackground'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
+  {
+    path: '/SpatialAudio',
+    component: SpatialAudio,
+    title: 'SpatialAudio',
+  },
   {
     path: '/VirtualBackground',
     component: VirtualBackground,
