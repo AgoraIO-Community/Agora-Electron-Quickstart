@@ -3,6 +3,7 @@ import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 import ContentInspect from './ContentInspect/ContentInspect'
 import CreateDataStream from './CreateDataStream/CreateDataStream'
 import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
+import LocalVideoTranscoder from './LocalVideoTranscoder/LocalVideoTranscoder'
 import MediaPlayer from './MediaPlayer/MediaPlayer'
 import RhythmPlayer from './RhythmPlayer/RhythmPlayer'
 import ScreenShare from './ScreenShare/ScreenShare'
@@ -15,6 +16,11 @@ import VirtualBackground from './VirtualBackground/VirtualBackground'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
+  {
+    path: '/LocalVideoTranscoder',
+    component: LocalVideoTranscoder,
+    title: 'LocalVideoTranscoder',
+  },
   {
     path: '/SendMetaData',
     component: SendMetaData,

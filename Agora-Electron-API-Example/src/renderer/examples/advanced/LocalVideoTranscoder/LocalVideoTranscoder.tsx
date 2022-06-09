@@ -2,20 +2,19 @@ import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
-  ContentInspectDeviceType,
-  ContentInspectResult,
-  ContentInspectType,
   DegradationPreference,
   IAudioDeviceManagerImpl,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
   IVideoDeviceManagerImpl,
+  LocalTranscoderConfiguration,
   MediaSourceType,
   OrientationMode,
   RtcConnection,
   RtcEngineExImplInternal,
   RtcStats,
+  TranscodingVideoStream,
   UserOfflineReasonType,
   VideoCodecType,
   VideoMirrorModeType,
@@ -30,6 +29,9 @@ import { FpsMap, ResolutionMap, RoleTypeMap } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
 import { configMapToOptions, getRandomInt } from '../../util'
+
+const localUid1 = getRandomInt()
+const localUid2 = getRandomInt()
 
 interface Device {
   deviceId: string
@@ -49,11 +51,10 @@ interface State {
   cameraDevices: Device[]
   currentFps?: number
   currentResolution?: { width: number; height: number }
-  contentInspectResult: string
+  isAddScreenShare: boolean
 }
-const localUid = getRandomInt(1, 9999999)
 
-export default class ContentInspect
+export default class LocalVideoTranscoder
   extends Component<{}, State, any>
   implements IRtcEngineEventHandlerEx
 {
@@ -69,18 +70,11 @@ export default class ContentInspect
     isJoined: false,
     audioRecordDevices: [],
     cameraDevices: [],
-    contentInspectResult: '',
+    isAddScreenShare: false,
   }
 
   componentDidMount() {
     const rtcEngine = this.getRtcEngine()
-    let res = rtcEngine.enableExtension(
-      'agora_segmentation',
-      'PortraitSegmentation',
-      true,
-      MediaSourceType.PrimaryCameraSource
-    )
-    console.log('enableExtension', res)
 
     this.getRtcEngine().registerEventHandler(this)
     this.videoDeviceManager = new IVideoDeviceManagerImpl()
@@ -95,7 +89,7 @@ export default class ContentInspect
 
   componentWillUnmount() {
     this.rtcEngine?.unregisterEventHandler(this)
-    this.rtcEngine?.leaveChannel()
+    this.onPressLeaveChannel()
     this.rtcEngine?.release()
   }
 
@@ -203,8 +197,13 @@ export default class ContentInspect
       AudioScenarioType.AudioScenarioChatroom
     )
 
-    console.log(`localUid: ${localUid}`)
-    this.rtcEngine?.joinChannel('', channelId, '', localUid)
+    const config = this.getLocalTranscoderConfiguration()
+    this.rtcEngine.startLocalVideoTranscoder(config)
+    this.rtcEngine.joinChannel2('', channelId, localUid1, {
+      publishCameraTrack: false,
+      publishSecondaryCameraTrack: false,
+      publishTrancodedVideoTrack: true,
+    })
   }
 
   setVideoConfig = () => {
@@ -224,71 +223,58 @@ export default class ContentInspect
       mirrorMode: VideoMirrorModeType.VideoMirrorModeAuto,
     })
   }
-  onContentInspectResult(result: ContentInspectResult): void {
-    console.log('onContentInspectResult', result)
-
-    let contentInspectResult = ''
-    switch (result) {
-      case ContentInspectResult.ContentInspectNeutral:
-        contentInspectResult = 'Neutral'
-        break
-      case ContentInspectResult.ContentInspectSexy:
-        contentInspectResult = 'Sexy'
-        break
-      case ContentInspectResult.ContentInspectPorn:
-        contentInspectResult = 'Porn'
-        break
-      default:
-        break
+  getLocalTranscoderConfiguration = () => {
+    const { isAddScreenShare } = this.state
+    const cameraStream = {
+      sourceType: MediaSourceType.PrimaryCameraSource,
+      remoteUserUid: localUid1,
+      imageUrl: '',
+      x: 0,
+      y: 0,
+      width: 640,
+      height: 320,
+      zOrder: 1,
+      alpha: 1,
+      mirror: true,
     }
-    this.setState({ contentInspectResult })
+    const streams: TranscodingVideoStream[] = [cameraStream]
+    if (isAddScreenShare) {
+      const screenShareStream = {
+        sourceType: MediaSourceType.PrimaryScreenSource,
+        remoteUserUid: localUid2,
+        imageUrl: '',
+        x: 0,
+        y: 0,
+        width: 640,
+        height: 320,
+        zOrder: 1,
+        alpha: 1,
+        mirror: true,
+      }
+    }
+    const config: LocalTranscoderConfiguration = {
+      streamCount: streams.length,
+      VideoInputStreams: streams,
+      videoOutputConfiguration: { dimensions: { width: 1080, height: 720 } },
+    }
+    return config
   }
 
-  onPressContentInspect = (enable) => {
-    const res = this.getRtcEngine().SetContentInspect({
-      enable,
-      DeviceWork: true,
-      CloudWork: false,
-      DeviceworkType: ContentInspectDeviceType.ContentInspectDeviceAgora,
-      extraInfo: '',
-      modules: [
-        {
-          type: ContentInspectType.ContentInspectModeration,
-          frequency: 2,
-        },
-      ],
-      moduleCount: 1,
-    })
-    console.log('enableSpatialAudio', enable, '\nres:', res)
+  onPressLeaveChannel = () => {
+    this.rtcEngine?.leaveChannel()
+    this.rtcEngine?.stopLocalVideoTranscoder()
+  }
+
+  onPressAddScreenScreen = (enabled) => {
+    this.setState({ isAddScreenShare: enabled })
   }
 
   renderRightBar = () => {
-    const {
-      audioRecordDevices,
-      cameraDevices,
-      isJoined,
-      contentInspectResult,
-    } = this.state
+    const { audioRecordDevices, cameraDevices, isJoined } = this.state
 
     return (
       <div className={styles.rightBar}>
         <div>
-          <div
-            style={{
-              display: 'flex',
-              textAlign: 'center',
-              alignItems: 'center',
-            }}
-          >
-            {'ContentInspect:   '}
-            <Switch
-              checkedChildren='Enable'
-              unCheckedChildren='Disable'
-              defaultChecked={false}
-              onChange={this.onPressContentInspect}
-            />
-          </div>
-          <p>{'Result: ' + contentInspectResult}</p>
           <DropDownButton
             options={cameraDevices.map((obj) => {
               const { deviceId, deviceName } = obj
@@ -326,6 +312,23 @@ export default class ContentInspect
               )
             }}
           />
+          <br></br>
+          <div
+            style={{
+              display: 'flex',
+              textAlign: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {'Add Screen Share'}
+            <Switch
+              checkedChildren='Enable'
+              unCheckedChildren='Disable'
+              defaultChecked={false}
+              onChange={this.onPressAddScreenScreen}
+            />
+          </div>
+          <br></br>
           <DropDownButton
             title='FPS'
             options={configMapToOptions(FpsMap)}
@@ -336,9 +339,7 @@ export default class ContentInspect
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
-          onPressLeave={() => {
-            this.rtcEngine?.leaveChannel()
-          }}
+          onPressLeave={this.onPressLeaveChannel}
         />
       </div>
     )

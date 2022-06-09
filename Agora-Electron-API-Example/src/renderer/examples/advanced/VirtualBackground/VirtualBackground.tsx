@@ -103,9 +103,6 @@ export default class VirtualBackground
       window.rtcEngine = this.rtcEngine
       const res = this.rtcEngine.initialize({
         appId: config.appID,
-        logConfig: {
-          filePath: '/Users/jerry/Downloads/1.log',
-        },
       })
       console.log('initialize:', res)
     }

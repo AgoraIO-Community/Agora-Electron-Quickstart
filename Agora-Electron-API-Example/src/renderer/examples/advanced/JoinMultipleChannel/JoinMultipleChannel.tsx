@@ -17,11 +17,12 @@ import { Component } from 'react'
 import Window from '../../component/Window'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
+import { getRandomInt } from '../../util'
 
 const { Search } = Input
 
-const channelUid1 = 1001
-const channelUid2 = 1002
+const localUid1 = getRandomInt()
+const localUid2 = getRandomInt()
 
 interface User {
   isMyself: boolean
@@ -80,9 +81,9 @@ export default class JoinMultipleChannel
     elapsed: number
   ): void {
     console.log('onJoinChannelSuccessEx', channelId, localUid)
-    if (localUid === channelUid1) {
+    if (localUid === localUid1) {
       this.setState({ isJoined1: true })
-    } else if (localUid === channelUid2) {
+    } else if (localUid === localUid2) {
       this.setState({ isJoined2: true })
     }
   }
@@ -100,7 +101,7 @@ export default class JoinMultipleChannel
       remoteUid
     )
 
-    if (localUid === channelUid1) {
+    if (localUid === localUid1) {
       const { allUser1: oldAllUser } = this.state
       const newAllUser = [...oldAllUser]
       newAllUser.push({
@@ -111,7 +112,7 @@ export default class JoinMultipleChannel
       this.setState({
         allUser1: newAllUser,
       })
-    } else if (localUid === channelUid2) {
+    } else if (localUid === localUid2) {
       const { allUser2: oldAllUser } = this.state
       const newAllUser = [...oldAllUser]
       newAllUser.push({
@@ -178,7 +179,7 @@ export default class JoinMultipleChannel
 
     const res = this.rtcEngine?.joinChannelEx(
       '',
-      { localUid: channelUid1, channelId },
+      { localUid: localUid1, channelId },
       {
         autoSubscribeAudio: false,
         autoSubscribeVideo: true,
@@ -206,7 +207,7 @@ export default class JoinMultipleChannel
 
     const res = this.rtcEngine?.joinChannelEx(
       '',
-      { localUid: channelUid2, channelId },
+      { localUid: localUid2, channelId },
       {
         autoSubscribeAudio: false,
         autoSubscribeVideo: true,
@@ -223,11 +224,11 @@ export default class JoinMultipleChannel
   onPressLeaveAll = () => {
     const { channel1, channel2 } = this.state
     this.rtcEngine.leaveChannelEx({
-      localUid: channelUid1,
+      localUid: localUid1,
       channelId: channel1,
     })
     this.rtcEngine.leaveChannelEx({
-      localUid: channelUid2,
+      localUid: localUid2,
       channelId: channel2,
     })
   }
