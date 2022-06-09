@@ -51,7 +51,7 @@ interface State {
 }
 const localUid = getRandomInt(1, 9999999)
 
-export default class EnableVirtualBackground
+export default class VirtualBackground
   extends Component<{}, State, any>
   implements IRtcEngineEventHandlerEx
 {
