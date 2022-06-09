@@ -242,6 +242,18 @@ export default class LocalVideoTranscoder
       mirror: true,
     }
     const streams: TranscodingVideoStream[] = [cameraStream]
+
+    streams.push({
+      sourceType: MediaSourceType.RtcImagePngSource,
+      imageUrl: '/Users/jerry/Downloads/1.png',
+      x: 640,
+      y: 0,
+      width: 300,
+      height: 300,
+      zOrder: 1,
+      alpha: 1,
+      mirror: true,
+    })
     if (isAddScreenShare) {
       const screenShareStream = {
         sourceType: MediaSourceType.PrimaryScreenSource,
