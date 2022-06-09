@@ -6,6 +6,7 @@ import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 import MediaPlayer from './MediaPlayer/MediaPlayer'
 import RhythmPlayer from './RhythmPlayer/RhythmPlayer'
 import ScreenShare from './ScreenShare/ScreenShare'
+import SendMetaData from './SendMetaData/SendMetaData'
 import SetEncryption from './SetEncryption/SetEncryption'
 import SetLiveTranscoding from './SetLiveTranscoding/SetLiveTranscoding'
 import SpatialAudio from './SpatialAudio/SpatialAudio'
@@ -14,6 +15,11 @@ import VirtualBackground from './VirtualBackground/VirtualBackground'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
+  {
+    path: '/SendMetaData',
+    component: SendMetaData,
+    title: 'SendMetaData',
+  },
   {
     path: '/RhythmPlayer',
     component: RhythmPlayer,
