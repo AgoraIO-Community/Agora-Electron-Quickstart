@@ -165,7 +165,6 @@ export default class JoinChannelAudio
           <div
             style={{
               display: 'flex',
-              // justifyContent: 'center',
               textAlign: 'center',
               alignItems: 'center',
             }}

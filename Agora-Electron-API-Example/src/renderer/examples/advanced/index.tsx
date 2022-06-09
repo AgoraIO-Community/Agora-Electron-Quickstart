@@ -1,5 +1,6 @@
 import AudioMixing from './AudioMixing/AudioMixing'
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
+import ContentInspect from './ContentInspect/ContentInspect'
 import CreateDataStream from './CreateDataStream/CreateDataStream'
 import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 import MediaPlayer from './MediaPlayer/MediaPlayer'
@@ -12,6 +13,11 @@ import VirtualBackground from './VirtualBackground/VirtualBackground'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
+  {
+    path: '/ContentInspect',
+    component: ContentInspect,
+    title: 'ContentInspect',
+  },
   {
     path: '/SpatialAudio',
     component: SpatialAudio,
