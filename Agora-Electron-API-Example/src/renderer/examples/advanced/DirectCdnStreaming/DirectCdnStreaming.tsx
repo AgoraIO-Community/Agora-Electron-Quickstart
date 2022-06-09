@@ -2,19 +2,21 @@ import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
+  ContentInspectDeviceType,
+  ContentInspectResult,
+  ContentInspectType,
   DegradationPreference,
   IAudioDeviceManagerImpl,
+  IDirectCdnStreamingEventHandler,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
   IVideoDeviceManagerImpl,
-  LocalTranscoderConfiguration,
   MediaSourceType,
   OrientationMode,
   RtcConnection,
   RtcEngineExImplInternal,
   RtcStats,
-  TranscodingVideoStream,
   UserOfflineReasonType,
   VideoCodecType,
   VideoMirrorModeType,
@@ -29,9 +31,6 @@ import { FpsMap, ResolutionMap, RoleTypeMap } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
 import { configMapToOptions, getRandomInt } from '../../util'
-
-const localUid1 = getRandomInt()
-const localUid2 = getRandomInt()
 
 interface Device {
   deviceId: string
@@ -51,12 +50,13 @@ interface State {
   cameraDevices: Device[]
   currentFps?: number
   currentResolution?: { width: number; height: number }
-  isAddScreenShare: boolean
+  contentInspectResult: string
 }
+const localUid = getRandomInt(1, 9999999)
 
-export default class LocalVideoTranscoder
+export default class DirectCdnStreaming
   extends Component<{}, State, any>
-  implements IRtcEngineEventHandlerEx
+  implements IRtcEngineEventHandlerEx, IDirectCdnStreamingEventHandler
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
@@ -70,11 +70,18 @@ export default class LocalVideoTranscoder
     isJoined: false,
     audioRecordDevices: [],
     cameraDevices: [],
-    isAddScreenShare: false,
+    contentInspectResult: '',
   }
 
   componentDidMount() {
     const rtcEngine = this.getRtcEngine()
+    let res = rtcEngine.enableExtension(
+      'agora_segmentation',
+      'PortraitSegmentation',
+      true,
+      MediaSourceType.PrimaryCameraSource
+    )
+    console.log('enableExtension', res)
 
     this.getRtcEngine().registerEventHandler(this)
     this.videoDeviceManager = new IVideoDeviceManagerImpl()
@@ -89,7 +96,7 @@ export default class LocalVideoTranscoder
 
   componentWillUnmount() {
     this.rtcEngine?.unregisterEventHandler(this)
-    this.onPressLeaveChannel()
+    this.rtcEngine?.leaveChannel()
     this.rtcEngine?.release()
   }
 
@@ -196,14 +203,9 @@ export default class LocalVideoTranscoder
       AudioProfileType.AudioProfileDefault,
       AudioScenarioType.AudioScenarioChatroom
     )
-    
-    const config = this.getLocalTranscoderConfiguration()
-    this.rtcEngine.startLocalVideoTranscoder(config)
-    this.rtcEngine.joinChannel2('', channelId, localUid1, {
-      publishCameraTrack: false,
-      publishScreenTrack: false,
-      publishTrancodedVideoTrack: true,
-    })
+
+    console.log(`localUid: ${localUid}`)
+    this.rtcEngine?.joinChannel('', channelId, '', localUid)
   }
 
   setVideoConfig = () => {
@@ -223,55 +225,65 @@ export default class LocalVideoTranscoder
       mirrorMode: VideoMirrorModeType.VideoMirrorModeAuto,
     })
   }
-  getLocalTranscoderConfiguration = () => {
-    const { isAddScreenShare } = this.state
-    const cameraStream = {
-      sourceType: MediaSourceType.PrimaryCameraSource,
-      x: 0,
-      y: 0,
-      width: 640,
-      height: 320,
-      zOrder: 1,
-      alpha: 1,
-      mirror: true,
+  onContentInspectResult(result: ContentInspectResult): void {
+    console.log('onContentInspectResult', result)
+
+    let contentInspectResult = ''
+    switch (result) {
+      case ContentInspectResult.ContentInspectNeutral:
+        contentInspectResult = 'Neutral'
+        break
+      case ContentInspectResult.ContentInspectSexy:
+        contentInspectResult = 'Sexy'
+        break
+      case ContentInspectResult.ContentInspectPorn:
+        contentInspectResult = 'Porn'
+        break
+      default:
+        break
     }
-    const streams: TranscodingVideoStream[] = [cameraStream]
-    if (isAddScreenShare) {
-      const screenShareStream = {
-        sourceType: MediaSourceType.PrimaryScreenSource,
-        x: 0,
-        y: 0,
-        width: 700,
-        height: 400,
-        zOrder: 2,
-        alpha: 1,
-        mirror: true,
-      }
-      streams.push(screenShareStream)
-    }
-    const config: LocalTranscoderConfiguration = {
-      streamCount: streams.length,
-      VideoInputStreams: streams,
-      videoOutputConfiguration: { dimensions: { width: 1080, height: 720 } },
-    }
-    return config
+    this.setState({ contentInspectResult })
   }
 
-  onPressLeaveChannel = () => {
-    this.rtcEngine?.leaveChannel()
-    this.rtcEngine?.stopLocalVideoTranscoder()
-  }
-
-  onPressAddScreenScreen = (enabled) => {
-    this.setState({ isAddScreenShare: enabled })
+  onPressContentInspect = (enable) => {
+    const res = this.getRtcEngine().startDirectCdnStreaming(this, '', {
+      publishCameraTrack: false,
+      publishMicrophoneTrack: false,
+      publishCustomAudioTrack: false,
+      publishCustomVideoTrack: false,
+      publishMediaPlayerAudioTrack: false,
+      publishMediaPlayerId: false,
+    })
+    console.log('enableSpatialAudio', enable, '\nres:', res)
   }
 
   renderRightBar = () => {
-    const { audioRecordDevices, cameraDevices, isJoined } = this.state
+    const {
+      audioRecordDevices,
+      cameraDevices,
+      isJoined,
+      contentInspectResult,
+    } = this.state
 
     return (
       <div className={styles.rightBar}>
         <div>
+          <div
+            style={{
+              display: 'flex',
+              textAlign: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {'ContentInspect:   '}
+            <Switch
+              checkedChildren='Enable'
+              unCheckedChildren='Disable'
+              defaultChecked={false}
+              onChange={this.onPressContentInspect}
+            />
+          </div>
+          <p>{'Result: ' + contentInspectResult}</p>
           <DropDownButton
             options={cameraDevices.map((obj) => {
               const { deviceId, deviceName } = obj
@@ -316,27 +328,12 @@ export default class LocalVideoTranscoder
               this.setState({ currentFps: res.dropId }, this.setVideoConfig)
             }}
           />
-          <br></br>
-          <div
-            style={{
-              display: 'flex',
-              textAlign: 'center',
-              alignItems: 'center',
-            }}
-          >
-            {'Add Screen Share'}
-            <Switch
-              checkedChildren='Enable'
-              unCheckedChildren='Disable'
-              defaultChecked={false}
-              onChange={this.onPressAddScreenScreen}
-            />
-          </div>
-          <br></br>
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
-          onPressLeave={this.onPressLeaveChannel}
+          onPressLeave={() => {
+            this.rtcEngine?.leaveChannel()
+          }}
         />
       </div>
     )

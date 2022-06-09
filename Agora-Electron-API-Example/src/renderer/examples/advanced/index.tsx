@@ -2,6 +2,7 @@ import AudioMixing from './AudioMixing/AudioMixing'
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 import ContentInspect from './ContentInspect/ContentInspect'
 import CreateDataStream from './CreateDataStream/CreateDataStream'
+import DirectCdnStreaming from './DirectCdnStreaming/DirectCdnStreaming'
 import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 import LocalVideoTranscoder from './LocalVideoTranscoder/LocalVideoTranscoder'
 import MediaPlayer from './MediaPlayer/MediaPlayer'
@@ -16,6 +17,11 @@ import VirtualBackground from './VirtualBackground/VirtualBackground'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
+  {
+    path: '/DirectCdnStreaming',
+    component: DirectCdnStreaming,
+    title: 'DirectCdnStreaming',
+  },
   {
     path: '/LocalVideoTranscoder',
     component: LocalVideoTranscoder,

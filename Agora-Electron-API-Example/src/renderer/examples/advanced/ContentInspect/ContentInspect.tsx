@@ -73,15 +73,6 @@ export default class ContentInspect
   }
 
   componentDidMount() {
-    const rtcEngine = this.getRtcEngine()
-    let res = rtcEngine.enableExtension(
-      'agora_segmentation',
-      'PortraitSegmentation',
-      true,
-      MediaSourceType.PrimaryCameraSource
-    )
-    console.log('enableExtension', res)
-
     this.getRtcEngine().registerEventHandler(this)
     this.videoDeviceManager = new IVideoDeviceManagerImpl()
     this.audioDeviceManager = new IAudioDeviceManagerImpl()
