@@ -237,7 +237,6 @@ export default class JoinMultipleChannel
     return (
       <div className={styles.rightBar} style={{ justifyContent: 'flex-start' }}>
         <Search
-          value='Channel1'
           placeholder={'please input new channelId1'}
           defaultValue='Channel1'
           allowClear

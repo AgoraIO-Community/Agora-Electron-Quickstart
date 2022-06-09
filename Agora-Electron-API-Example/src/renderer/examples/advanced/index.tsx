@@ -4,6 +4,7 @@ import ContentInspect from './ContentInspect/ContentInspect'
 import CreateDataStream from './CreateDataStream/CreateDataStream'
 import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
 import MediaPlayer from './MediaPlayer/MediaPlayer'
+import RhythmPlayer from './RhythmPlayer/RhythmPlayer'
 import ScreenShare from './ScreenShare/ScreenShare'
 import SetEncryption from './SetEncryption/SetEncryption'
 import SetLiveTranscoding from './SetLiveTranscoding/SetLiveTranscoding'
@@ -13,6 +14,11 @@ import VirtualBackground from './VirtualBackground/VirtualBackground'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
+  {
+    path: '/RhythmPlayer',
+    component: RhythmPlayer,
+    title: 'RhythmPlayer',
+  },
   {
     path: '/ContentInspect',
     component: ContentInspect,
