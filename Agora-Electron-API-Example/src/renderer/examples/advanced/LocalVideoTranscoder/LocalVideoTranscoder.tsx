@@ -52,6 +52,7 @@ interface State {
   currentFps?: number
   currentResolution?: { width: number; height: number }
   isAddScreenShare: boolean
+  videoDeviceId: string
 }
 
 export default class LocalVideoTranscoder
@@ -71,6 +72,7 @@ export default class LocalVideoTranscoder
     audioRecordDevices: [],
     cameraDevices: [],
     isAddScreenShare: false,
+    videoDeviceId: '',
   }
 
   componentDidMount() {
@@ -187,6 +189,7 @@ export default class LocalVideoTranscoder
 
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
+    const { videoDeviceId } = this.state
     this.rtcEngine.enableAudio()
     this.rtcEngine.enableVideo()
     this.rtcEngine?.setChannelProfile(
@@ -196,7 +199,9 @@ export default class LocalVideoTranscoder
       AudioProfileType.AudioProfileDefault,
       AudioScenarioType.AudioScenarioChatroom
     )
-    
+    this.rtcEngine.startPrimaryCameraCapture({
+      deviceId: videoDeviceId,
+    })
     const config = this.getLocalTranscoderConfiguration()
     this.rtcEngine.startLocalVideoTranscoder(config)
     this.rtcEngine.joinChannel2('', channelId, localUid1, {
@@ -264,6 +269,29 @@ export default class LocalVideoTranscoder
 
   onPressAddScreenScreen = (enabled) => {
     this.setState({ isAddScreenShare: enabled })
+    const rtcEngine = this.getRtcEngine()
+    const list = rtcEngine.getScreenCaptureSources(
+      { width: 1, height: 1 },
+      { width: 1, height: 1 },
+      true
+    )
+
+    rtcEngine.startPrimaryScreenCapture({
+      isCaptureWindow: false,
+      displayId: 1,
+      screenRect: { width: 0, height: 0, x: 0, y: 0 },
+      params: {
+        dimensions: { width: 1920, height: 1080 },
+        bitrate: 1000,
+        frameRate: 15,
+        captureMouseCursor: false,
+        windowFocus: false,
+        excludeWindowList: [],
+        excludeWindowCount: 0,
+      },
+
+      regionRect: { x: 0, y: 0, width: 0, height: 0 },
+    })
   }
 
   renderRightBar = () => {
@@ -278,7 +306,7 @@ export default class LocalVideoTranscoder
               return { dropId: deviceId, dropText: deviceName, ...obj }
             })}
             onPress={(res) => {
-              this.videoDeviceManager.setDevice(res.dropId)
+              this.setState({ videoDeviceId: res.dropId })
             }}
             title='Camera'
           />

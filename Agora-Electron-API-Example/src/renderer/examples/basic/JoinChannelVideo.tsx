@@ -172,10 +172,10 @@ export default class JoinChannelVideo
       deviceId: firstCameraId,
     })
     console.log('startPrimaryCameraCapture', start1Res)
-    const start2Res = this.rtcEngine?.startSecondaryCameraCapture({
-      deviceId: secondCameraId,
-    })
-    console.log('startSecondaryCameraCapture', start2Res)
+    // const start2Res = this.rtcEngine?.startSecondaryCameraCapture({
+    //   deviceId: secondCameraId,
+    // })
+    // console.log('startSecondaryCameraCapture', start2Res)
     this.rtcEngine?.setChannelProfile(
       ChannelProfileType.ChannelProfileLiveBroadcasting
     )
