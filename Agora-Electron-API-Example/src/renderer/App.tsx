@@ -12,7 +12,6 @@ import {
   InfoCircleOutlined,
 } from '@ant-design/icons'
 import './App.global.scss'
-import 'antd/dist/antd.css'
 import { Layout, Menu } from 'antd'
 import AuthInfoScreen from './examples/config/AuthInfoScreen'
 import basicRoute from './examples/basic'

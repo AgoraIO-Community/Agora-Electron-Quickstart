@@ -1,5 +1,7 @@
 declare namespace AppGlobalScssNamespace {
   export interface IAppGlobalScss {
+    "ant-menu": string;
+    "ant-menu-submenu": string;
     app: string;
     root: string;
   }
