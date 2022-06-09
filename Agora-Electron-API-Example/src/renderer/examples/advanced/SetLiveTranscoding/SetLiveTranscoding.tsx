@@ -66,6 +66,7 @@ export default class SetLiveTranscoding
       //@ts-ignore
       window.rtcEngine = this.rtcEngine
       const res = this.rtcEngine.initialize({ appId: config.appID })
+      this.rtcEngine.setLogFile(config.nativeSDKLogPath)
       console.log('initialize:', res)
     }
 
