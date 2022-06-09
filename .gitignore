@@ -14,3 +14,4 @@ appID.*
 *.lock
 electronDemo*
 .vs/
+*.dmp

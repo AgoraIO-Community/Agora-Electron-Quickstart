@@ -103,6 +103,7 @@ export default class LocalVideoTranscoder
       const res = this.rtcEngine.initialize({
         appId: config.appID,
       })
+      this.rtcEngine.setLogFile(config.nativeSDKLogPath)
       console.log('initialize:', res)
     }
 
@@ -245,10 +246,10 @@ export default class LocalVideoTranscoder
       const screenShareStream = {
         sourceType: MediaSourceType.PrimaryScreenSource,
         x: 0,
-        y: 0,
-        width: 700,
-        height: 400,
-        zOrder: 2,
+        y: 320,
+        width: 640,
+        height: 320,
+        zOrder: 1,
         alpha: 1,
         mirror: true,
       }
@@ -270,28 +271,39 @@ export default class LocalVideoTranscoder
   onPressAddScreenScreen = (enabled) => {
     this.setState({ isAddScreenShare: enabled })
     const rtcEngine = this.getRtcEngine()
-    const list = rtcEngine.getScreenCaptureSources(
-      { width: 1, height: 1 },
-      { width: 1, height: 1 },
-      true
-    )
+    if (enabled) {
+      const list = rtcEngine
+        .getScreenCaptureSources(
+          { width: 0, height: 0 },
+          { width: 0, height: 0 },
+          true
+        )
+        .filter((info) => info.primaryMonitor)
+      if (list.length !== 1) {
+        return
+      }
+      const sourceId = list[0].sourceId
+      const res = rtcEngine.startPrimaryScreenCapture({
+        isCaptureWindow: false,
+        screenRect: { width: 0, height: 0, x: 0, y: 0 },
+        windowId: sourceId,
+        displayId: sourceId,
+        params: {
+          dimensions: { width: 1920, height: 1080 },
+          bitrate: 1000,
+          frameRate: 15,
+          captureMouseCursor: false,
+          windowFocus: false,
+          excludeWindowList: [],
+          excludeWindowCount: 0,
+        },
 
-    rtcEngine.startPrimaryScreenCapture({
-      isCaptureWindow: false,
-      displayId: 1,
-      screenRect: { width: 0, height: 0, x: 0, y: 0 },
-      params: {
-        dimensions: { width: 1920, height: 1080 },
-        bitrate: 1000,
-        frameRate: 15,
-        captureMouseCursor: false,
-        windowFocus: false,
-        excludeWindowList: [],
-        excludeWindowCount: 0,
-      },
-
-      regionRect: { x: 0, y: 0, width: 0, height: 0 },
-    })
+        regionRect: { x: 0, y: 0, width: 0, height: 0 },
+      })
+      console.log('startPrimaryScreenCapture', res)
+    } else {
+      rtcEngine.stopPrimaryScreenCapture()
+    }
   }
 
   renderRightBar = () => {
@@ -373,8 +385,9 @@ export default class LocalVideoTranscoder
   renderItem = ({ isMyself, uid }: User) => {
     const { channelId } = this.state
     const videoSourceType = isMyself
-      ? VideoSourceType.VideoSourceCameraPrimary
+      ? VideoSourceType.VideoSourceTranscoded
       : VideoSourceType.VideoSourceRemote
+
     return (
       <List.Item>
         <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>
