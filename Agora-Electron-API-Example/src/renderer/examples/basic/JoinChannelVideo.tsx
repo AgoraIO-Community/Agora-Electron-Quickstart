@@ -164,7 +164,8 @@ export default class JoinChannelVideo
   }
 
   onPressJoinChannel = (channelId: string) => {
-    const { firstCameraId, secondCameraId } = this.state
+    const { firstCameraId, secondCameraId, currentFps, currentResolution } =
+      this.state
     this.setState({ channelId })
     this.rtcEngine.enableAudio()
     this.rtcEngine.enableVideo()
@@ -175,14 +176,24 @@ export default class JoinChannelVideo
       AudioProfileType.AudioProfileDefault,
       AudioScenarioType.AudioScenarioChatroom
     )
- 
+
     console.log('firstCameraId, secondCameraId ', firstCameraId, secondCameraId)
     const start1Res = this.rtcEngine?.startPrimaryCameraCapture({
       deviceId: firstCameraId,
+      format: {
+        width: currentResolution.width,
+        height: currentResolution.height,
+        fps: currentFps,
+      },
     })
     console.log('startPrimaryCameraCapture', start1Res)
     // const start2Res = this.rtcEngine?.startSecondaryCameraCapture({
     //   deviceId: secondCameraId,
+    //   format: {
+    //     width: currentResolution.width,
+    //     height: currentResolution.height,
+    //     fps: currentFps,
+    //   },
     // })
     // console.log('startSecondaryCameraCapture', start2Res)
 
