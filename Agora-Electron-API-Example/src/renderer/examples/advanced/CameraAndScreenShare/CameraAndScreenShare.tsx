@@ -2,13 +2,14 @@ import creteAgoraRtcEngine, {
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
+  IVideoDeviceManagerImpl,
   RtcConnection,
   RtcEngineExImplInternal,
   RtcStats,
   UserOfflineReasonType,
   VideoSourceType,
 } from 'agora-electron-sdk'
-import { Card, message } from 'antd'
+import { Card, Switch } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
@@ -19,38 +20,57 @@ import { getRandomInt } from '../../util'
 import { rgbImageBufferToBase64 } from '../../util/base64'
 import screenStyle from './CameraAndScreenShare.scss'
 
-const locaScreenlUid1 = getRandomInt(1, 9999999)
-const locaScreenlUid2 = getRandomInt(1, 9999999)
+const localUid1 = getRandomInt(1, 9999999)
+const localUid2 = getRandomInt(1, 9999999)
 
 interface State {
   captureInfoList: any[]
-  currentWindowSourceId?: number
-  currentScreenSourceId?: number
+  currentShare?: any
   channelId: string
-  isShared: boolean
+  isStart: boolean
+  cameraDevices: Device[]
+  firstCameraId: string
+  enableShare: boolean
+  enableCamera: boolean
+}
+interface Device {
+  deviceId: string
+  deviceName: string
 }
 
 export default class CameraAndScreenShare
   extends Component<{}, State, any>
   implements IRtcEngineEventHandlerEx
 {
+  videoDeviceManager: IVideoDeviceManagerImpl
+
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
   state: State = {
     captureInfoList: [],
     channelId: '',
-    isShared: false,
+    isStart: false,
+    cameraDevices: [],
+    firstCameraId: '',
+    enableShare: true,
+    enableCamera: true,
   }
 
   componentDidMount = async () => {
     this.getScreenCaptureInfo()
 
     this.getRtcEngine().registerEventHandler(this)
+
+    this.videoDeviceManager = new IVideoDeviceManagerImpl()
+
+    this.setState({
+      cameraDevices: this.videoDeviceManager.enumerateVideoDevices() as any,
+    })
   }
 
   componentWillUnmount() {
     this.rtcEngine?.unregisterEventHandler(this)
-    this.onPressStopSharing()
+    this.onPressStop()
     this.getRtcEngine().release()
   }
 
@@ -153,14 +173,52 @@ export default class CameraAndScreenShare
     console.error(err, msg)
   }
 
-  startWindowCapture = (channelId: string) => {
-    const { currentWindowSourceId } = this.state
+  startCameraCapture = (channelId: string) => {
+    const { firstCameraId, enableCamera } = this.state
+    if (!enableCamera) {
+      return
+    }
+    const rtcEngine = this.getRtcEngine()
+    let res = rtcEngine.startPrimaryCameraCapture({ deviceId: firstCameraId })
+    console.log('startPrimaryCameraCapture', res)
+
+    res = rtcEngine.joinChannelEx(
+      '',
+      {
+        localUid: localUid2,
+        channelId,
+      },
+      {
+        publishCameraTrack: true,
+        publishAudioTrack: false,
+        publishScreenTrack: false,
+        publishCustomAudioTrack: false,
+        publishCustomVideoTrack: false,
+        publishEncodedVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
+        publishMediaPlayerVideoTrack: false,
+        autoSubscribeAudio: false,
+        autoSubscribeVideo: false,
+        clientRoleType: 1,
+      }
+    )
+    console.log('joinChannelEx', res)
+  }
+
+  startScreenCapture = (channelId: string) => {
+    const { currentShare, enableShare } = this.state
+    if (!enableShare) {
+      return
+    }
+    const { isScreen, sourceId } = currentShare
+    console.log(currentShare)
 
     const rtcEngine = this.getRtcEngine()
-    rtcEngine.startPrimaryScreenCapture({
-      isCaptureWindow: true,
+    let res = rtcEngine.startPrimaryScreenCapture({
+      isCaptureWindow: !isScreen,
       screenRect: { width: 0, height: 0, x: 0, y: 0 },
-      windowId: currentWindowSourceId,
+      windowId: sourceId,
+      displayId: sourceId,
       params: {
         dimensions: { width: 1920, height: 1080 },
         bitrate: 1000,
@@ -173,16 +231,19 @@ export default class CameraAndScreenShare
 
       regionRect: { x: 0, y: 0, width: 0, height: 0 },
     })
-    rtcEngine.joinChannelEx(
+    console.log('startPrimaryScreenCapture', res)
+
+    res = rtcEngine.joinChannelEx(
       '',
       {
-        localUid: locaScreenlUid1,
+        localUid: localUid1,
         channelId,
       },
       {
         publishCameraTrack: false,
         publishAudioTrack: false,
         publishScreenTrack: true,
+        publishSecondaryScreenTrack: false,
         publishCustomAudioTrack: false,
         publishCustomVideoTrack: false,
         publishEncodedVideoTrack: false,
@@ -193,78 +254,25 @@ export default class CameraAndScreenShare
         clientRoleType: 1,
       }
     )
+    console.log('joinChannelEx', res)
   }
 
-  startScreenCapture = (channelId: string) => {
-    const { currentScreenSourceId } = this.state
-
-    const rtcEngine = this.getRtcEngine()
-    rtcEngine.startSecondaryScreenCapture({
-      isCaptureWindow: false,
-      screenRect: { width: 0, height: 0, x: 0, y: 0 },
-      windowId: currentScreenSourceId,
-      params: {
-        dimensions: { width: 1920, height: 1080 },
-        bitrate: 1000,
-        frameRate: 15,
-        captureMouseCursor: false,
-        windowFocus: false,
-        excludeWindowList: [],
-        excludeWindowCount: 0,
-      },
-
-      regionRect: { x: 0, y: 0, width: 0, height: 0 },
-    })
-
-    rtcEngine.joinChannelEx(
-      '',
-      {
-        localUid: locaScreenlUid2,
-        channelId,
-      },
-      {
-        publishCameraTrack: false,
-        publishAudioTrack: false,
-        publishScreenTrack: false,
-        publishSecondaryScreenTrack: true,
-        publishCustomAudioTrack: false,
-        publishCustomVideoTrack: false,
-        publishEncodedVideoTrack: false,
-        publishMediaPlayerAudioTrack: false,
-        publishMediaPlayerVideoTrack: false,
-        autoSubscribeAudio: false,
-        autoSubscribeVideo: false,
-        clientRoleType: 1,
-      }
-    )
-  }
-
-  onPressStartShare = async (channelId: string) => {
-    const { currentScreenSourceId, currentWindowSourceId } = this.state
-    if (
-      currentScreenSourceId === undefined ||
-      currentWindowSourceId === undefined
-    ) {
-      message.error(
-        `Must select window:${currentWindowSourceId} and screen:${currentScreenSourceId} to share`
-      )
-      return true
-    }
-    this.setState({ channelId, isShared: true })
-    await this.startWindowCapture(channelId)
+  onPressStart = async (channelId: string) => {
+    this.setState({ channelId, isStart: true })
     await this.startScreenCapture(channelId)
+    await this.startCameraCapture(channelId)
 
     return false
   }
 
-  onPressStopSharing = () => {
-    this.setState({ isShared: false })
+  onPressStop = () => {
+    this.setState({ isStart: false })
     const rtcEngine = this.getRtcEngine()
     rtcEngine.stopPrimaryScreenCapture()
-    rtcEngine.stopSecondaryScreenCapture()
+
     const { channelId } = this.state
-    rtcEngine.leaveChannelEx({ channelId, localUid: locaScreenlUid1 })
-    rtcEngine.leaveChannelEx({ channelId, localUid: locaScreenlUid2 })
+    rtcEngine.leaveChannelEx({ channelId, localUid: localUid1 })
+    rtcEngine.leaveChannelEx({ channelId, localUid: localUid2 })
   }
 
   renderPopup = (item: { image: string }) => {
@@ -280,89 +288,117 @@ export default class CameraAndScreenShare
   }
 
   renderRightBar = () => {
-    const { captureInfoList } = this.state
-
-    const screenList = captureInfoList
-      .filter((obj) => obj.isScreen)
-      .map((obj) => ({
-        dropId: obj,
-        dropText: obj.sourceName,
-      }))
-    const windowList = captureInfoList
-      .filter((obj) => !obj.isScreen)
-      .map((obj) => ({
-        dropId: obj,
-        dropText: obj.sourceTitle,
-      }))
-
+    const { captureInfoList, cameraDevices, enableShare, enableCamera } =
+      this.state
     return (
       <div className={styles.rightBar}>
         <div>
-          <div>Please Select a window/scrren to share</div>
-          <DropDownButton
-            defaultIndex={0}
-            title='Screen Share'
-            options={screenList}
-            PopContent={this.renderPopup}
-            PopContentTitle='Preview'
-            onPress={(res) => {
-              console.log('Screen Share choose', res.dropId.sourceId)
-              const sourceId = res.dropId.sourceId
-              if (sourceId === undefined) {
-                return
-              }
-              this.setState({ currentScreenSourceId: sourceId })
+          <div>Please Select camera and screen </div>
+          <div
+            style={{
+              display: 'flex',
+              textAlign: 'center',
+              alignItems: 'center',
             }}
-          />
-          <DropDownButton
-            defaultIndex={0}
-            title='Windows Share'
-            options={windowList}
-            PopContent={this.renderPopup}
-            PopContentTitle='Preview'
-            onPress={(res) => {
-              console.log('Windows Share choose', res.dropId.sourceId)
-              const sourceId = res.dropId.sourceId
-              if (sourceId === undefined) {
-                return
-              }
-              this.setState({ currentWindowSourceId: sourceId })
+          >
+            {'Enable Camera:   '}
+            <Switch
+              checkedChildren='Enable'
+              unCheckedChildren='Disable'
+              defaultChecked={enableCamera}
+              onChange={(value) => {
+                this.setState({ enableCamera: value })
+              }}
+            />
+          </div>
+          {enableCamera && (
+            <DropDownButton
+              options={cameraDevices.map((obj) => {
+                const { deviceId, deviceName } = obj
+                return { dropId: deviceId, dropText: deviceName, ...obj }
+              })}
+              onPress={(res) => {
+                const deviceId = res.dropId
+                this.setState({ firstCameraId: deviceId })
+              }}
+              title='Camera Device'
+            />
+          )}
+          <br />
+          <div
+            style={{
+              display: 'flex',
+              textAlign: 'center',
+              alignItems: 'center',
             }}
-          />
+          >
+            {'Enable Share:   '}
+            <Switch
+              checkedChildren='Enable'
+              unCheckedChildren='Disable'
+              defaultChecked={enableShare}
+              onChange={(value) => {
+                this.setState({ enableShare: value })
+              }}
+            />
+          </div>
+          {enableShare && (
+            <DropDownButton
+              defaultIndex={0}
+              title='Share Window/Screen'
+              options={captureInfoList.map((obj) => ({
+                dropId: obj,
+                dropText: obj.sourceName || obj.sourceTitle,
+              }))}
+              PopContent={this.renderPopup}
+              PopContentTitle='Preview'
+              onPress={(res) => {
+                const info = res.dropId
+                if (info === undefined) {
+                  return
+                }
+                this.setState({ currentShare: info })
+              }}
+            />
+          )}
         </div>
         <JoinChannelBar
-          buttonTitle='Start Share'
-          buttonTitleDisable='Stop Share'
-          onPressJoin={this.onPressStartShare}
-          onPressLeave={this.onPressStopSharing}
+          buttonTitle='Start'
+          buttonTitleDisable='Stop'
+          onPressJoin={this.onPressStart}
+          onPressLeave={this.onPressStop}
         />
       </div>
     )
   }
 
   render() {
-    const { isShared, channelId } = this.state
+    const { isStart, channelId, enableCamera, enableShare } = this.state
     return (
       <div className={styles.screen}>
         <div className={styles.content}>
-          {isShared && (
+          {isStart && (
             <>
-              <Card title='Local Share1' className={styles.card}>
-                <Window
-                  uid={locaScreenlUid1}
-                  rtcEngine={this.rtcEngine!}
-                  videoSourceType={VideoSourceType.VideoSourceScreenPrimary}
-                  channelId={channelId}
-                />
-              </Card>
-              <Card title='Local Share2' className={styles.card}>
-                <Window
-                  uid={locaScreenlUid2}
-                  rtcEngine={this.rtcEngine!}
-                  videoSourceType={VideoSourceType.VideoSourceScreenSecondary}
-                  channelId={channelId}
-                />
-              </Card>
+              {enableShare && (
+                <Card title='Local Share' className={styles.card}>
+                  <Window
+                    uid={localUid1}
+                    rtcEngine={this.rtcEngine!}
+                    videoSourceType={VideoSourceType.VideoSourceScreenPrimary}
+                    channelId={channelId}
+                  />
+                </Card>
+              )}
+              {enableCamera && (
+                <Card title='Local Camera' className={styles.card}>
+                  <Window
+                    uid={localUid2}
+                    rtcEngine={this.rtcEngine!}
+                    videoSourceType={VideoSourceType.VideoSourceCamera}
+                    channelId={channelId}
+                  />
+                </Card>
+              )}
             </>
           )}
         </div>
