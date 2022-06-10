@@ -1,11 +1,12 @@
 import AudioMixing from './AudioMixing/AudioMixing'
+import CameraAndScreenShare from './CameraAndScreenShare/CameraAndScreenShare'
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 import ContentInspect from './ContentInspect/ContentInspect'
 import CreateDataStream from './CreateDataStream/CreateDataStream'
 import DirectCdnStreaming from './DirectCdnStreaming/DirectCdnStreaming'
-import MultipleChannel from './MultipleChannel/MultipleChannel'
 import LocalVideoTranscoder from './LocalVideoTranscoder/LocalVideoTranscoder'
 import MediaPlayer from './MediaPlayer/MediaPlayer'
+import MultipleChannel from './MultipleChannel/MultipleChannel'
 import RhythmPlayer from './RhythmPlayer/RhythmPlayer'
 import ScreenShare from './ScreenShare/ScreenShare'
 import SendMetaData from './SendMetaData/SendMetaData'
@@ -17,6 +18,11 @@ import VirtualBackground from './VirtualBackground/VirtualBackground'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
+  {
+    path: '/CameraAndScreenShare',
+    component: CameraAndScreenShare,
+    title: 'CameraAndScreenShare',
+  },
   {
     path: '/DirectCdnStreaming',
     component: DirectCdnStreaming,
