@@ -39,7 +39,7 @@ interface State {
   isJoined2: boolean
 }
 
-export default class JoinMultipleChannel
+export default class MultipleChannel
   extends Component<{}, State, any>
   implements IRtcEngineEventHandlerEx
 {

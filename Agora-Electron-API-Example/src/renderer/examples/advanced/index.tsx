@@ -3,7 +3,7 @@ import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay'
 import ContentInspect from './ContentInspect/ContentInspect'
 import CreateDataStream from './CreateDataStream/CreateDataStream'
 import DirectCdnStreaming from './DirectCdnStreaming/DirectCdnStreaming'
-import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel'
+import MultipleChannel from './MultipleChannel/MultipleChannel'
 import LocalVideoTranscoder from './LocalVideoTranscoder/LocalVideoTranscoder'
 import MediaPlayer from './MediaPlayer/MediaPlayer'
 import RhythmPlayer from './RhythmPlayer/RhythmPlayer'
@@ -73,9 +73,9 @@ const advanceRoute = [
     title: 'CreateDataStream',
   },
   {
-    path: '/JoinMultipleChannel',
-    component: JoinMultipleChannel,
-    title: 'JoinMultipleChannel',
+    path: '/MultipleChannel',
+    component: MultipleChannel,
+    title: 'MultipleChannel',
   },
   {
     path: '/AudioMixing',
