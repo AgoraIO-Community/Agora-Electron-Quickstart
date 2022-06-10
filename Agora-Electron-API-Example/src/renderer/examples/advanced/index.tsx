@@ -18,10 +18,26 @@ import VirtualBackground from './VirtualBackground/VirtualBackground'
 import VoiceChanger from './VoiceChanger/VoiceChanger'
 
 const advanceRoute = [
+  { path: '/AudioMixing', component: AudioMixing, title: 'AudioMixing' },
   {
     path: '/CameraAndScreenShare',
     component: CameraAndScreenShare,
     title: 'CameraAndScreenShare',
+  },
+  {
+    path: '/ChannelMediaRelay',
+    component: ChannelMediaRelay,
+    title: 'ChannelMediaRelay',
+  },
+  {
+    path: '/ContentInspect',
+    component: ContentInspect,
+    title: 'ContentInspect',
+  },
+  {
+    path: '/CreateDataStream',
+    component: CreateDataStream,
+    title: 'CreateDataStream',
   },
   {
     path: '/DirectCdnStreaming',
@@ -33,81 +49,29 @@ const advanceRoute = [
     component: LocalVideoTranscoder,
     title: 'LocalVideoTranscoder',
   },
-  {
-    path: '/SendMetaData',
-    component: SendMetaData,
-    title: 'SendMetaData',
-  },
-  {
-    path: '/RhythmPlayer',
-    component: RhythmPlayer,
-    title: 'RhythmPlayer',
-  },
-  {
-    path: '/ContentInspect',
-    component: ContentInspect,
-    title: 'ContentInspect',
-  },
-  {
-    path: '/SpatialAudio',
-    component: SpatialAudio,
-    title: 'SpatialAudio',
-  },
-  {
-    path: '/VirtualBackground',
-    component: VirtualBackground,
-    title: 'VirtualBackground',
-  },
-  {
-    path: '/TakeSnapshot',
-    component: TakeSnapshot,
-    title: 'TakeSnapshot',
-  },
-  {
-    path: '/ScreenShare',
-    component: ScreenShare,
-    title: 'ScreenShare',
-  },
-  {
-    path: '/ChannelMediaRelay',
-    component: ChannelMediaRelay,
-    title: 'ChannelMediaRelay',
-  },
-  {
-    path: '/CreateDataStream',
-    component: CreateDataStream,
-    title: 'CreateDataStream',
-  },
+  { path: '/MediaPlayer', component: MediaPlayer, title: 'MediaPlayer' },
   {
     path: '/MultipleChannel',
     component: MultipleChannel,
     title: 'MultipleChannel',
   },
-  {
-    path: '/AudioMixing',
-    component: AudioMixing,
-    title: 'AudioMixing',
-  },
-  {
-    path: '/SetEncryption',
-    component: SetEncryption,
-    title: 'SetEncryption',
-  },
-  {
-    path: '/VoiceChanger',
-    component: VoiceChanger,
-    title: 'VoiceChanger',
-  },
+  { path: '/RhythmPlayer', component: RhythmPlayer, title: 'RhythmPlayer' },
+  { path: '/ScreenShare', component: ScreenShare, title: 'ScreenShare' },
+  { path: '/SendMetaData', component: SendMetaData, title: 'SendMetaData' },
+  { path: '/SetEncryption', component: SetEncryption, title: 'SetEncryption' },
   {
     path: '/SetLiveTranscoding',
     component: SetLiveTranscoding,
     title: 'SetLiveTranscoding',
   },
+  { path: '/SpatialAudio', component: SpatialAudio, title: 'SpatialAudio' },
+  { path: '/TakeSnapshot', component: TakeSnapshot, title: 'TakeSnapshot' },
   {
-    path: '/MediaPlayer',
-    component: MediaPlayer,
-    title: 'MediaPlayer',
+    path: '/VirtualBackground',
+    component: VirtualBackground,
+    title: 'VirtualBackground',
   },
+  { path: '/VoiceChanger', component: VoiceChanger, title: 'VoiceChanger' },
 ]
 
 export default advanceRoute
