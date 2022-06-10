@@ -168,6 +168,14 @@ export default class JoinChannelVideo
     this.setState({ channelId })
     this.rtcEngine.enableAudio()
     this.rtcEngine.enableVideo()
+    this.rtcEngine?.setChannelProfile(
+      ChannelProfileType.ChannelProfileLiveBroadcasting
+    )
+    this.rtcEngine?.setAudioProfile(
+      AudioProfileType.AudioProfileDefault,
+      AudioScenarioType.AudioScenarioChatroom
+    )
+ 
     console.log('firstCameraId, secondCameraId ', firstCameraId, secondCameraId)
     const start1Res = this.rtcEngine?.startPrimaryCameraCapture({
       deviceId: firstCameraId,
@@ -177,13 +185,6 @@ export default class JoinChannelVideo
     //   deviceId: secondCameraId,
     // })
     // console.log('startSecondaryCameraCapture', start2Res)
-    this.rtcEngine?.setChannelProfile(
-      ChannelProfileType.ChannelProfileLiveBroadcasting
-    )
-    this.rtcEngine?.setAudioProfile(
-      AudioProfileType.AudioProfileDefault,
-      AudioScenarioType.AudioScenarioChatroom
-    )
 
     const res1 = this.rtcEngine?.joinChannelEx(
       '',
@@ -198,19 +199,19 @@ export default class JoinChannelVideo
       }
     )
     console.log(`localUid1: ${localUid1} joinChannel2: ${res1}`)
-    const res2 = this.rtcEngine?.joinChannelEx(
-      '',
-      {
-        channelId,
-        localUid: localUid2,
-      },
-      {
-        publishSecondaryCameraTrack: true,
-        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
-        channelProfile: ChannelProfileType.ChannelProfileCommunication,
-      }
-    )
-    console.log(`localUid1: ${localUid2} joinChannel2: ${res2}`)
+    // const res2 = this.rtcEngine?.joinChannelEx(
+    //   '',
+    //   {
+    //     channelId,
+    //     localUid: localUid2,
+    //   },
+    //   {
+    //     publishSecondaryCameraTrack: true,
+    //     clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+    //     channelProfile: ChannelProfileType.ChannelProfileCommunication,
+    //   }
+    // )
+    // console.log(`localUid1: ${localUid2} joinChannel2: ${res2}`)
   }
 
   setVideoConfig = () => {
@@ -248,7 +249,7 @@ export default class JoinChannelVideo
             }}
             title='First Camera'
           />
-          <DropDownButton
+          {/* <DropDownButton
             options={cameraDevices.map((obj) => {
               const { deviceId, deviceName } = obj
               return { dropId: deviceId, dropText: deviceName, ...obj }
@@ -258,7 +259,7 @@ export default class JoinChannelVideo
               this.setState({ firstCameraId: deviceId })
             }}
             title='Second Camera'
-          />
+          /> */}
           <DropDownButton
             title='Microphone'
             options={audioRecordDevices.map((obj) => {

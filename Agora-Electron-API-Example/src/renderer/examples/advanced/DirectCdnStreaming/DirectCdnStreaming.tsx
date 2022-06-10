@@ -2,10 +2,10 @@ import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
-  ContentInspectDeviceType,
-  ContentInspectResult,
-  ContentInspectType,
   DegradationPreference,
+  DirectCdnStreamingError,
+  DirectCdnStreamingState,
+  DirectCdnStreamingStats,
   IAudioDeviceManagerImpl,
   IDirectCdnStreamingEventHandler,
   IRtcEngine,
@@ -22,7 +22,7 @@ import creteAgoraRtcEngine, {
   VideoMirrorModeType,
   VideoSourceType,
 } from 'agora-electron-sdk'
-import { Card, List, Switch } from 'antd'
+import { Card, Input, List } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
@@ -31,6 +31,8 @@ import { FpsMap, ResolutionMap, RoleTypeMap } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
 import { configMapToOptions, getRandomInt } from '../../util'
+
+const { Search } = Input
 
 interface Device {
   deviceId: string
@@ -50,7 +52,8 @@ interface State {
   cameraDevices: Device[]
   currentFps?: number
   currentResolution?: { width: number; height: number }
-  contentInspectResult: string
+  cdnResult: string
+  isStartCDN: boolean
 }
 const localUid = getRandomInt(1, 9999999)
 
@@ -70,7 +73,8 @@ export default class DirectCdnStreaming
     isJoined: false,
     audioRecordDevices: [],
     cameraDevices: [],
-    contentInspectResult: '',
+    cdnResult: '',
+    isStartCDN: false,
   }
 
   componentDidMount() {
@@ -225,36 +229,39 @@ export default class DirectCdnStreaming
       mirrorMode: VideoMirrorModeType.VideoMirrorModeAuto,
     })
   }
-  onContentInspectResult(result: ContentInspectResult): void {
-    console.log('onContentInspectResult', result)
 
-    let contentInspectResult = ''
-    switch (result) {
-      case ContentInspectResult.ContentInspectNeutral:
-        contentInspectResult = 'Neutral'
+  onDirectCdnStreamingStateChanged?(
+    state: DirectCdnStreamingState,
+    error: DirectCdnStreamingError,
+    message: string
+  ): void {
+    console.log('onDirectCdnStreamingStateChanged', state, error, message)
+
+    let cdnResult = ''
+    switch (state) {
+      case DirectCdnStreamingState.DirectCdnStreamingStateIdle:
+        cdnResult = 'Idle'
         break
-      case ContentInspectResult.ContentInspectSexy:
-        contentInspectResult = 'Sexy'
+      case DirectCdnStreamingState.DirectCdnStreamingStateRunning:
+        cdnResult = 'Running'
         break
-      case ContentInspectResult.ContentInspectPorn:
-        contentInspectResult = 'Porn'
+      case DirectCdnStreamingState.DirectCdnStreamingStateStopped:
+        cdnResult = 'Stopped'
+        break
+      case DirectCdnStreamingState.DirectCdnStreamingStateFailed:
+        cdnResult = 'Failed'
+        break
+      case DirectCdnStreamingState.DirectCdnStreamingStateRecovering:
+        cdnResult = 'Recovering'
         break
       default:
         break
     }
-    this.setState({ contentInspectResult })
+    this.setState({ cdnResult })
   }
 
-  onPressContentInspect = (enable) => {
-    const res = this.getRtcEngine().startDirectCdnStreaming(this, '', {
-      publishCameraTrack: false,
-      publishMicrophoneTrack: false,
-      publishCustomAudioTrack: false,
-      publishCustomVideoTrack: false,
-      publishMediaPlayerAudioTrack: false,
-      publishMediaPlayerId: false,
-    })
-    console.log('enableSpatialAudio', enable, '\nres:', res)
+  onDirectCdnStreamingStats?(stats: DirectCdnStreamingStats): void {
+    console.log('onDirectCdnStreamingStats', stats)
   }
 
   renderRightBar = () => {
@@ -262,28 +269,13 @@ export default class DirectCdnStreaming
       audioRecordDevices,
       cameraDevices,
       isJoined,
-      contentInspectResult,
+      cdnResult,
+      isStartCDN,
     } = this.state
 
     return (
       <div className={styles.rightBar}>
         <div>
-          <div
-            style={{
-              display: 'flex',
-              textAlign: 'center',
-              alignItems: 'center',
-            }}
-          >
-            {'ContentInspect:   '}
-            <Switch
-              checkedChildren='Enable'
-              unCheckedChildren='Disable'
-              defaultChecked={false}
-              onChange={this.onPressContentInspect}
-            />
-          </div>
-          <p>{'Result: ' + contentInspectResult}</p>
           <DropDownButton
             options={cameraDevices.map((obj) => {
               const { deviceId, deviceName } = obj
@@ -328,6 +320,34 @@ export default class DirectCdnStreaming
               this.setState({ currentFps: res.dropId }, this.setVideoConfig)
             }}
           />
+          <br />
+          <Search
+            placeholder='publishUrl'
+            allowClear
+            defaultValue={'rtmp://examplepush.agoramde.agoraio.cn/live/xxx'}
+            enterButton={!isStartCDN ? 'Start CDN' : 'Stop CDN'}
+            size='small'
+            // disabled={!isJoined}
+            onSearch={(publishUrl) => {
+              const rtcEngine = this.getRtcEngine()
+              let res
+              if (!isStartCDN) {
+                res = rtcEngine.startDirectCdnStreaming(this, publishUrl, {
+                  publishCameraTrack: true,
+                  publishMicrophoneTrack: false,
+                  publishCustomAudioTrack: false,
+                  publishCustomVideoTrack: false,
+                  publishMediaPlayerAudioTrack: false,
+                })
+                console.log('startDirectCdnStreaming', '\nres:', res)
+              } else {
+                res = rtcEngine.stopDirectCdnStreaming()
+                console.log('stopDirectCdnStreaming', '\nres:', res)
+              }
+              this.setState({ isStartCDN: !isStartCDN })
+            }}
+          />
+          <p>{'Result: ' + cdnResult}</p>
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
