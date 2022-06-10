@@ -203,8 +203,8 @@ export default class LocalVideoTranscoder
     this.rtcEngine.startPrimaryCameraCapture({
       deviceId: videoDeviceId,
     })
-    const config = this.getLocalTranscoderConfiguration()
-    this.rtcEngine.startLocalVideoTranscoder(config)
+    const localTranscoderConfiguration = this.getLocalTranscoderConfiguration()
+    this.rtcEngine.startLocalVideoTranscoder(localTranscoderConfiguration)
     this.rtcEngine.joinChannel2('', channelId, localUid1, {
       publishCameraTrack: false,
       publishScreenTrack: false,
@@ -229,6 +229,7 @@ export default class LocalVideoTranscoder
       mirrorMode: VideoMirrorModeType.VideoMirrorModeAuto,
     })
   }
+
   getLocalTranscoderConfiguration = () => {
     const { isAddScreenShare } = this.state
     const cameraStream = {
@@ -267,12 +268,12 @@ export default class LocalVideoTranscoder
       }
       streams.push(screenShareStream)
     }
-    const config: LocalTranscoderConfiguration = {
+    const localTranscoderConfiguration: LocalTranscoderConfiguration = {
       streamCount: streams.length,
       VideoInputStreams: streams,
       videoOutputConfiguration: { dimensions: { width: 1080, height: 720 } },
     }
-    return config
+    return localTranscoderConfiguration
   }
 
   onPressLeaveChannel = () => {
