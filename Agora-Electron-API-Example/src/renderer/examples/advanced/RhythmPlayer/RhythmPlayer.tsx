@@ -17,7 +17,7 @@ import SliderBar from '../../component/SliderBar'
 import { AudioProfileList, AudioScenarioList } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
-import { configMapToOptions, getRandomInt } from '../../util'
+import { configMapToOptions, getRandomInt, getResourcePath } from '../../util'
 
 const { Search } = Input
 
@@ -58,8 +58,8 @@ export default class RhythmPlayer
     isJoined: false,
     beatsPerMeasure: 4,
     beatsPerMinute: 360,
-    file1: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-    file2: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3',
+    file1: getResourcePath('rhythm.mp3'),
+    file2: getResourcePath('audioEffect.mp3'),
   }
 
   componentDidMount() {
@@ -155,6 +155,7 @@ export default class RhythmPlayer
     const { audioProfile, audioScenario } = this.state
     this.rtcEngine?.setAudioProfile(audioProfile, audioScenario)
   }
+
   onPressRhythmPlayer = (enabled) => {
     if (enabled) {
       const { beatsPerMeasure, beatsPerMinute, file1, file2 } = this.state
@@ -224,7 +225,7 @@ export default class RhythmPlayer
           <br></br>
           <Search
             placeholder={'please input path or url'}
-            defaultValue='https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+            defaultValue={file1}
             allowClear
             enterButton={'File1'}
             size='small'
@@ -235,7 +236,7 @@ export default class RhythmPlayer
           <br />
           <Search
             placeholder={'please input path or url'}
-            defaultValue='https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3'
+            defaultValue={file2}
             allowClear
             enterButton={'File2'}
             size='small'

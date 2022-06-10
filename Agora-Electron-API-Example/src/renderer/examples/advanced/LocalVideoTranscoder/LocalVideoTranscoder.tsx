@@ -28,7 +28,7 @@ import Window from '../../component/Window'
 import { FpsMap, ResolutionMap, RoleTypeMap } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
-import { configMapToOptions, getRandomInt } from '../../util'
+import { configMapToOptions, getRandomInt, getResourcePath } from '../../util';
 
 const localUid1 = getRandomInt()
 const localUid2 = getRandomInt()
@@ -246,7 +246,7 @@ export default class LocalVideoTranscoder
 
     streams.push({
       sourceType: MediaSourceType.RtcImagePngSource,
-      imageUrl: '/Users/jerry/Downloads/1.png',
+      imageUrl: getResourcePath('png.png'),
       x: 640,
       y: 0,
       width: 300,
