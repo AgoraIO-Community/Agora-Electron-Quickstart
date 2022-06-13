@@ -71,7 +71,7 @@ export default class JoinChannelVideo
     firstCameraId: '',
     secondCameraId: '',
     currentResolution: ResolutionMap['120x120'],
-    currentFps: 15,
+    currentFps: FpsMap['15fps'],
   }
 
   componentDidMount() {
