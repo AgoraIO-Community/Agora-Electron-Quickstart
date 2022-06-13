@@ -7,6 +7,7 @@ import creteAgoraRtcEngine, {
 } from 'agora-electron-sdk'
 import { Card, message, Switch } from 'antd'
 import { Component } from 'react'
+import ChooseFilterWindowModal from '../../component/ChooseFilterWindowModal'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
 import Window from '../../component/Window'
@@ -132,7 +133,7 @@ export default class ScreenShare extends Component<{}, State, any> {
     )
   }
 
-  startScreenCapture = (channelId: string) => {
+  startScreenCapture = (channelId: string, excludeWindows: number[]) => {
     const { currentScreenSourceId, currentFps, currentResolution } = this.state
 
     const rtcEngine = this.getRtcEngine()
@@ -145,8 +146,8 @@ export default class ScreenShare extends Component<{}, State, any> {
         frameRate: currentFps,
         captureMouseCursor: false,
         windowFocus: false,
-        excludeWindowList: [],
-        excludeWindowCount: 0,
+        excludeWindowList: excludeWindows,
+        excludeWindowCount: excludeWindows.length,
       },
 
       regionRect: { x: 0, y: 0, width: 0, height: 0 },
@@ -186,9 +187,24 @@ export default class ScreenShare extends Component<{}, State, any> {
       )
       return true
     }
+    const { captureInfoList } = this.state
+
+    const windowIds = captureInfoList
+      .filter((obj) => !obj.isScreen)
+      .map((obj) => obj.sourceId)
+
+    let excludeWindows: number[] = []
+    //@ts-ignore
+    const isCancel = !(await this.modal.showModal(windowIds, (res) => {
+      excludeWindows = (res && res.map((windowId) => parseInt(windowId))) || []
+    }))
+    if (isCancel) {
+      return true
+    }
+
     this.setState({ channelId, isShared: true })
     await this.startWindowCapture(channelId)
-    await this.startScreenCapture(channelId)
+    await this.startScreenCapture(channelId, excludeWindows)
 
     return false
   }
@@ -338,6 +354,12 @@ export default class ScreenShare extends Component<{}, State, any> {
           buttonTitleDisable='Stop Share'
           onPressJoin={this.onPressStartShare}
           onPressLeave={this.onPressStopSharing}
+        />
+        <ChooseFilterWindowModal
+          cRef={(ref) => {
+            //@ts-ignore
+            this.modal = ref
+          }}
         />
       </div>
     )

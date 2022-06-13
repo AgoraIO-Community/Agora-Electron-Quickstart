@@ -12,7 +12,10 @@ const ChooseFilterWindowModal = ({ cRef }) => {
   const [checkAll, setCheckAll] = useState(false)
 
   const dismissModal = (result: boolean) => {
-    resultResolve && resultResolve(result)
+    if (resultResolve) {
+      resultResolve(result)
+    }
+
     setIsModalVisible(false)
   }
 
