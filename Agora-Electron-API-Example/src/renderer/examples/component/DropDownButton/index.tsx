@@ -39,7 +39,7 @@ const DropDownButton = ({
   }
   const { dropText: currentText } = options[selectIndex] || {}
   useEffect(() => {
-    warpOnPress({ key: 0 })
+    warpOnPress({ key: selectIndex })
   }, [options.length])
   return (
     <div>

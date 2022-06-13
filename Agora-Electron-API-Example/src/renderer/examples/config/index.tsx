@@ -46,6 +46,7 @@ export const ResolutionMap = {
   '1920x1080': { width: 1920, height: 1080 },
 }
 export const FpsMap = {
+  '7fps': FrameRate.FrameRateFps7,
   '15fps': FrameRate.FrameRateFps15,
   '30fps': FrameRate.FrameRateFps30,
 }

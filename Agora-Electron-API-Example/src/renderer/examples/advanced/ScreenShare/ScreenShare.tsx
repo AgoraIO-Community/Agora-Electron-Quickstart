@@ -1,59 +1,53 @@
 import creteAgoraRtcEngine, {
+  ClientRoleType,
   IRtcEngine,
-  IRtcEngineEventHandlerEx,
   IRtcEngineEx,
-  RtcConnection,
   RtcEngineExImplInternal,
-  RtcStats,
-  UserOfflineReasonType,
   VideoSourceType,
 } from 'agora-electron-sdk'
-import { Card, message } from 'antd'
+import { Card, message, Switch } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
 import Window from '../../component/Window'
+import { FpsMap, ResolutionMap } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
-import { getRandomInt } from '../../util'
+import { configMapToOptions, getRandomInt } from '../../util'
 import { rgbImageBufferToBase64 } from '../../util/base64'
 import screenStyle from './ScreenShare.scss'
 
-const locaScreenlUid1 = getRandomInt(1, 9999999)
-const locaScreenlUid2 = getRandomInt(1, 9999999)
+const localScreenUid1 = getRandomInt(1, 9999999)
+const localScreenUid2 = getRandomInt(1, 9999999)
 
 interface State {
-  // currentFps?: number
-  // currentResolution?: { width: number; height: number }
+  currentFps: number
+  currentResolution: { width: number; height: number }
   captureInfoList: any[]
   currentWindowSourceId?: number
   currentScreenSourceId?: number
   channelId: string
   isShared: boolean
+  captureMouseCursor: boolean
 }
 
-const SCREEN_SHARE_ID = 99
-
-export default class ScreenShare
-  extends Component<{}, State, any>
-  implements IRtcEngineEventHandlerEx
-{
+export default class ScreenShare extends Component<{}, State, any> {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
   state: State = {
     captureInfoList: [],
     channelId: '',
     isShared: false,
+    currentResolution: ResolutionMap['1920x1080'],
+    currentFps: FpsMap['7fps'],
+    captureMouseCursor: false,
   }
 
   componentDidMount = async () => {
     this.getScreenCaptureInfo()
-
-    this.getRtcEngine().registerEventHandler(this)
   }
 
   componentWillUnmount() {
-    this.rtcEngine?.unregisterEventHandler(this)
     this.onPressStopSharing()
     this.getRtcEngine().release()
   }
@@ -97,68 +91,8 @@ export default class ScreenShare
     return this.rtcEngine
   }
 
-  onJoinChannelSuccessEx(
-    { channelId, localUid }: RtcConnection,
-    elapsed: number
-  ): void {
-    // this.setState({
-    //   localVideoSourceUid: connection.localUid,
-    // })
-    // const { allUser: oldAllUser } = this.state
-    // const newAllUser = [...oldAllUser]
-    // newAllUser.push({ isMyself: true, uid: localUid })
-    // this.setState({
-    //   isJoined: true,
-    //   allUser: newAllUser,
-    // })
-  }
-
-  onUserJoinedEx(
-    connection: RtcConnection,
-    remoteUid: number,
-    elapsed: number
-  ): void {
-    // console.log(
-    //   'onUserJoinedEx',
-    //   'connection',
-    //   connection,
-    //   'remoteUid',
-    //   remoteUid
-    // )
-    // const { allUser: oldAllUser } = this.state
-    // const newAllUser = [...oldAllUser]
-    // newAllUser.push({ isMyself: false, uid: remoteUid })
-    // this.setState({
-    //   allUser: newAllUser,
-    // })
-  }
-
-  onUserOfflineEx(
-    { localUid, channelId }: RtcConnection,
-    remoteUid: number,
-    reason: UserOfflineReasonType
-  ): void {
-    // console.log('onUserOfflineEx', channelId, remoteUid)
-    // const { allUser: oldAllUser } = this.state
-    // const newAllUser = [...oldAllUser.filter((obj) => obj.uid !== remoteUid)]
-    // this.setState({
-    //   allUser: newAllUser,
-    // })
-  }
-
-  onLeaveChannelEx(connection: RtcConnection, stats: RtcStats): void {
-    // this.setState({
-    //   isJoined: false,
-    //   allUser: [],
-    // })
-  }
-
-  onError(err: number, msg: string): void {
-    console.error(err, msg)
-  }
-
   startWindowCapture = (channelId: string) => {
-    const { currentWindowSourceId } = this.state
+    const { currentWindowSourceId, currentFps, currentResolution } = this.state
 
     const rtcEngine = this.getRtcEngine()
     rtcEngine.startPrimaryScreenCapture({
@@ -166,9 +100,8 @@ export default class ScreenShare
       screenRect: { width: 0, height: 0, x: 0, y: 0 },
       windowId: currentWindowSourceId,
       params: {
-        dimensions: { width: 1920, height: 1080 },
-        bitrate: 1000,
-        frameRate: 15,
+        dimensions: currentResolution,
+        frameRate: currentFps,
         captureMouseCursor: false,
         windowFocus: false,
         excludeWindowList: [],
@@ -180,7 +113,7 @@ export default class ScreenShare
     rtcEngine.joinChannelEx(
       '',
       {
-        localUid: locaScreenlUid1,
+        localUid: localScreenUid1,
         channelId,
       },
       {
@@ -194,13 +127,13 @@ export default class ScreenShare
         publishMediaPlayerVideoTrack: false,
         autoSubscribeAudio: false,
         autoSubscribeVideo: false,
-        clientRoleType: 1,
+        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
       }
     )
   }
 
   startScreenCapture = (channelId: string) => {
-    const { currentScreenSourceId } = this.state
+    const { currentScreenSourceId, currentFps, currentResolution } = this.state
 
     const rtcEngine = this.getRtcEngine()
     rtcEngine.startSecondaryScreenCapture({
@@ -208,9 +141,8 @@ export default class ScreenShare
       screenRect: { width: 0, height: 0, x: 0, y: 0 },
       windowId: currentScreenSourceId,
       params: {
-        dimensions: { width: 1920, height: 1080 },
-        bitrate: 1000,
-        frameRate: 15,
+        dimensions: currentResolution,
+        frameRate: currentFps,
         captureMouseCursor: false,
         windowFocus: false,
         excludeWindowList: [],
@@ -223,7 +155,7 @@ export default class ScreenShare
     rtcEngine.joinChannelEx(
       '',
       {
-        localUid: locaScreenlUid2,
+        localUid: localScreenUid2,
         channelId,
       },
       {
@@ -238,7 +170,7 @@ export default class ScreenShare
         publishMediaPlayerVideoTrack: false,
         autoSubscribeAudio: false,
         autoSubscribeVideo: false,
-        clientRoleType: 1,
+        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
       }
     )
   }
@@ -267,8 +199,8 @@ export default class ScreenShare
     rtcEngine.stopPrimaryScreenCapture()
     rtcEngine.stopSecondaryScreenCapture()
     const { channelId } = this.state
-    rtcEngine.leaveChannelEx({ channelId, localUid: locaScreenlUid1 })
-    rtcEngine.leaveChannelEx({ channelId, localUid: locaScreenlUid2 })
+    rtcEngine.leaveChannelEx({ channelId, localUid: localScreenUid1 })
+    rtcEngine.leaveChannelEx({ channelId, localUid: localScreenUid2 })
   }
 
   renderPopup = (item: { image: string }) => {
@@ -283,8 +215,30 @@ export default class ScreenShare
     )
   }
 
+  updateScreenCaptureParameters = () => {
+    const { currentFps, currentResolution, captureMouseCursor } = this.state
+
+    if (!currentFps || !currentResolution) {
+      return
+    }
+    const res = this.rtcEngine.updateScreenCaptureParameters({
+      dimensions: currentResolution,
+      frameRate: currentFps,
+      captureMouseCursor: captureMouseCursor,
+      windowFocus: false,
+      excludeWindowList: [],
+      excludeWindowCount: 0,
+    })
+    console.log(
+      'updateScreenCaptureParameters',
+      currentFps,
+      currentResolution,
+      res
+    )
+  }
+
   renderRightBar = () => {
-    const { captureInfoList } = this.state
+    const { captureInfoList, isShared } = this.state
 
     const screenList = captureInfoList
       .filter((obj) => obj.isScreen)
@@ -298,7 +252,6 @@ export default class ScreenShare
         dropId: obj,
         dropText: obj.sourceTitle,
       }))
-
 
     return (
       <div className={styles.rightBar}>
@@ -334,6 +287,51 @@ export default class ScreenShare
               this.setState({ currentWindowSourceId: sourceId })
             }}
           />
+          {isShared && (
+            <>
+              <DropDownButton
+                title='Resolution'
+                options={configMapToOptions(ResolutionMap)}
+                defaultIndex={configMapToOptions(ResolutionMap).length - 1}
+                onPress={(res) => {
+                  this.setState(
+                    { currentResolution: res.dropId },
+                    this.updateScreenCaptureParameters
+                  )
+                }}
+              />
+              <DropDownButton
+                title='FPS'
+                options={configMapToOptions(FpsMap)}
+                onPress={(res) => {
+                  this.setState(
+                    { currentFps: res.dropId },
+                    this.updateScreenCaptureParameters
+                  )
+                }}
+              />
+              <div
+                style={{
+                  display: 'flex',
+                  textAlign: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {'CaptureMouseCursor'}
+                <Switch
+                  checkedChildren='Enable'
+                  unCheckedChildren='Disable'
+                  defaultChecked={false}
+                  onChange={(enable) => {
+                    this.setState(
+                      { captureMouseCursor: enable },
+                      this.updateScreenCaptureParameters
+                    )
+                  }}
+                />
+              </div>
+            </>
+          )}
         </div>
         <JoinChannelBar
           buttonTitle='Start Share'
@@ -354,7 +352,7 @@ export default class ScreenShare
             <>
               <Card title='Local Share1' className={styles.card}>
                 <Window
-                  uid={locaScreenlUid1}
+                  uid={localScreenUid1}
                   rtcEngine={this.rtcEngine!}
                   videoSourceType={VideoSourceType.VideoSourceScreenPrimary}
                   channelId={channelId}
@@ -362,7 +360,7 @@ export default class ScreenShare
               </Card>
               <Card title='Local Share2' className={styles.card}>
                 <Window
-                  uid={locaScreenlUid2}
+                  uid={localScreenUid2}
                   rtcEngine={this.rtcEngine!}
                   videoSourceType={VideoSourceType.VideoSourceScreenSecondary}
                   channelId={channelId}
