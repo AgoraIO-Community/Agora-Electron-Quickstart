@@ -1,4 +1,5 @@
 import creteAgoraRtcEngine, {
+  ClientRoleType,
   IMediaPlayer,
   IMediaPlayerSourceObserver,
   IRtcEngine,
@@ -10,14 +11,17 @@ import creteAgoraRtcEngine, {
 } from 'electron-agora-rtc-ng'
 import { Button, Input } from 'antd'
 import { Component } from 'react'
+import SliderBar from '../../component/SliderBar'
 import Window from '../../component/Window'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
+import { getRandomInt } from '../../util'
 const { Search } = Input
 
 interface State {
   isPlaying: boolean
   mpkState?: MediaPlayerState
+  duration: number
 }
 
 export default class MediaPlayer
@@ -33,6 +37,7 @@ export default class MediaPlayer
   state: State = {
     isPlaying: false,
     mpkState: undefined,
+    duration: 100000,
   }
 
   componentDidMount() {
@@ -73,6 +78,8 @@ export default class MediaPlayer
       case MediaPlayerState.PlayerStateOpenCompleted:
         console.log('onPlayerSourceStateChanged1:open finish')
         this.getMediaPlayer().play()
+        const duration = this.getMediaPlayer().getDuration()
+        this.setState({ duration })
         break
       default:
         break
@@ -81,12 +88,17 @@ export default class MediaPlayer
     this.setState({ mpkState: state })
   }
 
+  onPositionChanged?(position: number): void {
+    console.log('onPositionChanged', position)
+  }
+
   onPressMpk = (url) => {
     if (!url) {
       return
     }
     const { isPlaying } = this.state
     const mpk = this.getMediaPlayer()
+
     if (isPlaying) {
       mpk.stop()
     } else {
@@ -97,7 +109,7 @@ export default class MediaPlayer
   }
 
   renderRightBar = () => {
-    const { isPlaying } = this.state
+    const { isPlaying, duration } = this.state
     return (
       <div className={styles.rightBar} style={{ justifyContent: 'flex-start' }}>
         <Search
@@ -124,6 +136,43 @@ export default class MediaPlayer
               }}
             >
               Resume
+            </Button>
+            <SliderBar
+              max={100}
+              min={0}
+              step={1}
+              title='Process'
+              onChange={(value) => {
+                this.getMediaPlayer().seek((value / 100) * this.state.duration)
+              }}
+            />
+            <Button
+              onClick={() => {
+                const res = this.rtcEngine.joinChannel2(
+                  '',
+                  config.defaultChannelId,
+                  getRandomInt(),
+                  {
+                    publishMediaPlayerId:
+                      this.getMediaPlayer().getMediaPlayerId(),
+                    autoSubscribeAudio: false,
+                    autoSubscribeVideo: false,
+                    publishMediaPlayerAudioTrack: true,
+                    publishMediaPlayerVideoTrack: true,
+                    clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+                  }
+                )
+                console.log('joinChannel2', res)
+              }}
+            >
+              Publish
+            </Button>
+            <Button
+              onClick={() => {
+                this.rtcEngine.leaveChannel()
+              }}
+            >
+              UnPublish
             </Button>
           </>
         )}
