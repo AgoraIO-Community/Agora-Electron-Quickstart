@@ -18,7 +18,7 @@ import creteAgoraRtcEngine, {
   VideoMirrorModeType,
   VideoSourceType,
 } from 'agora-electron-sdk'
-import { Card, List } from 'antd'
+import { Button, Card, List } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../component/DropDownButton'
 import JoinChannelBar from '../component/JoinChannelBar'
@@ -70,6 +70,8 @@ export default class JoinChannelVideo
     cameraDevices: [],
     firstCameraId: '',
     secondCameraId: '',
+    currentResolution: ResolutionMap['120x120'],
+    currentFps: 15,
   }
 
   componentDidMount() {
@@ -97,7 +99,6 @@ export default class JoinChannelVideo
       window.rtcEngine = this.rtcEngine
       const res = this.rtcEngine.initialize({ appId: config.appID })
       this.rtcEngine.setLogFile(config.nativeSDKLogPath)
-      console.log('initialize:', res)
     }
 
     return this.rtcEngine
@@ -177,16 +178,6 @@ export default class JoinChannelVideo
       AudioScenarioType.AudioScenarioChatroom
     )
 
-    console.log('firstCameraId, secondCameraId ', firstCameraId, secondCameraId)
-    const start1Res = this.rtcEngine?.startPrimaryCameraCapture({
-      deviceId: firstCameraId,
-      format: {
-        width: currentResolution.width,
-        height: currentResolution.height,
-        fps: currentFps,
-      },
-    })
-    console.log('startPrimaryCameraCapture', start1Res)
     // const start2Res = this.rtcEngine?.startSecondaryCameraCapture({
     //   deviceId: secondCameraId,
     //   format: {
@@ -255,7 +246,18 @@ export default class JoinChannelVideo
               return { dropId: deviceId, dropText: deviceName, ...obj }
             })}
             onPress={(res) => {
+              const { currentFps, currentResolution } = this.state
               const deviceId = res.dropId
+              this.rtcEngine?.stopPrimaryCameraCapture()
+              const start1Res = this.rtcEngine?.startPrimaryCameraCapture({
+                deviceId,
+                format: {
+                  width: currentResolution.width,
+                  height: currentResolution.height,
+                  fps: currentFps,
+                },
+              })
+
               this.setState({ firstCameraId: deviceId })
             }}
             title='First Camera'
@@ -325,7 +327,7 @@ export default class JoinChannelVideo
           ? VideoSourceType.VideoSourceCameraPrimary
           : VideoSourceType.VideoSourceCameraSecondary
     }
-    console.log('renderItem', videoSourceType, channelId, uid)
+    console.log('renderItem')
     return (
       <List.Item>
         <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>
@@ -335,6 +337,18 @@ export default class JoinChannelVideo
             videoSourceType={videoSourceType}
             channelId={channelId}
           />
+          <Button
+            onClick={() => {
+              const { allUser: oldAllUser } = this.state
+              const newAllUser = [...oldAllUser]
+              newAllUser.push({ isMyself, uid })
+              this.setState({
+                allUser: newAllUser,
+              })
+            }}
+          >
+            Append
+          </Button>
         </Card>
       </List.Item>
     )

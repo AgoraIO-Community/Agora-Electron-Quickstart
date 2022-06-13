@@ -1,4 +1,5 @@
 import {
+  AgoraEnv,
   IRtcEngine,
   IRtcEngineEx,
   RenderModeType,
@@ -7,6 +8,7 @@ import {
   VideoSourceType,
 } from 'agora-electron-sdk'
 import { Component } from 'react'
+import { getRandomInt } from '../../util'
 import styles from './index.scss'
 
 interface WindowProps {
@@ -16,10 +18,22 @@ interface WindowProps {
   channelId?: string
 }
 class Window extends Component<WindowProps> {
-  componentDidMount() {
+  state = {
+    isMirror: false,
+    uniqueId: getRandomInt(),
+  }
+
+  getHTMLElement = () => {
+    const { uniqueId } = this.state
     const { uid, rtcEngine, channelId, videoSourceType } = this.props
 
-    const dom = document.querySelector(`#video-${uid}`) as HTMLElement
+    return document.querySelector(`#video-${uid}-${uniqueId}`) as HTMLElement
+  }
+
+  componentDidMount() {
+    const { uid, rtcEngine, channelId, videoSourceType } = this.props
+    const dom = this.getHTMLElement()
+
     console.log(
       `Window:  VideoSourceType: ${videoSourceType}, channelId:${channelId}, uid:${uid}, view: ${dom}`
     )
@@ -46,18 +60,36 @@ class Window extends Component<WindowProps> {
   }
 
   componentWillUnmount() {
-    const { uid, rtcEngine } = this.props
+    const { rtcEngine } = this.props
 
-    const dom = document.querySelector(`#video-${uid}`) as HTMLElement
+    const dom = this.getHTMLElement()
 
     rtcEngine.destroyRendererByView(dom)
   }
 
+  updateMirror = () => {
+    const { isMirror } = this.state
+    const dom = this.getHTMLElement()
+
+    AgoraEnv.AgoraRendererManager.setRenderOption(
+      dom,
+      RenderModeType.RenderModeAdaptive,
+      isMirror
+    )
+  }
+
   render() {
     const { uid } = this.props
+    const { isMirror, uniqueId } = this.state
+
     return (
-      <div className={styles['window-item']}>
-        <div className={styles['video-item']} id={`video-${uid}`} />
+      <div
+        className={styles['window-item']}
+        onClick={() => {
+          this.setState({ isMirror: !isMirror }, this.updateMirror)
+        }}
+      >
+        <div className={styles['video-item']} id={`video-${uid}-${uniqueId}`} />
       </div>
     )
   }
