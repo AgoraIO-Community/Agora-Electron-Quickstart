@@ -62,7 +62,7 @@
     ]
   },
   "dependencies": {
-    "agora-electron-sdk": "3.6.200-iris.1-dcg.7",
+    "electron-agora-rtc-ng": "3.6.200-iris.1-dcg.7",
     "antd": "^4.20.3",
     "history": "^5.0.0",
     "react": "^18.1.0",

@@ -1,14 +1,17 @@
+import { Card, List, Switch } from 'antd'
 import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
   DegradationPreference,
-  IAudioDeviceManagerImpl,
+  IMediaPlayer,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
   IVideoDeviceManagerImpl,
   LocalTranscoderConfiguration,
+  MediaPlayerError,
+  MediaPlayerState,
   MediaSourceType,
   OrientationMode,
   RtcConnection,
@@ -20,15 +23,14 @@ import creteAgoraRtcEngine, {
   VideoMirrorModeType,
   VideoSourceType,
 } from 'electron-agora-rtc-ng'
-import { Card, List, Switch } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
 import Window from '../../component/Window'
-import { FpsMap, ResolutionMap, RoleTypeMap } from '../../config'
+import { FpsMap, ResolutionMap } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
-import { configMapToOptions, getRandomInt, getResourcePath } from '../../util';
+import { configMapToOptions, getRandomInt, getResourcePath } from '../../util'
 
 const localUid1 = getRandomInt()
 const localUid2 = getRandomInt()
@@ -47,50 +49,51 @@ interface State {
   isJoined: boolean
   channelId: string
   allUser: User[]
-  audioRecordDevices: Device[]
   cameraDevices: Device[]
   currentFps?: number
   currentResolution?: { width: number; height: number }
   isAddScreenShare: boolean
   videoDeviceId: string
+  isAddPNG: boolean
+  isAddGIF: boolean
+  isAddMPK: boolean
 }
 
 export default class LocalVideoTranscoder
   extends Component<{}, State, any>
-  implements IRtcEngineEventHandlerEx
+  implements IRtcEngineEventHandlerEx, IMediaPlayerSourceObserver
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
   videoDeviceManager: IVideoDeviceManagerImpl
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  mpk?: IMediaPlayer
 
   state: State = {
     channelId: '',
     allUser: [],
     isJoined: false,
-    audioRecordDevices: [],
     cameraDevices: [],
     isAddScreenShare: false,
     videoDeviceId: '',
+    isAddPNG: false,
+    isAddGIF: false,
+    isAddMPK: false,
   }
 
   componentDidMount() {
-    const rtcEngine = this.getRtcEngine()
-
     this.getRtcEngine().registerEventHandler(this)
+    this.getMediaPlayer().registerPlayerSourceObserver(this)
     this.videoDeviceManager = new IVideoDeviceManagerImpl()
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
 
     this.setState({
-      audioRecordDevices:
-        this.audioDeviceManager.enumerateRecordingDevices() as any,
       cameraDevices: this.videoDeviceManager.enumerateVideoDevices() as any,
     })
   }
 
   componentWillUnmount() {
     this.rtcEngine?.unregisterEventHandler(this)
+    this.getMediaPlayer().unregisterPlayerSourceObserver(this)
     this.onPressLeaveChannel()
     this.rtcEngine?.release()
   }
@@ -108,6 +111,21 @@ export default class LocalVideoTranscoder
     }
 
     return this.rtcEngine
+  }
+
+  onPlayerSourceStateChanged(
+    state: MediaPlayerState,
+    ec: MediaPlayerError
+  ): void {
+    switch (state) {
+      case MediaPlayerState.PlayerStateOpenCompleted:
+        console.log('onPlayerSourceStateChanged1:open finish')
+        this.getMediaPlayer().play()
+
+        break
+      default:
+        break
+    }
   }
 
   onJoinChannelSuccessEx(
@@ -188,6 +206,43 @@ export default class LocalVideoTranscoder
     )
   }
 
+  enableScreenShare = (enable: boolean) => {
+    const rtcEngine = this.getRtcEngine()
+    if (!enable) {
+      rtcEngine.stopPrimaryScreenCapture()
+      return
+    }
+    const list = rtcEngine
+      .getScreenCaptureSources(
+        { width: 0, height: 0 },
+        { width: 0, height: 0 },
+        true
+      )
+      .filter((info) => info.primaryMonitor)
+    if (list.length !== 1) {
+      return
+    }
+    const sourceId = list[0].sourceId
+    const res = rtcEngine.startPrimaryScreenCapture({
+      isCaptureWindow: false,
+      screenRect: { width: 0, height: 0, x: 0, y: 0 },
+      windowId: sourceId,
+      displayId: sourceId,
+      params: {
+        dimensions: { width: 1920, height: 1080 },
+        bitrate: 1000,
+        frameRate: 15,
+        captureMouseCursor: false,
+        windowFocus: false,
+        excludeWindowList: [],
+        excludeWindowCount: 0,
+      },
+
+      regionRect: { x: 0, y: 0, width: 0, height: 0 },
+    })
+    console.log('startPrimaryScreenCapture', res)
+  }
+
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
     const { videoDeviceId } = this.state
@@ -203,8 +258,13 @@ export default class LocalVideoTranscoder
     this.rtcEngine.startPrimaryCameraCapture({
       deviceId: videoDeviceId,
     })
+    this.enableScreenShare(true)
     const localTranscoderConfiguration = this.getLocalTranscoderConfiguration()
     this.rtcEngine.startLocalVideoTranscoder(localTranscoderConfiguration)
+    this.getMediaPlayer().open(
+      'https://agora-adc-artifacts.oss-cn-beijing.aliyuncs.com/video/meta_live_mpk.mov',
+      0
+    )
     this.rtcEngine.joinChannel2('', channelId, localUid1, {
       publishCameraTrack: false,
       publishScreenTrack: false,
@@ -231,7 +291,7 @@ export default class LocalVideoTranscoder
   }
 
   getLocalTranscoderConfiguration = () => {
-    const { isAddScreenShare } = this.state
+    const { isAddScreenShare, isAddPNG, isAddGIF, isAddMPK } = this.state
     const cameraStream = {
       sourceType: MediaSourceType.PrimaryCameraSource,
       x: 0,
@@ -243,20 +303,35 @@ export default class LocalVideoTranscoder
       mirror: true,
     }
     const streams: TranscodingVideoStream[] = [cameraStream]
+    if (isAddPNG) {
+      streams.push({
+        sourceType: MediaSourceType.RtcImagePngSource,
+        imageUrl: getResourcePath('png.png'),
+        x: 640,
+        y: 0,
+        width: 300,
+        height: 300,
+        zOrder: 1,
+        alpha: 1,
+        mirror: true,
+      })
+    }
+    if (isAddGIF) {
+      streams.push({
+        sourceType: MediaSourceType.RtcImageGifSource,
+        imageUrl: getResourcePath('gif.gif'),
+        x: 320,
+        y: 160,
+        width: 300,
+        height: 300,
+        zOrder: 2,
+        alpha: 1,
+        mirror: true,
+      })
+    }
 
-    streams.push({
-      sourceType: MediaSourceType.RtcImagePngSource,
-      imageUrl: getResourcePath('png.png'),
-      x: 640,
-      y: 0,
-      width: 300,
-      height: 300,
-      zOrder: 1,
-      alpha: 1,
-      mirror: true,
-    })
     if (isAddScreenShare) {
-      const screenShareStream = {
+      streams.push({
         sourceType: MediaSourceType.PrimaryScreenSource,
         x: 0,
         y: 320,
@@ -265,8 +340,21 @@ export default class LocalVideoTranscoder
         zOrder: 1,
         alpha: 1,
         mirror: true,
-      }
-      streams.push(screenShareStream)
+      })
+    }
+
+    if (isAddMPK) {
+      streams.push({
+        sourceType: MediaSourceType.MediaPlayerSource,
+        remoteUserUid: this.getMediaPlayer().getMediaPlayerId(),
+        x: 320,
+        y: 640,
+        width: 640,
+        height: 320,
+        zOrder: 1,
+        alpha: 1,
+        mirror: true,
+      })
     }
     const localTranscoderConfiguration: LocalTranscoderConfiguration = {
       streamCount: streams.length,
@@ -277,50 +365,28 @@ export default class LocalVideoTranscoder
   }
 
   onPressLeaveChannel = () => {
+    this.enableScreenShare(false)
+    this.getMediaPlayer().stop()
     this.rtcEngine?.leaveChannel()
     this.rtcEngine?.stopLocalVideoTranscoder()
   }
 
-  onPressAddScreenScreen = (enabled) => {
-    this.setState({ isAddScreenShare: enabled })
-    const rtcEngine = this.getRtcEngine()
-    if (enabled) {
-      const list = rtcEngine
-        .getScreenCaptureSources(
-          { width: 0, height: 0 },
-          { width: 0, height: 0 },
-          true
-        )
-        .filter((info) => info.primaryMonitor)
-      if (list.length !== 1) {
-        return
-      }
-      const sourceId = list[0].sourceId
-      const res = rtcEngine.startPrimaryScreenCapture({
-        isCaptureWindow: false,
-        screenRect: { width: 0, height: 0, x: 0, y: 0 },
-        windowId: sourceId,
-        displayId: sourceId,
-        params: {
-          dimensions: { width: 1920, height: 1080 },
-          bitrate: 1000,
-          frameRate: 15,
-          captureMouseCursor: false,
-          windowFocus: false,
-          excludeWindowList: [],
-          excludeWindowCount: 0,
-        },
+  updateTranscoderConfiguration = () => {
+    const newConfig = this.getLocalTranscoderConfiguration()
+    this.getRtcEngine().updateLocalTranscoderConfiguration(newConfig)
+  }
 
-        regionRect: { x: 0, y: 0, width: 0, height: 0 },
-      })
-      console.log('startPrimaryScreenCapture', res)
-    } else {
-      rtcEngine.stopPrimaryScreenCapture()
+  getMediaPlayer = () => {
+    if (!this.mpk) {
+      const mpk = this.getRtcEngine().createMediaPlayer()
+      this.mpk = mpk
+      return mpk
     }
+    return this.mpk
   }
 
   renderRightBar = () => {
-    const { audioRecordDevices, cameraDevices, isJoined } = this.state
+    const { cameraDevices, isJoined } = this.state
 
     return (
       <div className={styles.rightBar}>
@@ -335,23 +401,7 @@ export default class LocalVideoTranscoder
             }}
             title='Camera'
           />
-          <DropDownButton
-            title='Microphone'
-            options={audioRecordDevices.map((obj) => {
-              const { deviceId, deviceName } = obj
-              return { dropId: deviceId, dropText: deviceName, ...obj }
-            })}
-            onPress={(res) => {
-              this.audioDeviceManager.setRecordingDevice(res.dropId)
-            }}
-          />
-          <DropDownButton
-            title='Role'
-            options={configMapToOptions(RoleTypeMap)}
-            onPress={(res) => {
-              this.getRtcEngine().setClientRole(res.dropId)
-            }}
-          />
+
           <DropDownButton
             title='Resolution'
             options={configMapToOptions(ResolutionMap)}
@@ -369,23 +419,93 @@ export default class LocalVideoTranscoder
               this.setState({ currentFps: res.dropId }, this.setVideoConfig)
             }}
           />
-          <br></br>
-          <div
-            style={{
-              display: 'flex',
-              textAlign: 'center',
-              alignItems: 'center',
-            }}
-          >
-            {'Add Screen Share'}
-            <Switch
-              checkedChildren='Enable'
-              unCheckedChildren='Disable'
-              defaultChecked={false}
-              onChange={this.onPressAddScreenScreen}
-            />
-          </div>
-          <br></br>
+          {isJoined && (
+            <>
+              <br></br>
+              <div
+                style={{
+                  display: 'flex',
+                  textAlign: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {'Add Screen Share'}
+                <Switch
+                  checkedChildren='Enable'
+                  unCheckedChildren='Disable'
+                  defaultChecked={this.state.isAddScreenShare}
+                  onChange={(isAddScreenShare) => {
+                    this.setState(
+                      { isAddScreenShare },
+                      this.updateTranscoderConfiguration
+                    )
+                  }}
+                />
+              </div>
+              <br></br>
+              <div
+                style={{
+                  display: 'flex',
+                  textAlign: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {'Add PNG'}
+                <Switch
+                  checkedChildren='Enable'
+                  unCheckedChildren='Disable'
+                  defaultChecked={this.state.isAddPNG}
+                  onChange={(isAddPNG) => {
+                    this.setState(
+                      { isAddPNG },
+                      this.updateTranscoderConfiguration
+                    )
+                  }}
+                />
+              </div>
+              <br></br>
+              <div
+                style={{
+                  display: 'flex',
+                  textAlign: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {'Add GIF'}
+                <Switch
+                  checkedChildren='Enable'
+                  unCheckedChildren='Disable'
+                  defaultChecked={this.state.isAddGIF}
+                  onChange={(isAddGIF) => {
+                    this.setState(
+                      { isAddGIF },
+                      this.updateTranscoderConfiguration
+                    )
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  textAlign: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {'Add MPK'}
+                <Switch
+                  checkedChildren='Enable'
+                  unCheckedChildren='Disable'
+                  defaultChecked={this.state.isAddMPK}
+                  onChange={(isAddMPK) => {
+                    this.setState(
+                      { isAddMPK },
+                      this.updateTranscoderConfiguration
+                    )
+                  }}
+                />
+              </div>
+            </>
+          )}
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
