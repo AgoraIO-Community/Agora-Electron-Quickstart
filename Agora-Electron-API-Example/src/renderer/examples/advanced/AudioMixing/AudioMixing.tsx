@@ -1,3 +1,4 @@
+import { Button, Card, List, Switch } from 'antd'
 import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
@@ -11,7 +12,6 @@ import creteAgoraRtcEngine, {
   RtcStats,
   UserOfflineReasonType,
 } from 'electron-agora-rtc-ng'
-import { Button, Card, List } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
@@ -22,7 +22,7 @@ import styles from '../../config/public.scss'
 import { configMapToOptions, getRandomInt, getResourcePath } from '../../util'
 
 const EFFECT_ID = 1
-
+const mp3Path = getResourcePath('audioEffect.mp3')
 interface User {
   isMyself: boolean
   uid: number
@@ -38,6 +38,11 @@ interface State {
   audioScenario: number
   allUser: User[]
   isJoined: boolean
+  effectCount: number
+  effectPitch: number
+  effectPan: number
+  effectGain: number
+  effectPublish: boolean
 }
 
 export default class AudioMixing
@@ -54,6 +59,11 @@ export default class AudioMixing
     audioScenario: AudioScenarioList.Standard,
     allUser: [],
     isJoined: false,
+    effectCount: -1,
+    effectPitch: 1,
+    effectPan: 0,
+    effectGain: 100,
+    effectPublish: true,
   }
 
   componentDidMount() {
@@ -209,19 +219,83 @@ export default class AudioMixing
             }}
           />
           <p>Audio Effect Controls</p>
+          <SliderBar
+            max={1}
+            min={-1}
+            value={-1}
+            step={1}
+            title='Effect Count'
+            onChange={(value) => {
+              this.setState({ effectCount: value })
+            }}
+          />
+          <SliderBar
+            max={2.0}
+            min={0.5}
+            value={1}
+            step={0.1}
+            title='Effect Pitch'
+            onChange={(value) => {
+              this.setState({ effectPitch: value })
+            }}
+          />
+          <SliderBar
+            max={1}
+            min={-1}
+            value={0}
+            step={1}
+            title='Effect Pan'
+            onChange={(value) => {
+              this.setState({ effectPan: value })
+            }}
+          />
+          <SliderBar
+            max={100}
+            min={0}
+            value={100}
+            step={1}
+            title='Effect Gain'
+            onChange={(value) => {
+              this.setState({ effectGain: value })
+            }}
+          />
+          <div
+            style={{
+              display: 'flex',
+              textAlign: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {'Enable publish:   '}
+            <Switch
+              checkedChildren='Enable'
+              unCheckedChildren='Disable'
+              defaultChecked={false}
+              onChange={(value) => {
+                this.setState({ effectPublish: value })
+              }}
+            />
+          </div>
           <Button
             htmlType='button'
             onClick={() => {
-              const mp3Path = getResourcePath('audioEffect.mp3')
+              const {
+                effectCount,
+                effectGain,
+                effectPan,
+                effectPitch,
+                effectPublish,
+              } = this.state
 
+              //  loopCount: number, pitch: number, pan: number, gain
               this.getRtcEngine().playEffect(
                 EFFECT_ID,
                 mp3Path,
-                -1,
-                1,
-                0,
-                100,
-                true,
+                effectCount,
+                effectPitch,
+                effectPan,
+                effectGain,
+                effectPublish,
                 0
               )
             }}
@@ -281,6 +355,25 @@ export default class AudioMixing
             }}
           >
             disable
+          </Button>
+          <br />
+          <br />
+          <p>Audio Mixing</p>
+          <Button
+            htmlType='button'
+            onClick={() => {
+              this.getRtcEngine().startAudioMixing(mp3Path, true, false, -1)
+            }}
+          >
+            Start Audio Mixing
+          </Button>
+          <Button
+            htmlType='button'
+            onClick={() => {
+              this.getRtcEngine().stopAudioMixing()
+            }}
+          >
+            Stop Audio Mixing
           </Button>
         </div>
         <JoinChannelBar
