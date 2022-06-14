@@ -141,6 +141,7 @@ export default class ScreenShare extends Component<{}, State, any> {
       isCaptureWindow: false,
       screenRect: { width: 0, height: 0, x: 0, y: 0 },
       windowId: currentScreenSourceId,
+      displayId: currentScreenSourceId,
       params: {
         dimensions: currentResolution,
         frameRate: currentFps,

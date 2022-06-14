@@ -327,10 +327,10 @@ export default class JoinChannelVideo
           ? VideoSourceType.VideoSourceCameraPrimary
           : VideoSourceType.VideoSourceCameraSecondary
     }
-    console.log('renderItem')
     return (
       <List.Item>
         <Card title={`${isMyself ? 'Local' : 'Remote'} Uid: ${uid}`}>
+          <p>Click view to mirror</p>
           <Window
             uid={uid}
             rtcEngine={this.rtcEngine!}

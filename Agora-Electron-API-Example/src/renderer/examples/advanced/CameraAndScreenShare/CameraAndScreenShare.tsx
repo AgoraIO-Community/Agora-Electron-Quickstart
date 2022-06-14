@@ -1,12 +1,17 @@
 import creteAgoraRtcEngine, {
+  ClientRoleType,
+  DegradationPreference,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
   IVideoDeviceManagerImpl,
+  OrientationMode,
   RtcConnection,
   RtcEngineExImplInternal,
   RtcStats,
   UserOfflineReasonType,
+  VideoCodecType,
+  VideoMirrorModeType,
   VideoSourceType,
 } from 'electron-agora-rtc-ng'
 import { Card, Switch } from 'antd'
@@ -14,9 +19,10 @@ import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
 import Window from '../../component/Window'
+import { FpsMap, ResolutionMap } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
-import { getRandomInt } from '../../util'
+import { configMapToOptions, getRandomInt } from '../../util'
 import { rgbImageBufferToBase64 } from '../../util/base64'
 import screenStyle from './CameraAndScreenShare.scss'
 
@@ -25,13 +31,18 @@ const localUid2 = getRandomInt(1, 9999999)
 
 interface State {
   captureInfoList: any[]
-  currentShare?: any
+  currentShareInfo?: any
   channelId: string
   isStart: boolean
   cameraDevices: Device[]
   firstCameraId: string
   enableShare: boolean
   enableCamera: boolean
+  currentFps?: number
+  currentResolution?: { width: number; height: number }
+  currentShareFps?: number
+  currentShareResolution?: { width: number; height: number }
+  captureMouseCursor: boolean
 }
 interface Device {
   deviceId: string
@@ -54,6 +65,7 @@ export default class CameraAndScreenShare
     firstCameraId: '',
     enableShare: true,
     enableCamera: true,
+    captureMouseCursor: true,
   }
 
   componentDidMount = async () => {
@@ -206,34 +218,61 @@ export default class CameraAndScreenShare
   }
 
   startScreenCapture = (channelId: string) => {
-    const { currentShare, enableShare } = this.state
+    const {
+      currentShareInfo,
+      enableShare,
+      currentFps,
+      currentShareResolution,
+      captureMouseCursor,
+    } = this.state
     if (!enableShare) {
       return
     }
-    const { isScreen, sourceId } = currentShare
-    console.log(currentShare)
+    const { isScreen, sourceId } = currentShareInfo
+    console.log(currentShareInfo)
 
     const rtcEngine = this.getRtcEngine()
-    let res = rtcEngine.startPrimaryScreenCapture({
-      isCaptureWindow: !isScreen,
-      screenRect: { width: 0, height: 0, x: 0, y: 0 },
-      windowId: sourceId,
-      displayId: sourceId,
-      params: {
-        dimensions: { width: 1920, height: 1080 },
-        bitrate: 1000,
-        frameRate: 15,
-        captureMouseCursor: false,
-        windowFocus: false,
-        excludeWindowList: [],
-        excludeWindowCount: 0,
-      },
+    if (isScreen) {
+      this.rtcEngine.startScreenCaptureByDisplayId(
+        sourceId,
+        {
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+        },
+        {
+          dimensions: currentShareResolution,
+          bitrate: 1000,
+          frameRate: currentFps,
+          captureMouseCursor,
+          windowFocus: false,
+          excludeWindowList: [],
+          excludeWindowCount: 0,
+        }
+      )
+    } else {
+      this.rtcEngine.startScreenCaptureByWindowId(
+        sourceId,
+        {
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+        },
+        {
+          dimensions: currentShareResolution,
+          bitrate: 1000,
+          frameRate: currentFps,
+          captureMouseCursor,
+          windowFocus: false,
+          excludeWindowList: [],
+          excludeWindowCount: 0,
+        }
+      )
+    }
 
-      regionRect: { x: 0, y: 0, width: 0, height: 0 },
-    })
-    console.log('startPrimaryScreenCapture', res)
-
-    res = rtcEngine.joinChannelEx(
+    const res = rtcEngine.joinChannelEx(
       '',
       {
         localUid: localUid1,
@@ -251,7 +290,7 @@ export default class CameraAndScreenShare
         publishMediaPlayerVideoTrack: false,
         autoSubscribeAudio: false,
         autoSubscribeVideo: false,
-        clientRoleType: 1,
+        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
       }
     )
     console.log('joinChannelEx', res)
@@ -273,6 +312,41 @@ export default class CameraAndScreenShare
     const { channelId } = this.state
     rtcEngine.leaveChannelEx({ channelId, localUid: localUid1 })
     rtcEngine.leaveChannelEx({ channelId, localUid: localUid2 })
+  }
+
+  setVideoConfig = () => {
+    const { currentFps, currentResolution } = this.state
+    if (!currentResolution || !currentFps) {
+      return
+    }
+
+    this.getRtcEngine().setVideoEncoderConfiguration({
+      codecType: VideoCodecType.VideoCodecH264,
+      dimensions: currentResolution!,
+      frameRate: currentFps,
+      bitrate: 65,
+      minBitrate: 1,
+      orientationMode: OrientationMode.OrientationModeAdaptive,
+      degradationPreference: DegradationPreference.MaintainBalanced,
+      mirrorMode: VideoMirrorModeType.VideoMirrorModeAuto,
+    })
+  }
+
+  updateScreenCaptureParameters = () => {
+    const { currentShareResolution, currentShareFps, captureMouseCursor } =
+      this.state
+
+    if (!currentShareResolution || !currentShareFps) {
+      return
+    }
+    const res = this.rtcEngine.updateScreenCaptureParameters({
+      dimensions: currentShareResolution,
+      frameRate: currentShareFps,
+      captureMouseCursor,
+      windowFocus: false,
+      excludeWindowList: [],
+      excludeWindowCount: 0,
+    })
   }
 
   renderPopup = (item: { image: string }) => {
@@ -312,17 +386,36 @@ export default class CameraAndScreenShare
             />
           </div>
           {enableCamera && (
-            <DropDownButton
-              options={cameraDevices.map((obj) => {
-                const { deviceId, deviceName } = obj
-                return { dropId: deviceId, dropText: deviceName, ...obj }
-              })}
-              onPress={(res) => {
-                const deviceId = res.dropId
-                this.setState({ firstCameraId: deviceId })
-              }}
-              title='Camera Device'
-            />
+            <>
+              <DropDownButton
+                options={cameraDevices.map((obj) => {
+                  const { deviceId, deviceName } = obj
+                  return { dropId: deviceId, dropText: deviceName, ...obj }
+                })}
+                onPress={(res) => {
+                  const deviceId = res.dropId
+                  this.setState({ firstCameraId: deviceId })
+                }}
+                title='Camera Device'
+              />
+              <DropDownButton
+                title='Resolution'
+                options={configMapToOptions(ResolutionMap)}
+                onPress={(res) => {
+                  this.setState(
+                    { currentResolution: res.dropId },
+                    this.setVideoConfig
+                  )
+                }}
+              />
+              <DropDownButton
+                title='FPS'
+                options={configMapToOptions(FpsMap)}
+                onPress={(res) => {
+                  this.setState({ currentFps: res.dropId }, this.setVideoConfig)
+                }}
+              />
+            </>
           )}
           <br />
           <div
@@ -343,23 +436,66 @@ export default class CameraAndScreenShare
             />
           </div>
           {enableShare && (
-            <DropDownButton
-              defaultIndex={0}
-              title='Share Window/Screen'
-              options={captureInfoList.map((obj) => ({
-                dropId: obj,
-                dropText: obj.sourceName || obj.sourceTitle,
-              }))}
-              PopContent={this.renderPopup}
-              PopContentTitle='Preview'
-              onPress={(res) => {
-                const info = res.dropId
-                if (info === undefined) {
-                  return
-                }
-                this.setState({ currentShare: info })
-              }}
-            />
+            <>
+              <DropDownButton
+                defaultIndex={0}
+                title='Share Window/Screen'
+                options={captureInfoList.map((obj) => ({
+                  dropId: obj,
+                  dropText: obj.sourceName || obj.sourceTitle,
+                }))}
+                PopContent={this.renderPopup}
+                PopContentTitle='Preview'
+                onPress={(res) => {
+                  const info = res.dropId
+                  if (info === undefined) {
+                    return
+                  }
+                  this.setState({ currentShareInfo: info })
+                }}
+              />
+              <DropDownButton
+                title='Resolution'
+                options={configMapToOptions(ResolutionMap)}
+                defaultIndex={configMapToOptions(ResolutionMap).length - 1}
+                onPress={(res) => {
+                  this.setState(
+                    { currentShareResolution: res.dropId },
+                    this.updateScreenCaptureParameters
+                  )
+                }}
+              />
+              <DropDownButton
+                title='FPS'
+                options={configMapToOptions(FpsMap)}
+                onPress={(res) => {
+                  this.setState(
+                    { currentShareFps: res.dropId },
+                    this.updateScreenCaptureParameters
+                  )
+                }}
+              />
+              <div
+                style={{
+                  display: 'flex',
+                  textAlign: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {'CaptureMouseCursor'}
+                <Switch
+                  checkedChildren='Enable'
+                  unCheckedChildren='Disable'
+                  defaultChecked={false}
+                  onChange={(enable) => {
+                    this.setState(
+                      { captureMouseCursor: enable },
+                      this.updateScreenCaptureParameters
+                    )
+                  }}
+                />
+              </div>
+            </>
           )}
         </div>
         <JoinChannelBar
