@@ -4,7 +4,7 @@ import creteAgoraRtcEngine, {
   IRtcEngineEx,
   RtcEngineExImplInternal,
   VideoSourceType,
-} from 'agora-electron-sdk'
+} from 'electron-agora-rtc-ng'
 import { Card, message, Switch } from 'antd'
 import { Component } from 'react'
 import ChooseFilterWindowModal from '../../component/ChooseFilterWindowModal'

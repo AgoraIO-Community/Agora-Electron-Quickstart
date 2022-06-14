@@ -3,7 +3,7 @@ import {
   AudioScenarioType,
   ClientRoleType,
   FrameRate,
-} from 'agora-electron-sdk'
+} from 'electron-agora-rtc-ng'
 
 export const AudioProfileList = {
   Default: AudioProfileType.AudioProfileDefault, //0

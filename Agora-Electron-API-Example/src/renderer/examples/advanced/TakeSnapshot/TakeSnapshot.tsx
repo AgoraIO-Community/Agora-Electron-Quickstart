@@ -16,7 +16,7 @@ import creteAgoraRtcEngine, {
   VideoCodecType,
   VideoMirrorModeType,
   VideoSourceType,
-} from 'agora-electron-sdk'
+} from 'electron-agora-rtc-ng'
 import { Button, Card, List } from 'antd'
 import os from 'os'
 import path from 'path'

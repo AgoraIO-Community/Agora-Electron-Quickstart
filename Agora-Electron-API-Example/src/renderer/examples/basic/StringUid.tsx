@@ -7,7 +7,7 @@ import creteAgoraRtcEngine, {
   RtcEngineExImplInternal,
   RtcStats,
   UserOfflineReasonType,
-} from 'agora-electron-sdk'
+} from 'electron-agora-rtc-ng'
 import { Card, List } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../component/DropDownButton'

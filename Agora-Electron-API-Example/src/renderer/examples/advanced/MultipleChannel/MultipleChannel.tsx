@@ -11,7 +11,7 @@ import creteAgoraRtcEngine, {
   RtcStats,
   UserOfflineReasonType,
   VideoSourceType,
-} from 'agora-electron-sdk'
+} from 'electron-agora-rtc-ng'
 import { Button, Card, Input, List } from 'antd'
 import { Component } from 'react'
 import Window from '../../component/Window'

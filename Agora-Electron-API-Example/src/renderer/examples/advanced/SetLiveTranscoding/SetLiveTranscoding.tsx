@@ -11,7 +11,7 @@ import creteAgoraRtcEngine, {
   RtcStats,
   UserOfflineReasonType,
   VideoSourceType,
-} from 'agora-electron-sdk'
+} from 'electron-agora-rtc-ng'
 import { Button, Card, Checkbox, Input, List, message } from 'antd'
 import React, { Component } from 'react'
 import JoinChannelBar from '../../component/JoinChannelBar'

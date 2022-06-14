@@ -16,7 +16,7 @@ import creteAgoraRtcEngine, {
   VideoMirrorModeType,
   VideoSourceType,
   ClientRoleType,
-} from 'agora-electron-sdk'
+} from 'electron-agora-rtc-ng'
 import { List, Card, Input } from 'antd'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'

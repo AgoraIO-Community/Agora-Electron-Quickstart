@@ -7,7 +7,7 @@ import creteAgoraRtcEngine, {
   MediaPlayerState,
   RtcEngineExImplInternal,
   VideoSourceType,
-} from 'agora-electron-sdk'
+} from 'electron-agora-rtc-ng'
 import { Button, Input } from 'antd'
 import { Component } from 'react'
 import Window from '../../component/Window'

@@ -6,7 +6,7 @@ import {
   RtcEngineExImplInternal,
   VideoMirrorModeType,
   VideoSourceType,
-} from 'agora-electron-sdk'
+} from 'electron-agora-rtc-ng'
 import { Component } from 'react'
 import { getRandomInt } from '../../util'
 import styles from './index.scss'
