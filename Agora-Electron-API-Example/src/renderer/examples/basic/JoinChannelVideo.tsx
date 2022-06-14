@@ -1,3 +1,4 @@
+import { Button, Card, List } from 'antd'
 import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
@@ -18,7 +19,6 @@ import creteAgoraRtcEngine, {
   VideoMirrorModeType,
   VideoSourceType,
 } from 'electron-agora-rtc-ng'
-import { Button, Card, List } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../component/DropDownButton'
 import JoinChannelBar from '../component/JoinChannelBar'
@@ -50,6 +50,7 @@ interface State {
   currentResolution?: { width: number; height: number }
   firstCameraId: string
   secondCameraId: string
+  isPreview: boolean
 }
 
 export default class JoinChannelVideo
@@ -72,6 +73,7 @@ export default class JoinChannelVideo
     secondCameraId: '',
     currentResolution: ResolutionMap['120x120'],
     currentFps: FpsMap['15fps'],
+    isPreview: false,
   }
 
   componentDidMount() {
@@ -108,8 +110,11 @@ export default class JoinChannelVideo
     { channelId, localUid }: RtcConnection,
     elapsed: number
   ): void {
+    const { allUser: oldAllUser, isPreview } = this.state
+    if (isPreview) {
+      return
+    }
     console.log('onJoinChannelSuccessEx', channelId, localUid)
-    const { allUser: oldAllUser } = this.state
     const newAllUser = [...oldAllUser]
     newAllUser.push({ isMyself: true, uid: localUid })
     this.setState({
@@ -307,6 +312,19 @@ export default class JoinChannelVideo
               this.setState({ currentFps: res.dropId }, this.setVideoConfig)
             }}
           />
+          <Button
+            onClick={() => {
+              const { allUser: oldAllUser } = this.state
+              const newAllUser = [...oldAllUser]
+              newAllUser.push({ isMyself: true, uid: localUid1 })
+              this.setState({
+                isPreview: true,
+                allUser: newAllUser,
+              })
+            }}
+          >
+            Start Preview
+          </Button>
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
@@ -355,11 +373,11 @@ export default class JoinChannelVideo
   }
 
   render() {
-    const { isJoined, allUser } = this.state
+    const { isJoined, allUser, isPreview } = this.state
     return (
       <div className={styles.screen}>
         <div className={styles.content}>
-          {isJoined && (
+          {(isJoined || isPreview) && (
             <List
               grid={{
                 gutter: 16,
