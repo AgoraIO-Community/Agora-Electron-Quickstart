@@ -19,8 +19,9 @@ import creteAgoraRtcEngine, {
   VideoCodecType,
   VideoMirrorModeType,
   VideoSourceType,
+  VirtualBackgroundSource,
 } from 'electron-agora-rtc-ng'
-import { Button, Card, List } from 'antd'
+import { Button, Card, List, Switch } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
@@ -28,7 +29,7 @@ import Window from '../../component/Window'
 import { FpsMap, ResolutionMap, RoleTypeMap } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
-import { configMapToOptions, getRandomInt } from '../../util'
+import { configMapToOptions, getRandomInt, getResourcePath } from '../../util'
 
 interface Device {
   deviceId: string
@@ -48,6 +49,8 @@ interface State {
   cameraDevices: Device[]
   currentFps?: number
   currentResolution?: { width: number; height: number }
+  enableVirtual: boolean
+  isColorMode: boolean
 }
 const localUid = getRandomInt(1, 9999999)
 
@@ -67,6 +70,7 @@ export default class VirtualBackground
     isJoined: false,
     audioRecordDevices: [],
     cameraDevices: [],
+    enableVirtual: false,
   }
 
   componentDidMount() {
@@ -104,6 +108,7 @@ export default class VirtualBackground
       const res = this.rtcEngine.initialize({
         appId: config.appID,
       })
+      this.rtcEngine.setLogFile(config.nativeSDKLogPath)
       console.log('initialize:', res)
     }
 
@@ -222,27 +227,43 @@ export default class VirtualBackground
     })
   }
 
-  onPressVirtualBackground = () => {
+  onPressVirtualBackground = (enableVirtual) => {
+    const { isColorMode } = this.state
     const rtcEngine = this.getRtcEngine()
-    // let res = rtcEngine.enableExtension(
-    //   'agora_segmentation',
-    //   'PortraitSegmentation',
-    //   true,
-    //   MediaSourceType.PrimaryCameraSource
-    // )
-    // console.log('enableExtension', res)
+
     rtcEngine.enableVideo()
-    let res = this.getRtcEngine().enableVirtualBackground(true, {
-      backgroundSourceType: BackgroundSourceType.BackgroundColor,
-      color: 232,
-      // source: 1,
-      blurDegree: BackgroundBlurDegree.BlurDegreeHigh,
-    })
-    console.log('enableVirtualBackground:', res)
+
+    let virtualBackgroundSource: VirtualBackgroundSource
+    if (isColorMode) {
+      virtualBackgroundSource = {
+        backgroundSourceType: BackgroundSourceType.BackgroundColor,
+        color: 232,
+        // source: 1,
+        blurDegree: BackgroundBlurDegree.BlurDegreeHigh,
+      }
+    } else {
+      virtualBackgroundSource = {
+        backgroundSourceType: BackgroundSourceType.BackgroundImg,
+        source: getResourcePath('background.png'),
+        blurDegree: BackgroundBlurDegree.BlurDegreeHigh,
+      }
+    }
+    this.getRtcEngine().enableVirtualBackground(
+      enableVirtual,
+      virtualBackgroundSource
+    )
+
+    this.setState({ enableVirtual })
   }
 
   renderRightBar = () => {
-    const { audioRecordDevices, cameraDevices, isJoined } = this.state
+    const {
+      audioRecordDevices,
+      cameraDevices,
+      isJoined,
+      enableVirtual,
+      isColorMode,
+    } = this.state
 
     return (
       <div className={styles.rightBar}>
@@ -292,9 +313,42 @@ export default class VirtualBackground
             }}
           />
           {isJoined && (
-            <Button onClick={this.onPressVirtualBackground}>
-              Enable VirtualBackground
-            </Button>
+            <>
+              <div
+                style={{
+                  display: 'flex',
+                  textAlign: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {'Enable Virtual:   '}
+                <Switch
+                  checkedChildren='Enable'
+                  unCheckedChildren='Disable'
+                  defaultChecked={enableVirtual}
+                  onChange={(value) => {
+                    this.onPressVirtualBackground(value)
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  textAlign: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {'Mode:   '}
+                <Switch
+                  unCheckedChildren='Image'
+                  checkedChildren='Color'
+                  defaultChecked={isColorMode}
+                  onChange={(value) => {
+                    this.setState({ isColorMode: value })
+                  }}
+                />
+              </div>
+            </>
           )}
         </div>
         <JoinChannelBar
