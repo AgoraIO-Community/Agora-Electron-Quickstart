@@ -175,25 +175,6 @@ export default class VirtualBackground
     console.error(err, msg)
   }
 
-  onSnapshotTaken(
-    channel: string,
-    uid: number,
-    filePath: string,
-    width: number,
-    height: number,
-    errCode: number
-  ): void {
-    console.log(
-      'onSnapshotTaken',
-      channel,
-      uid,
-      filePath,
-      width,
-      height,
-      errCode
-    )
-  }
-
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
     this.rtcEngine.enableAudio()

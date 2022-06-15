@@ -188,25 +188,6 @@ export default class LocalVideoTranscoder
     console.error(err, msg)
   }
 
-  onSnapshotTaken(
-    channel: string,
-    uid: number,
-    filePath: string,
-    width: number,
-    height: number,
-    errCode: number
-  ): void {
-    console.log(
-      'onSnapshotTaken',
-      channel,
-      uid,
-      filePath,
-      width,
-      height,
-      errCode
-    )
-  }
-
   enableScreenShare = (enable: boolean) => {
     const rtcEngine = this.getRtcEngine()
     if (!enable) {
