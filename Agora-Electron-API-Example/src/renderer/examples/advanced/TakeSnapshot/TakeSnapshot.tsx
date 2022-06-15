@@ -216,7 +216,7 @@ export default class TakeSnapshot
     const filePath = path.resolve(os.homedir(), `./snapshot${getRandomInt()}`)
     const res = this.getRtcEngine().takeSnapshot({
       channel: channelId,
-      uid: localUid,
+      uid: 0,
       filePath,
     })
     console.log(`takeSnapshot ${filePath}: `, res)
