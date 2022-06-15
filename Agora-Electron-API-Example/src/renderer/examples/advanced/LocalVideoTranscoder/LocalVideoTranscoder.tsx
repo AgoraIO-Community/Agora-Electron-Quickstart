@@ -5,6 +5,7 @@ import creteAgoraRtcEngine, {
   ChannelProfileType,
   DegradationPreference,
   IMediaPlayer,
+  IMediaPlayerSourceObserver,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,

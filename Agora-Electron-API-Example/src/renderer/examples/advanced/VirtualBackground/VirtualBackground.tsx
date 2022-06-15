@@ -71,6 +71,7 @@ export default class VirtualBackground
     audioRecordDevices: [],
     cameraDevices: [],
     enableVirtual: false,
+    isColorMode: true,
   }
 
   componentDidMount() {
