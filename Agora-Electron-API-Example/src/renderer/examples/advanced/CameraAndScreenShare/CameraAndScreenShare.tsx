@@ -1,3 +1,4 @@
+import { Card, Switch } from 'antd'
 import creteAgoraRtcEngine, {
   ClientRoleType,
   DegradationPreference,
@@ -14,7 +15,6 @@ import creteAgoraRtcEngine, {
   VideoMirrorModeType,
   VideoSourceType,
 } from 'electron-agora-rtc-ng'
-import { Card, Switch } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
@@ -63,7 +63,7 @@ export default class CameraAndScreenShare
     isStart: false,
     cameraDevices: [],
     firstCameraId: '',
-    enableShare: true,
+    enableShare: false,
     enableCamera: true,
     captureMouseCursor: true,
   }
@@ -435,25 +435,27 @@ export default class CameraAndScreenShare
               }}
             />
           </div>
+          {!enableShare && (
+            <DropDownButton
+              defaultIndex={0}
+              title='Share Window/Screen'
+              options={captureInfoList.map((obj) => ({
+                dropId: obj,
+                dropText: obj.sourceName || obj.sourceTitle,
+              }))}
+              PopContent={this.renderPopup}
+              PopContentTitle='Preview'
+              onPress={(res) => {
+                const info = res.dropId
+                if (info === undefined) {
+                  return
+                }
+                this.setState({ currentShareInfo: info })
+              }}
+            />
+          )}
           {enableShare && (
             <>
-              <DropDownButton
-                defaultIndex={0}
-                title='Share Window/Screen'
-                options={captureInfoList.map((obj) => ({
-                  dropId: obj,
-                  dropText: obj.sourceName || obj.sourceTitle,
-                }))}
-                PopContent={this.renderPopup}
-                PopContentTitle='Preview'
-                onPress={(res) => {
-                  const info = res.dropId
-                  if (info === undefined) {
-                    return
-                  }
-                  this.setState({ currentShareInfo: info })
-                }}
-              />
               <DropDownButton
                 title='Resolution'
                 options={configMapToOptions(ResolutionMap)}
