@@ -58,7 +58,7 @@ export default class RhythmPlayer
     allUser: [],
     isJoined: false,
     beatsPerMeasure: 4,
-    beatsPerMinute: 360,
+    beatsPerMinute: 60,
     file1: getResourcePath('dang.mp3'),
     file2: getResourcePath('ding.mp3'),
     enableRhythm: false,
@@ -186,6 +186,8 @@ export default class RhythmPlayer
       file1,
       file2,
       enableRhythm,
+      beatsPerMeasure,
+      beatsPerMinute,
     } = this.state
     return (
       <div className={styles.rightBar}>
@@ -259,7 +261,7 @@ export default class RhythmPlayer
               <SliderBar
                 max={9}
                 min={1}
-                value={4}
+                value={beatsPerMeasure}
                 step={1}
                 title='Beats Per Measure'
                 onChange={(value) => {
@@ -271,7 +273,7 @@ export default class RhythmPlayer
               <SliderBar
                 max={360}
                 min={60}
-                value={60}
+                value={beatsPerMinute}
                 step={1}
                 title='Beats Per Minute'
                 onChange={(value) => {
