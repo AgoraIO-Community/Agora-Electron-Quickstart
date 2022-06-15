@@ -76,7 +76,8 @@ export default class DirectCdnStreaming
     cameraDevices: [],
     cdnResult: '',
     isStartCDN: false,
-    publishUrl: 'rtmp://push.alexmk.name/live/agora_rtc_ng',
+    publishUrl:
+      'rtmp://vid-218.push.chinanetcenter.broadcastapp.agora.io/live/test',
   }
 
   componentDidMount() {
@@ -345,7 +346,7 @@ export default class DirectCdnStreaming
 
           {isStartCDN && (
             <>
-              <p>{'Result: ' + cdnResult}</p>
+              <p>{'Result: ' + cdnResult.replace('push', 'pull')}</p>
               <pre>ffplay {publishUrl}</pre>
             </>
           )}

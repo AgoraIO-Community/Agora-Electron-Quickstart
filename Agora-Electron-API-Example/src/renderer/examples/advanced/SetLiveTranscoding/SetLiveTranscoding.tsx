@@ -1,25 +1,32 @@
+import { Button, Card, Checkbox, Input, List, message } from 'antd'
 import creteAgoraRtcEngine, {
+  AudioCodecProfileType,
   AudioProfileType,
+  AudioSampleRateType,
   AudioScenarioType,
   ChannelProfileType,
   ClientRoleType,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
+  LiveTranscoding,
   RtcConnection,
   RtcEngineExImplInternal,
   RtcStats,
+  RtmpStreamPublishErrorType,
+  RtmpStreamPublishState,
   UserOfflineReasonType,
+  VideoCodecProfileType,
   VideoSourceType,
 } from 'electron-agora-rtc-ng'
-import { Button, Card, Checkbox, Input, List, message } from 'antd'
-import React, { Component } from 'react'
+import { Component } from 'react'
 import JoinChannelBar from '../../component/JoinChannelBar'
 import Window from '../../component/Window'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
 import { getRandomInt } from '../../util'
 
+const localUid1 = getRandomInt(1, 9999999)
 interface User {
   isMyself: boolean
   uid: number
@@ -29,9 +36,11 @@ interface State {
   isJoined: boolean
   channelId: string
   allUser: User[]
-  isTranscoding: boolean
+  useTranscoding: boolean
   url: string
-  currentResolution?: { width: number; height: number }
+  rtmpUrl: string
+  isRtmping: boolean
+  rtmpResult: string
 }
 
 export default class SetLiveTranscoding
@@ -45,7 +54,10 @@ export default class SetLiveTranscoding
     url: '',
     allUser: [],
     isJoined: false,
-    isTranscoding: false,
+    rtmpUrl:
+      'rtmp://vid-218.push.chinanetcenter.broadcastapp.agora.io/live/test',
+    isRtmping: false,
+    rtmpResult: '',
   }
 
   componentDidMount() {
@@ -71,6 +83,44 @@ export default class SetLiveTranscoding
     }
 
     return this.rtcEngine
+  }
+
+  onRtmpStreamingStateChanged(
+    url: string,
+    state: RtmpStreamPublishState,
+    errCode: RtmpStreamPublishErrorType
+  ): void {
+    let stateStr: string
+    switch (state) {
+      case RtmpStreamPublishState.RtmpStreamPublishStateIdle:
+        stateStr = 'Idle'
+        break
+      case RtmpStreamPublishState.RtmpStreamPublishStateConnecting:
+        stateStr = 'Connecting'
+        break
+      case RtmpStreamPublishState.RtmpStreamPublishStateRunning:
+        stateStr = 'Running'
+        break
+      case RtmpStreamPublishState.RtmpStreamPublishStateRecovering:
+        stateStr = 'Recovering'
+        break
+      case RtmpStreamPublishState.RtmpStreamPublishStateRecovering:
+        stateStr = 'Recovering'
+        break
+      case RtmpStreamPublishState.RtmpStreamPublishStateFailure:
+        stateStr = 'Failure'
+        break
+      case RtmpStreamPublishState.RtmpStreamPublishStateDisconnecting:
+        stateStr = 'Disconnecting'
+        break
+
+      default:
+        break
+    }
+    this.setState({ rtmpResult: stateStr })
+    console.log(
+      `onRtmpStreamingStateChanged url:${url} publishState:${stateStr} errCode:${errCode}`
+    )
   }
 
   onJoinChannelSuccessEx(
@@ -145,82 +195,91 @@ export default class SetLiveTranscoding
     )
     this.rtcEngine?.setClientRole(ClientRoleType.ClientRoleBroadcaster)
 
-    const localUid = getRandomInt(1, 9999999)
-    console.log(`localUid: ${localUid}`)
-    this.rtcEngine?.joinChannel('', channelId, '', localUid)
+    console.log(`localUid: ${localUid1}`)
+    this.rtcEngine?.joinChannel('', channelId, '', localUid1)
   }
 
-  onPressStart = () => {
-    const { url, isTranscoding } = this.state
-    if (!url || !url.startsWith('rtmp://') || url === 'rtmp://') {
-      message.error("RTMP URL cannot be empty or not start with 'rtmp://'")
-      return
-    }
+  onPressRTMP = () => {
+    const { rtmpUrl, isRtmping } = this.state
     let res
-    if (isTranscoding) {
-      const transcoding = {
+    if (isRtmping) {
+      res = this.getRtcEngine().stopRtmpStream(rtmpUrl)
+      console.log('stopRtmpStream', res)
+    } else {
+      if (!rtmpUrl || !rtmpUrl.startsWith('rtmp://') || rtmpUrl === 'rtmp://') {
+        message.error("RTMP URL cannot be empty or not start with 'rtmp://'")
+        return
+      }
+
+      const transcoding: LiveTranscoding = {
+        transcodingUsers: [
+          {
+            uid: 0,
+            x: 0,
+            y: 0,
+            width: 360,
+            height: 640,
+            zOrder: 0,
+            alpha: 1,
+            audioChannel: 0,
+          },
+        ],
+        userCount: 1,
+        width: 1080,
+        height: 720,
+        videoBitrate: 400,
+        videoCodecProfile: VideoCodecProfileType.VideoCodecProfileHigh,
+        videoGop: 30,
+        videoFramerate: 15,
+        lowLatency: false,
+        audioSampleRate: AudioSampleRateType.AudioSampleRate44100,
         audioBitrate: 48,
         audioChannels: 1,
-        audioCodecProfile: 1,
-        audioSampleRate: 44100,
-        backgroundColor: 12632256,
-        backgroundImage: [],
-        height: 720,
-        lowLatency: false,
-        transcodingExtraInfo: '',
-        watermark: [],
-        videoBitrate: 1130,
-        videoCodecProfile: 100,
-        videoFrameRate: 15,
-        videoGop: 30,
-        width: 1280,
-        transcodingUsers: [],
+        audioCodecProfile: AudioCodecProfileType.AudioCodecProfileLcAac,
       }
-      res = this.getRtcEngine().updateRtmpTranscoding(transcoding)
-      console.log('updateRtmpTranscoding', res)
-      res = this.getRtcEngine().startRtmpStreamWithTranscoding(url, transcoding)
-      console.log('startRtmpStreamWithTranscoding', res)
-      return
-    }
-    res = this.getRtcEngine().startRtmpStreamWithoutTranscoding(url)
-    console.log('startRtmpStreamWithoutTranscoding', res)
-  }
 
-  onPressStop = () => {
-    const { url } = this.state
-    const res = this.getRtcEngine().stopRtmpStream(url)
-    console.log('stopRtmpStream', res)
+      res = this.getRtcEngine().startRtmpStreamWithTranscoding(
+        rtmpUrl,
+        transcoding
+      )
+      console.log('startRtmpStreamWithTranscoding', res)
+    }
+    this.setState({ isRtmping: !isRtmping })
   }
 
   renderRightBar = () => {
-    const { isTranscoding } = this.state
+    const {  rtmpUrl, isRtmping, isJoined, rtmpResult } =
+      this.state
 
     return (
       <div className={styles.rightBar}>
         <div>
-          <p>rtmp</p>
-          <Input
-            placeholder='rtmp://'
-            defaultValue='rtmp://'
-            onChange={(res) => {
-              this.setState({
-                //@ts-ignore
-                url: res.nativeEvent.target.value as string,
-              })
-            }}
-          />
-          <Checkbox
-            onChange={() => {
-              this.setState({ isTranscoding: !isTranscoding })
-            }}
-            checked={isTranscoding}
-          >
-            Transcoding
-          </Checkbox>
-          <br />
-          <Button onClick={this.onPressStart}>Start Rtmp Stream</Button>
-          <br />
-          <Button onClick={this.onPressStart}>Stop Rtmp Stream</Button>
+          {isJoined && (
+            <>
+              <p>rtmp</p>
+              <Input
+                placeholder='rtmp://'
+                defaultValue={rtmpUrl}
+                onChange={(res) => {
+                  this.setState({
+                    //@ts-ignore
+                    rtmpUrl: res.nativeEvent.target.value as string,
+                  })
+                }}
+              />
+
+              <br />
+              <Button onClick={this.onPressRTMP}>
+                {!isRtmping ? 'Start' : 'Stop'} Rtmp Stream
+              </Button>
+              {isRtmping && (
+                <>
+                  <p>{'Result: ' + rtmpResult}</p>
+                  <pre>ffplay {rtmpUrl.replace('push', 'pull')}</pre>
+                </>
+              )}
+            </>
+          )}
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
