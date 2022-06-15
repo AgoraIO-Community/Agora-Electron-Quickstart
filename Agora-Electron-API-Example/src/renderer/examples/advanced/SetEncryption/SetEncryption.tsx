@@ -173,7 +173,7 @@ export default class SetEncryption extends Component<{}, State, any> {
     const res = this.getRtcEngine().enableEncryption(true, {
       encryptionKey: encryptionKey! || '',
       encryptionMode: encryptionMode!,
-      encryptionKdfSalt: [1, 2, 3, 4, 5],
+      encryptionKdfSalt: [],
     })
     console.log('enableEncryption', res)
   }
