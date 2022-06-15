@@ -329,6 +329,7 @@ export default class JoinChannelVideo
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
           onPressLeave={() => {
+            this.setState({ isPreview: false })
             this.rtcEngine?.leaveChannel()
           }}
         />
