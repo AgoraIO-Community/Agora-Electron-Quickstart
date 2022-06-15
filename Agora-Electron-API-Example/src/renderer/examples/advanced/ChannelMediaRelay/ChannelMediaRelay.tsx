@@ -1,3 +1,4 @@
+import { Card, Input, List } from 'antd'
 import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
@@ -12,7 +13,6 @@ import creteAgoraRtcEngine, {
   UserOfflineReasonType,
   VideoSourceType,
 } from 'electron-agora-rtc-ng'
-import { Card, Input, List } from 'antd'
 import { Component } from 'react'
 import JoinChannelBar from '../../component/JoinChannelBar'
 import Window from '../../component/Window'
@@ -33,6 +33,7 @@ interface State {
   allUser: User[]
   currentFps?: number
   currentResolution?: { width: number; height: number }
+  relayChannelName: string
 }
 
 export default class ChannelMediaRelay
@@ -46,6 +47,7 @@ export default class ChannelMediaRelay
     allUser: [],
     isJoined: false,
     isRelaying: false,
+    relayChannelName: 'testRelay',
   }
 
   componentDidMount() {
@@ -161,8 +163,37 @@ export default class ChannelMediaRelay
     this.rtcEngine?.joinChannel('', channelId, '', localUid)
   }
 
+  onPressChannelRelay = (relayChannelName: string) => {
+    const { isRelaying } = this.state
+    if (isRelaying) {
+      this.getRtcEngine().stopChannelMediaRelay()
+    } else {
+      if (!relayChannelName) {
+        return
+      }
+      const { channelId } = this.state
+
+      this.getRtcEngine().startChannelMediaRelay({
+        srcInfo: {
+          channelName: channelId,
+          token: config.token,
+          uid: 0,
+        },
+        destInfos: [
+          {
+            channelName: relayChannelName,
+            token: config.token,
+            uid: 0,
+          },
+        ],
+        destCount: 1,
+      })
+    }
+    this.setState({ isRelaying: !isRelaying })
+  }
+
   renderRightBar = () => {
-    const { isJoined, isRelaying } = this.state
+    const { isJoined, isRelaying, relayChannelName } = this.state
 
     return (
       <div className={styles.rightBar}>
@@ -173,33 +204,9 @@ export default class ChannelMediaRelay
             allowClear
             enterButton={!isRelaying ? 'Start Relay' : 'Stop Relay'}
             size='small'
+            defaultValue={relayChannelName}
             disabled={!isJoined}
-            onSearch={(relayChannnelName) => {
-              if (isRelaying) {
-                this.getRtcEngine().stopChannelMediaRelay()
-              } else {
-                const { channelId, allUser } = this.state
-                const self = allUser.filter((user) => user.isMyself)[0]
-
-                console.log('relayChannnelName', relayChannnelName)
-                this.getRtcEngine().startChannelMediaRelay({
-                  srcInfo: {
-                    channelName: channelId,
-                    token: config.token,
-                    uid: 123,
-                  },
-                  destInfos: [
-                    {
-                      channelName: relayChannnelName,
-                      token: config.token,
-                      uid: 123,
-                    },
-                  ],
-                  destCount: 1,
-                })
-              }
-              this.setState({ isRelaying: !isRelaying })
-            }}
+            onSearch={this.onPressChannelRelay}
           />
         </div>
         <JoinChannelBar
