@@ -1,3 +1,4 @@
+import { Card, Input, List } from 'antd'
 import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
@@ -22,7 +23,6 @@ import creteAgoraRtcEngine, {
   VideoMirrorModeType,
   VideoSourceType,
 } from 'electron-agora-rtc-ng'
-import { Card, Input, List } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
@@ -31,6 +31,7 @@ import { FpsMap, ResolutionMap, RoleTypeMap } from '../../config'
 import config from '../../config/agora.config'
 import styles from '../../config/public.scss'
 import { configMapToOptions, getRandomInt } from '../../util'
+import './DirectCdnStreaming.scss'
 
 const { Search } = Input
 
@@ -54,8 +55,8 @@ interface State {
   currentResolution?: { width: number; height: number }
   cdnResult: string
   isStartCDN: boolean
+  publishUrl: string
 }
-const localUid = getRandomInt(1, 9999999)
 
 export default class DirectCdnStreaming
   extends Component<{}, State, any>
@@ -75,6 +76,7 @@ export default class DirectCdnStreaming
     cameraDevices: [],
     cdnResult: '',
     isStartCDN: false,
+    publishUrl: 'rtmp://push.alexmk.name/live/agora_rtc_ng',
   }
 
   componentDidMount() {
@@ -177,25 +179,6 @@ export default class DirectCdnStreaming
     console.error(err, msg)
   }
 
-  onSnapshotTaken(
-    channel: string,
-    uid: number,
-    filePath: string,
-    width: number,
-    height: number,
-    errCode: number
-  ): void {
-    console.log(
-      'onSnapshotTaken',
-      channel,
-      uid,
-      filePath,
-      width,
-      height,
-      errCode
-    )
-  }
-
   onPressJoinChannel = (channelId: string) => {
     this.setState({ channelId })
     this.rtcEngine.enableAudio()
@@ -208,8 +191,7 @@ export default class DirectCdnStreaming
       AudioScenarioType.AudioScenarioChatroom
     )
 
-    console.log(`localUid: ${localUid}`)
-    this.rtcEngine?.joinChannel('', channelId, '', localUid)
+    this.rtcEngine?.joinChannel('', channelId, '', getRandomInt(1, 9999999))
   }
 
   setVideoConfig = () => {
@@ -230,11 +212,11 @@ export default class DirectCdnStreaming
     })
   }
 
-  onDirectCdnStreamingStateChanged?(
+  onDirectCdnStreamingStateChanged = (
     state: DirectCdnStreamingState,
     error: DirectCdnStreamingError,
     message: string
-  ): void {
+  ) => {
     console.log('onDirectCdnStreamingStateChanged', state, error, message)
 
     let cdnResult = ''
@@ -260,8 +242,38 @@ export default class DirectCdnStreaming
     this.setState({ cdnResult })
   }
 
-  onDirectCdnStreamingStats?(stats: DirectCdnStreamingStats): void {
+  onDirectCdnStreamingStats = (stats: DirectCdnStreamingStats) => {
     console.log('onDirectCdnStreamingStats', stats)
+  }
+
+  onPressStartOrStop = (publishUrl) => {
+    const { currentFps, currentResolution, isStartCDN } = this.state
+    const rtcEngine = this.getRtcEngine()
+    let res
+    if (!isStartCDN) {
+      rtcEngine.setDirectCdnStreamingVideoConfiguration({
+        codecType: VideoCodecType.VideoCodecAv1,
+        dimensions: currentResolution,
+        frameRate: currentFps,
+        bitrate: 500,
+        minBitrate: 1,
+        orientationMode: OrientationMode.OrientationModeAdaptive,
+        degradationPreference: DegradationPreference.MaintainBalanced,
+        mirrorMode: VideoMirrorModeType.VideoMirrorModeAuto,
+      })
+      res = rtcEngine.startDirectCdnStreaming(this, publishUrl, {
+        publishCameraTrack: true,
+        publishMicrophoneTrack: false,
+        publishCustomAudioTrack: false,
+        publishCustomVideoTrack: false,
+        publishMediaPlayerAudioTrack: false,
+      })
+      console.log('startDirectCdnStreaming', '\nres:', res)
+    } else {
+      res = rtcEngine.stopDirectCdnStreaming()
+      console.log('stopDirectCdnStreaming', '\nres:', res)
+    }
+    this.setState({ isStartCDN: !isStartCDN, publishUrl })
   }
 
   renderRightBar = () => {
@@ -271,6 +283,7 @@ export default class DirectCdnStreaming
       isJoined,
       cdnResult,
       isStartCDN,
+      publishUrl,
     } = this.state
 
     return (
@@ -324,30 +337,18 @@ export default class DirectCdnStreaming
           <Search
             placeholder='publishUrl'
             allowClear
-            defaultValue={'rtmp://examplepush.agoramde.agoraio.cn/live/xxx'}
+            defaultValue={publishUrl}
             enterButton={!isStartCDN ? 'Start CDN' : 'Stop CDN'}
             size='small'
-            // disabled={!isJoined}
-            onSearch={(publishUrl) => {
-              const rtcEngine = this.getRtcEngine()
-              let res
-              if (!isStartCDN) {
-                res = rtcEngine.startDirectCdnStreaming(this, publishUrl, {
-                  publishCameraTrack: true,
-                  publishMicrophoneTrack: false,
-                  publishCustomAudioTrack: false,
-                  publishCustomVideoTrack: false,
-                  publishMediaPlayerAudioTrack: false,
-                })
-                console.log('startDirectCdnStreaming', '\nres:', res)
-              } else {
-                res = rtcEngine.stopDirectCdnStreaming()
-                console.log('stopDirectCdnStreaming', '\nres:', res)
-              }
-              this.setState({ isStartCDN: !isStartCDN })
-            }}
+            onSearch={this.onPressStartOrStop}
           />
-          <p>{'Result: ' + cdnResult}</p>
+
+          {isStartCDN && (
+            <>
+              <p>{'Result: ' + cdnResult}</p>
+              <pre>ffplay {publishUrl}</pre>
+            </>
+          )}
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}
