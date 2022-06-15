@@ -1,3 +1,4 @@
+import { Card, List, Switch } from 'antd'
 import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
@@ -21,7 +22,6 @@ import creteAgoraRtcEngine, {
   VideoSourceType,
   VirtualBackgroundSource,
 } from 'electron-agora-rtc-ng'
-import { Button, Card, List, Switch } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
@@ -237,16 +237,15 @@ export default class VirtualBackground
     let virtualBackgroundSource: VirtualBackgroundSource
     if (isColorMode) {
       virtualBackgroundSource = {
-        backgroundSourceType: BackgroundSourceType.BackgroundColor,
+        background_source_type: BackgroundSourceType.BackgroundColor,
         color: 232,
-        // source: 1,
-        blurDegree: BackgroundBlurDegree.BlurDegreeHigh,
+        blur_degree: BackgroundBlurDegree.BlurDegreeHigh,
       }
     } else {
       virtualBackgroundSource = {
-        backgroundSourceType: BackgroundSourceType.BackgroundImg,
+        background_source_type: BackgroundSourceType.BackgroundImg,
         source: getResourcePath('background.png'),
-        blurDegree: BackgroundBlurDegree.BlurDegreeHigh,
+        blur_degree: BackgroundBlurDegree.BlurDegreeHigh,
       }
     }
     this.getRtcEngine().enableVirtualBackground(
@@ -332,23 +331,25 @@ export default class VirtualBackground
                   }}
                 />
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  textAlign: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                {'Mode:   '}
-                <Switch
-                  unCheckedChildren='Image'
-                  checkedChildren='Color'
-                  defaultChecked={isColorMode}
-                  onChange={(value) => {
-                    this.setState({ isColorMode: value })
+              {!enableVirtual && (
+                <div
+                  style={{
+                    display: 'flex',
+                    textAlign: 'center',
+                    alignItems: 'center',
                   }}
-                />
-              </div>
+                >
+                  {'Mode:   '}
+                  <Switch
+                    unCheckedChildren='Image'
+                    checkedChildren='Color'
+                    defaultChecked={isColorMode}
+                    onChange={(value) => {
+                      this.setState({ isColorMode: value })
+                    }}
+                  />
+                </div>
+              )}
             </>
           )}
         </div>
