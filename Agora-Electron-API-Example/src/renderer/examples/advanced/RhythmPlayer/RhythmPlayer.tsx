@@ -1,3 +1,4 @@
+import { Card, Input, List, Switch } from 'antd'
 import creteAgoraRtcEngine, {
   ClientRoleType,
   IAudioDeviceManagerImpl,
@@ -9,7 +10,6 @@ import creteAgoraRtcEngine, {
   RtcStats,
   UserOfflineReasonType,
 } from 'electron-agora-rtc-ng'
-import { Card, Input, List, Switch } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
@@ -40,6 +40,7 @@ interface State {
   beatsPerMinute: number
   file1: string
   file2: string
+  enableRhythm: boolean
 }
 
 export default class RhythmPlayer
@@ -58,8 +59,9 @@ export default class RhythmPlayer
     isJoined: false,
     beatsPerMeasure: 4,
     beatsPerMinute: 360,
-    file1: getResourcePath('rhythm.mp3'),
-    file2: getResourcePath('audioEffect.mp3'),
+    file1: getResourcePath('dang.mp3'),
+    file2: getResourcePath('ding.mp3'),
+    enableRhythm: false,
   }
 
   componentDidMount() {
@@ -156,8 +158,9 @@ export default class RhythmPlayer
     this.rtcEngine?.setAudioProfile(audioProfile, audioScenario)
   }
 
-  onPressRhythmPlayer = (enabled) => {
-    if (enabled) {
+  onPressRhythmPlayer = (enableRhythm) => {
+    this.setState({ enableRhythm })
+    if (enableRhythm) {
       const { beatsPerMeasure, beatsPerMinute, file1, file2 } = this.state
       const res = this.getRtcEngine().startRhythmPlayer(file1, file2, {
         beatsPerMeasure,
@@ -178,7 +181,12 @@ export default class RhythmPlayer
   }
 
   renderRightBar = () => {
-    const { audioRecordDevices: audioDevices, file1, file2 } = this.state
+    const {
+      audioRecordDevices: audioDevices,
+      file1,
+      file2,
+      enableRhythm,
+    } = this.state
     return (
       <div className={styles.rightBar}>
         <div>
@@ -218,58 +226,62 @@ export default class RhythmPlayer
             <Switch
               checkedChildren='Enable'
               unCheckedChildren='Disable'
-              defaultChecked={false}
+              defaultChecked={enableRhythm}
               onChange={this.onPressRhythmPlayer}
             />
           </div>
           <br></br>
-          <Search
-            placeholder={'please input path or url'}
-            defaultValue={file1}
-            allowClear
-            enterButton={'File1'}
-            size='small'
-            onChange={(value) => {
-              this.setState({ file1: value })
-            }}
-          />
-          <br />
-          <Search
-            placeholder={'please input path or url'}
-            defaultValue={file2}
-            allowClear
-            enterButton={'File2'}
-            size='small'
-            onChange={(value) => {
-              this.setState({ file2: value })
-            }}
-          />
-          <br />
+          {!enableRhythm && (
+            <>
+              <Search
+                placeholder={'please input path or url'}
+                defaultValue={file1}
+                allowClear
+                enterButton={'File1'}
+                size='small'
+                onChange={(value) => {
+                  this.setState({ file1: value })
+                }}
+              />
+              <br />
+              <Search
+                placeholder={'please input path or url'}
+                defaultValue={file2}
+                allowClear
+                enterButton={'File2'}
+                size='small'
+                onChange={(value) => {
+                  this.setState({ file2: value })
+                }}
+              />
+              <br />
 
-          <SliderBar
-            max={9}
-            min={1}
-            value={4}
-            step={1}
-            title='Beats Per Measure'
-            onChange={(value) => {
-              this.setState({
-                beatsPerMeasure: value,
-              })
-            }}
-          />
-          <SliderBar
-            max={360}
-            min={60}
-            value={60}
-            step={1}
-            title='Beats Per Minute'
-            onChange={(value) => {
-              this.setState({
-                beatsPerMinute: value,
-              })
-            }}
-          />
+              <SliderBar
+                max={9}
+                min={1}
+                value={4}
+                step={1}
+                title='Beats Per Measure'
+                onChange={(value) => {
+                  this.setState({
+                    beatsPerMeasure: value,
+                  })
+                }}
+              />
+              <SliderBar
+                max={360}
+                min={60}
+                value={60}
+                step={1}
+                title='Beats Per Minute'
+                onChange={(value) => {
+                  this.setState({
+                    beatsPerMinute: value,
+                  })
+                }}
+              />
+            </>
+          )}
         </div>
         <JoinChannelBar
           onPressJoin={(channelId) => {
