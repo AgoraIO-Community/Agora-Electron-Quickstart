@@ -80,7 +80,7 @@ module.exports = function (config) {
   config.externals = [
     // ...config.externals,
     'webpack',
-    'agora-electron-sdk',
+    'electron-agora-rtc-ng',
   ]
   console.log('config', config.module.rules)
   return config
