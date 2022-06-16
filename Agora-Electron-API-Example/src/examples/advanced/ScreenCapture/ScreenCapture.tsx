@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
 import AgoraRtcEngine from 'agora-electron-sdk';
-import { List, Card, Button, message } from 'antd';
+import { Button, Card, List, message, Switch } from 'antd';
+import React, { Component } from 'react';
 import config from '../../config/agora.config';
 import styles from '../../config/public.scss';
 import { readImage } from '../../util/base64';
@@ -13,10 +13,12 @@ interface CaptureInfo {
   sourceName: string;
   sourceTitle: string;
   thumbImageBase64: string;
+  iconImageBase64: string;
 }
 
 interface State {
   captureInfos: CaptureInfo[];
+  isThumbImage: boolean;
 }
 
 export default class ScreenShare extends Component<{}, State, any> {
@@ -24,6 +26,7 @@ export default class ScreenShare extends Component<{}, State, any> {
 
   state: State = {
     captureInfos: [],
+    isThumbImage: true,
   };
 
   componentDidMount = async () => {
@@ -47,7 +50,7 @@ export default class ScreenShare extends Component<{}, State, any> {
     return this.rtcEngine;
   }
 
-  onPressGetScrrenCaptureSource = async () => {
+  onPressGetScreenCaptureSource = async () => {
     if (!this.getRtcEngine().getScreenCaptureSources) {
       message.error('API not exit on this sdk version');
       return;
@@ -63,26 +66,54 @@ export default class ScreenShare extends Component<{}, State, any> {
       readImage(item.thumbImage.buffer)
     );
     const imageList = await Promise.all(imageListPromise);
+
+    const iconImageListPromise = list.map((item) =>
+      readImage(item.iconImage ? item.iconImage.buffer : new Uint8Array([]))
+    );
+    const iconImageList = await Promise.all(iconImageListPromise);
     const captureInfos = list.map((infoObj, index) => ({
       ...infoObj,
       thumbImageBase64: imageList[index],
+      iconImageBase64: iconImageList[index],
     }));
     console.log('screenInfoList', captureInfos);
     this.setState({ captureInfos });
   };
 
   renderRightBar = () => {
+    const { isThumbImage } = this.state;
     return (
       <div className={styles.rightBar}>
-        <Button onClick={this.onPressGetScrrenCaptureSource}>
-          Get Screen Capture Source
-        </Button>
+        <div>
+          <div
+            style={{
+              display: 'flex',
+              textAlign: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {'Image Mode:   '}
+            <Switch
+              checkedChildren="Thumb Image"
+              unCheckedChildren="Icon Image"
+              defaultChecked={isThumbImage}
+              onChange={(value) => {
+                this.setState({ isThumbImage: value });
+              }}
+            />
+          </div>
+          <Button onClick={this.onPressGetScreenCaptureSource}>
+            Get Screen Capture Source
+          </Button>
+        </div>
       </div>
     );
   };
 
   renderItem = (captureInfo: CaptureInfo, index: number) => {
-    const { sourceTitle, thumbImageBase64, type, sourceName } = captureInfo;
+    const { isThumbImage } = this.state;
+    const { sourceTitle, thumbImageBase64, type, sourceName, iconImageBase64 } =
+      captureInfo;
     let title = sourceTitle;
     if (title && title.length > 20) {
       title = title.substring(0, 20) + '...';
@@ -96,7 +127,7 @@ export default class ScreenShare extends Component<{}, State, any> {
       <List.Item>
         <Card title={title}>
           <img
-            src={thumbImageBase64}
+            src={isThumbImage ? thumbImageBase64 : iconImageBase64}
             alt="img shot"
             className={screenStyle.previewShot}
           />
