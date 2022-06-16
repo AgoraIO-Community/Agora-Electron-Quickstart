@@ -13,10 +13,20 @@ export const isDebug = () => {
 }
 
 export const getResourcePath = (filePath = './') => {
+  let resourcePath
   if (isDebug()) {
-    return path.resolve(`${__dirname}`, '../../../../extraResources/', filePath)
+    resourcePath = path.resolve(
+      `${__dirname}`,
+      '../../../../extraResources/',
+      filePath
+    )
+  } else {
+    resourcePath = path.resolve(
+      `${process.resourcesPath}/extraResources`,
+      filePath
+    )
   }
-  return path.resolve(`${process.resourcesPath}/extraResources`, filePath)
+  return resourcePath
 }
 
 export const getRandomInt = (min = 1, max = 99999) => {
