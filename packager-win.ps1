@@ -41,7 +41,7 @@ function Package($archNum){
   Remove-Item -Path dist -Recurse -Force -ErrorAction Ignore;
   yarn
   # copy native sdk
-  Copy-Item -Path ../Electron-*/* -Destination src/node_modules/agora-electron-sdk/ -Recurse -Force
+  Copy-Item -Path ../Electron-*/* -Destination src/node_modules/electron-agora-rtc-ng/ -Recurse -Force
   # dist start
   DistByArch -type $archNum
   # move zip
@@ -79,7 +79,7 @@ echo "结束"
 #   @REM del /f/q/s node_modules
 #   @REM call yarn --verbose
   
-#   xcopy %cd%/Electron-*  node_modules/agora-electron-sdk/ /s /e /y
+#   xcopy %cd%/Electron-*  node_modules/electron-agora-rtc-ng/ /s /e /y
 #   @REM call yarn dist:zip
 
 #   @REM pushd dist

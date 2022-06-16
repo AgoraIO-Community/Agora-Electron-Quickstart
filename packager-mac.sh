@@ -7,7 +7,7 @@ packExample() {
   echo 当前工作路径:$(pwd)
   rm -rf node_modules dist
   yarn
-  cp -P -R ../Electron-*/* src/node_modules/agora-electron-sdk/
+  cp -P -R ../Electron-*/* src/node_modules/electron-agora-rtc-ng/
   yarn dist:mac
 
   pushd dist/mac
