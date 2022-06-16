@@ -1,3 +1,4 @@
+import { Card, List, Switch } from 'antd'
 import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
@@ -6,12 +7,11 @@ import creteAgoraRtcEngine, {
   ContentInspectResult,
   ContentInspectType,
   DegradationPreference,
-  IAudioDeviceManagerImpl,
+  IAudioDeviceManager,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
-  IVideoDeviceManagerImpl,
-  MediaSourceType,
+  IVideoDeviceManager,
   OrientationMode,
   RtcConnection,
   RtcEngineExImplInternal,
@@ -21,7 +21,6 @@ import creteAgoraRtcEngine, {
   VideoMirrorModeType,
   VideoSourceType,
 } from 'electron-agora-rtc-ng'
-import { Card, List, Switch } from 'antd'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
 import JoinChannelBar from '../../component/JoinChannelBar'
@@ -59,9 +58,9 @@ export default class ContentInspect
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  videoDeviceManager: IVideoDeviceManagerImpl
+  videoDeviceManager: IVideoDeviceManager
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  audioDeviceManager: IAudioDeviceManager
 
   state: State = {
     channelId: '',
@@ -74,8 +73,8 @@ export default class ContentInspect
 
   componentDidMount() {
     this.getRtcEngine().registerEventHandler(this)
-    this.videoDeviceManager = new IVideoDeviceManagerImpl()
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+    this.videoDeviceManager = this.getRtcEngine().getVideoDeviceManager()
+    this.audioDeviceManager = this.getRtcEngine().getAudioDeviceManager()
 
     this.setState({
       audioRecordDevices:

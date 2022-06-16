@@ -1,6 +1,6 @@
 import creteAgoraRtcEngine, {
   ClientRoleType,
-  IAudioDeviceManagerImpl,
+  IAudioDeviceManager,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
@@ -42,7 +42,7 @@ export default class JoinChannelAudio
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  audioDeviceManager: IAudioDeviceManager
 
   state: State = {
     audioRecordDevices: [],
@@ -55,7 +55,7 @@ export default class JoinChannelAudio
   componentDidMount() {
     this.getRtcEngine().registerEventHandler(this)
 
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+    this.audioDeviceManager = this.getRtcEngine().getAudioDeviceManager()
 
     this.setState({
       audioRecordDevices:

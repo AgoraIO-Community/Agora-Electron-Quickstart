@@ -3,7 +3,6 @@ import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
-  IAudioDeviceManagerImpl,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
@@ -11,6 +10,7 @@ import creteAgoraRtcEngine, {
   RtcEngineExImplInternal,
   RtcStats,
   UserOfflineReasonType,
+  IAudioDeviceManager,
 } from 'electron-agora-rtc-ng'
 import { Component } from 'react'
 import DropDownButton from '../../component/DropDownButton'
@@ -51,7 +51,7 @@ export default class AudioMixing
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  audioDeviceManager: IAudioDeviceManager
 
   state: State = {
     audioRecordDevices: [],
@@ -68,7 +68,7 @@ export default class AudioMixing
 
   componentDidMount() {
     this.getRtcEngine().registerEventHandler(this)
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+    this.audioDeviceManager = this.getRtcEngine().getAudioDeviceManager()
 
     this.setState({
       audioRecordDevices:
@@ -340,22 +340,24 @@ export default class AudioMixing
               this.rtcEngine?.adjustLoopbackRecordingVolume(value)
             }}
           />
-          <Button
-            htmlType='button'
-            onClick={() => {
-              this.getRtcEngine().enableLoopbackRecording(true)
+          <div
+            style={{
+              display: 'flex',
+              textAlign: 'center',
+              alignItems: 'center',
             }}
           >
-            enable
-          </Button>
-          <Button
-            htmlType='button'
-            onClick={() => {
-              this.getRtcEngine().enableLoopbackRecording(false)
-            }}
-          >
-            disable
-          </Button>
+            {'Enable LoopBack Recording:   '}
+            <Switch
+              checkedChildren='Enable'
+              unCheckedChildren='Disable'
+              defaultChecked={false}
+              onChange={(value) => {
+                this.getRtcEngine().enableLoopbackRecording(value)
+              }}
+            />
+          </div>
+
           <br />
           <br />
           <p>Audio Mixing</p>

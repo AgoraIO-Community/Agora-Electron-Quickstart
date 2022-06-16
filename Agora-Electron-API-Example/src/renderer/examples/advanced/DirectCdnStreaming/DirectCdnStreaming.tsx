@@ -7,12 +7,12 @@ import creteAgoraRtcEngine, {
   DirectCdnStreamingError,
   DirectCdnStreamingState,
   DirectCdnStreamingStats,
-  IAudioDeviceManagerImpl,
+  IAudioDeviceManager,
   IDirectCdnStreamingEventHandler,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
-  IVideoDeviceManagerImpl,
+  IVideoDeviceManager,
   MediaSourceType,
   OrientationMode,
   RtcConnection,
@@ -64,9 +64,9 @@ export default class DirectCdnStreaming
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  videoDeviceManager: IVideoDeviceManagerImpl
+  videoDeviceManager: IVideoDeviceManager
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  audioDeviceManager: IAudioDeviceManager
 
   state: State = {
     channelId: '',
@@ -91,8 +91,8 @@ export default class DirectCdnStreaming
     console.log('enableExtension', res)
 
     this.getRtcEngine().registerEventHandler(this)
-    this.videoDeviceManager = new IVideoDeviceManagerImpl()
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+    this.videoDeviceManager = this.getRtcEngine().getVideoDeviceManager()
+    this.audioDeviceManager = this.getRtcEngine().getAudioDeviceManager()
 
     this.setState({
       audioRecordDevices:

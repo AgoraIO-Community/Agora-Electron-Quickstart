@@ -5,11 +5,11 @@ import creteAgoraRtcEngine, {
   ChannelProfileType,
   ClientRoleType,
   DegradationPreference,
-  IAudioDeviceManagerImpl,
+  IAudioDeviceManager,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
-  IVideoDeviceManagerImpl,
+  IVideoDeviceManager,
   OrientationMode,
   RtcConnection,
   RtcEngineExImplInternal,
@@ -59,9 +59,9 @@ export default class JoinChannelVideo
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  videoDeviceManager: IVideoDeviceManagerImpl
+  videoDeviceManager: IVideoDeviceManager
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  audioDeviceManager: IAudioDeviceManager
 
   state: State = {
     channelId: '',
@@ -78,8 +78,8 @@ export default class JoinChannelVideo
 
   componentDidMount() {
     this.getRtcEngine().registerEventHandler(this)
-    this.videoDeviceManager = new IVideoDeviceManagerImpl()
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+    this.videoDeviceManager = this.getRtcEngine().getVideoDeviceManager()
+    this.audioDeviceManager = this.getRtcEngine().getAudioDeviceManager()
 
     this.setState({
       audioRecordDevices:
@@ -239,8 +239,21 @@ export default class JoinChannelVideo
     })
   }
 
+  onPressPreview = () => {
+    const { allUser: oldAllUser, isJoined, isPreview } = this.state
+    if (isPreview) {
+      return;
+    }
+    const newAllUser = [...oldAllUser]
+    newAllUser.push({ isMyself: true, uid: localUid1 })
+    this.setState({
+      isPreview: true,
+      allUser: newAllUser,
+    })
+  }
+
   renderRightBar = () => {
-    const { audioRecordDevices, cameraDevices } = this.state
+    const { audioRecordDevices, cameraDevices, isJoined } = this.state
 
     return (
       <div className={styles.rightBar}>
@@ -312,19 +325,9 @@ export default class JoinChannelVideo
               this.setState({ currentFps: res.dropId }, this.setVideoConfig)
             }}
           />
-          <Button
-            onClick={() => {
-              const { allUser: oldAllUser } = this.state
-              const newAllUser = [...oldAllUser]
-              newAllUser.push({ isMyself: true, uid: localUid1 })
-              this.setState({
-                isPreview: true,
-                allUser: newAllUser,
-              })
-            }}
-          >
-            Start Preview
-          </Button>
+          {!isJoined && (
+            <Button onClick={this.onPressPreview}>Start Preview</Button>
+          )}
         </div>
         <JoinChannelBar
           onPressJoin={this.onPressJoinChannel}

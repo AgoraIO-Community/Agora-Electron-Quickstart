@@ -5,7 +5,7 @@ import creteAgoraRtcEngine, {
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
-  IVideoDeviceManagerImpl,
+  IVideoDeviceManager,
   OrientationMode,
   RtcConnection,
   RtcEngineExImplInternal,
@@ -53,7 +53,7 @@ export default class CameraAndScreenShare
   extends Component<{}, State, any>
   implements IRtcEngineEventHandlerEx
 {
-  videoDeviceManager: IVideoDeviceManagerImpl
+  videoDeviceManager: IVideoDeviceManager
 
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
@@ -73,7 +73,7 @@ export default class CameraAndScreenShare
 
     this.getRtcEngine().registerEventHandler(this)
 
-    this.videoDeviceManager = new IVideoDeviceManagerImpl()
+    this.videoDeviceManager = this.getRtcEngine().getVideoDeviceManager()
 
     this.setState({
       cameraDevices: this.videoDeviceManager.enumerateVideoDevices() as any,

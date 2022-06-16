@@ -1,6 +1,6 @@
 import creteAgoraRtcEngine, {
   ClientRoleType,
-  IAudioDeviceManagerImpl,
+  IAudioDeviceManager,
   IRtcEngine,
   IRtcEngineEx,
   RtcConnection,
@@ -37,7 +37,7 @@ interface State {
 export default class StringUid extends Component<State> {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  audioDeviceManager: IAudioDeviceManager
 
   state: State = {
     audioRecordDevices: [],
@@ -49,7 +49,7 @@ export default class StringUid extends Component<State> {
 
   componentDidMount() {
     this.getRtcEngine().registerEventHandler(this)
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+    this.audioDeviceManager = this.getRtcEngine().getAudioDeviceManager()
 
     this.setState({
       audioRecordDevices:

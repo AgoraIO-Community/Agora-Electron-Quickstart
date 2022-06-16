@@ -9,7 +9,7 @@ import creteAgoraRtcEngine, {
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
-  IVideoDeviceManagerImpl,
+  IVideoDeviceManager,
   LocalTranscoderConfiguration,
   MediaPlayerError,
   MediaPlayerState,
@@ -66,7 +66,7 @@ export default class LocalVideoTranscoder
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  videoDeviceManager: IVideoDeviceManagerImpl
+  videoDeviceManager: IVideoDeviceManager
 
   mpk?: IMediaPlayer
 
@@ -85,7 +85,7 @@ export default class LocalVideoTranscoder
   componentDidMount() {
     this.getRtcEngine().registerEventHandler(this)
     this.getMediaPlayer().registerPlayerSourceObserver(this)
-    this.videoDeviceManager = new IVideoDeviceManagerImpl()
+    this.videoDeviceManager = this.getRtcEngine().getVideoDeviceManager()
 
     this.setState({
       cameraDevices: this.videoDeviceManager.enumerateVideoDevices() as any,

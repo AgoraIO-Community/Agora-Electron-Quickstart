@@ -2,7 +2,7 @@ import creteAgoraRtcEngine, {
   AudioProfileType,
   AudioScenarioType,
   ChannelProfileType,
-  IAudioDeviceManagerImpl,
+  IAudioDeviceManager,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
@@ -56,7 +56,7 @@ export default class VoiceChanger
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  audioDeviceManager: IAudioDeviceManager
 
   state: State = {
     audioRecordDevices: [],
@@ -71,7 +71,7 @@ export default class VoiceChanger
   componentDidMount() {
     this.getRtcEngine().registerEventHandler(this)
 
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+    this.audioDeviceManager = this.getRtcEngine().getAudioDeviceManager()
 
     this.setState({
       audioRecordDevices:

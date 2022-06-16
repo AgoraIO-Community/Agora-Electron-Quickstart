@@ -3,11 +3,11 @@ import creteAgoraRtcEngine, {
   AudioScenarioType,
   ChannelProfileType,
   DegradationPreference,
-  IAudioDeviceManagerImpl,
+  IAudioDeviceManager,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
-  IVideoDeviceManagerImpl,
+  IVideoDeviceManager,
   OrientationMode,
   RtcConnection,
   RtcEngineExImplInternal,
@@ -56,9 +56,9 @@ export default class TakeSnapshot
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  videoDeviceManager: IVideoDeviceManagerImpl
+  videoDeviceManager: IVideoDeviceManager
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  audioDeviceManager: IAudioDeviceManager
 
   state: State = {
     channelId: '',
@@ -70,8 +70,8 @@ export default class TakeSnapshot
 
   componentDidMount() {
     this.getRtcEngine().registerEventHandler(this)
-    this.videoDeviceManager = new IVideoDeviceManagerImpl()
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+    this.videoDeviceManager = this.getRtcEngine().getVideoDeviceManager()
+    this.audioDeviceManager = this.getRtcEngine().getAudioDeviceManager()
 
     this.setState({
       audioRecordDevices:

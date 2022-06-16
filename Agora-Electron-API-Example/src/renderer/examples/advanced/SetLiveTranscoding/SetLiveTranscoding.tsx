@@ -36,7 +36,6 @@ interface State {
   isJoined: boolean
   channelId: string
   allUser: User[]
-  useTranscoding: boolean
   url: string
   rtmpUrl: string
   isRtmping: boolean

@@ -1,7 +1,7 @@
 import { Card, Input, List, Switch } from 'antd'
 import creteAgoraRtcEngine, {
   ClientRoleType,
-  IAudioDeviceManagerImpl,
+  IAudioDeviceManager,
   IRtcEngine,
   IRtcEngineEventHandlerEx,
   IRtcEngineEx,
@@ -49,7 +49,7 @@ export default class RhythmPlayer
 {
   rtcEngine?: IRtcEngineEx & IRtcEngine & RtcEngineExImplInternal
 
-  audioDeviceManager: IAudioDeviceManagerImpl
+  audioDeviceManager: IAudioDeviceManager
 
   state: State = {
     audioRecordDevices: [],
@@ -67,7 +67,7 @@ export default class RhythmPlayer
   componentDidMount() {
     this.getRtcEngine().registerEventHandler(this)
 
-    this.audioDeviceManager = new IAudioDeviceManagerImpl()
+    this.audioDeviceManager = this.getRtcEngine().getAudioDeviceManager()
 
     this.setState({
       audioRecordDevices:
