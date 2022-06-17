@@ -1,30 +1,23 @@
-import ScreenShare from './ScreenShare/ScreenShare';
+import AudioMixing from './AudioMixing/AudioMixing';
+import BeautyEffect from './BeautyEffect/BeautyEffect';
 import CameraAndScreenShare from './CameraAndScreenShare/CameraAndScreenShare';
-import LoadPlugin from './LoadPlugin/LoadPlugin';
 import ChannelMediaRelay from './ChannelMediaRelay/ChannelMediaRelay';
 import CreateDataStream from './CreateDataStream/CreateDataStream';
 import JoinMultipleChannel from './JoinMultipleChannel/JoinMultipleChannel';
+import LoadPlugin from './LoadPlugin/LoadPlugin';
 import ScreenCapture from './ScreenCapture/ScreenCapture';
-import AudioMixing from './AudioMixing/AudioMixing';
+import ScreenShare from './ScreenShare/ScreenShare';
 import SetEncryption from './SetEncryption/SetEncryption';
 import SetLiveTranscoding from './SetLiveTranscoding/SetLiveTranscoding';
 import VoiceChanger from './VoiceChanger/VoiceChanger';
 
 const advanceRoute = [
-  {
-    path: '/ScreenShare',
-    component: ScreenShare,
-    title: 'ScreenShare',
-  },
+  { path: '/AudioMixing', component: AudioMixing, title: 'AudioMixing' },
+  { path: '/BeautyEffect', component: BeautyEffect, title: 'BeautyEffect' },
   {
     path: '/CameraAndScreenShare',
     component: CameraAndScreenShare,
     title: 'CameraAndScreenShare',
-  },
-  {
-    path: '/LoadPlugin',
-    component: LoadPlugin,
-    title: 'LoadPlugin',
   },
   {
     path: '/ChannelMediaRelay',
@@ -41,31 +34,16 @@ const advanceRoute = [
     component: JoinMultipleChannel,
     title: 'JoinMultipleChannel',
   },
-  {
-    path: '/ScreenCapture',
-    component: ScreenCapture,
-    title: 'ScreenCapture',
-  },
-  {
-    path: '/AudioMixing',
-    component: AudioMixing,
-    title: 'AudioMixing',
-  },
-  {
-    path: '/SetEncryption',
-    component: SetEncryption,
-    title: 'SetEncryption',
-  },
+  { path: '/LoadPlugin', component: LoadPlugin, title: 'LoadPlugin' },
+  { path: '/ScreenCapture', component: ScreenCapture, title: 'ScreenCapture' },
+  { path: '/ScreenShare', component: ScreenShare, title: 'ScreenShare' },
+  { path: '/SetEncryption', component: SetEncryption, title: 'SetEncryption' },
   {
     path: '/SetLiveTranscoding',
     component: SetLiveTranscoding,
     title: 'SetLiveTranscoding',
   },
-  {
-    path: '/VoiceChanger',
-    component: VoiceChanger,
-    title: 'VoiceChanger',
-  },
+  { path: '/VoiceChanger', component: VoiceChanger, title: 'VoiceChanger' },
 ];
 
 export default advanceRoute;
