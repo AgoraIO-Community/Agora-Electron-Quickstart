@@ -9,6 +9,7 @@ import ScreenCapture from './ScreenCapture/ScreenCapture';
 import ScreenShare from './ScreenShare/ScreenShare';
 import SetEncryption from './SetEncryption/SetEncryption';
 import SetLiveTranscoding from './SetLiveTranscoding/SetLiveTranscoding';
+import VirtualBackground from './VirtualBackground/VirtualBackground';
 import VoiceChanger from './VoiceChanger/VoiceChanger';
 
 const advanceRoute = [
@@ -42,6 +43,11 @@ const advanceRoute = [
     path: '/SetLiveTranscoding',
     component: SetLiveTranscoding,
     title: 'SetLiveTranscoding',
+  },
+  {
+    path: '/VirtualBackground',
+    component: VirtualBackground,
+    title: 'VirtualBackground',
   },
   { path: '/VoiceChanger', component: VoiceChanger, title: 'VoiceChanger' },
 ];
