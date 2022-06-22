@@ -1,4 +1,5 @@
 import { Card, Switch } from 'antd'
+import electron, { ipcRenderer } from "electron";
 import creteAgoraRtcEngine, {
   ClientRoleType,
   DegradationPreference,
@@ -22,6 +23,15 @@ import styles from '../../config/public.scss'
 import { configMapToOptions, getRandomInt } from '../../util'
 import { rgbImageBufferToBase64 } from '../../util/base64'
 import screenStyle from './CameraAndScreenShare.scss'
+
+const desktopCapturer = {
+  getSources: (opts) =>
+    ipcRenderer.invoke("DESKTOP_CAPTURER_GET_SOURCES", {
+      types: ["window", "screen"],
+    }),
+};
+//@ts-ignore
+window.desktopCapturer = desktopCapturer;
 
 const localUid1 = getRandomInt(1, 9999999)
 const localUid2 = getRandomInt(1, 9999999)
@@ -92,6 +102,7 @@ export default class CameraAndScreenShare
     const imageList = list.map((item) =>
       rgbImageBufferToBase64(item.thumbImage)
     )
+    
 
     const formatList = list.map(
       ({ sourceName, sourceTitle, sourceId, type }, index) => ({
@@ -105,6 +116,7 @@ export default class CameraAndScreenShare
             : sourceTitle.replace(/\s+/g, '').substr(0, 20) + '...',
       })
     )
+    console.log(list,imageList,formatList);
     this.setState({ captureInfoList: formatList })
   }
 
@@ -139,23 +151,48 @@ export default class CameraAndScreenShare
 
     const rtcEngine = this.getRtcEngine()
     if (isScreen) {
-      this.rtcEngine.startScreenCaptureByDisplayId(
-        sourceId,
-        {
-          x: 0,
-          y: 0,
-          ...currentShareResolution,
-        },
-        {
-          dimensions: currentShareResolution,
-
-          frameRate: currentFps,
-          captureMouseCursor,
-          windowFocus: false,
-          excludeWindowList: [],
-          excludeWindowCount: 0,
-        }
-      )
+      if (process.platform=='darwin') {
+        this.rtcEngine.startScreenCaptureByDisplayId(
+          sourceId,
+          {
+            x: 0,
+            y: 0,
+            ...currentShareResolution,
+          },
+          {
+            dimensions: currentShareResolution,
+  
+            frameRate: currentFps,
+            captureMouseCursor,
+            windowFocus: false,
+            excludeWindowList: [],
+            excludeWindowCount: 0,
+          }
+        )
+      } else {
+        this.rtcEngine.startScreenCaptureByScreenRect(
+          {
+            x: 0,
+            y: 0,
+            ...currentShareResolution,
+          },
+          {
+            x: 0,
+            y: 0,
+            ...currentShareResolution,
+          },
+          {
+            dimensions: currentShareResolution,
+  
+            frameRate: currentFps,
+            captureMouseCursor,
+            windowFocus: false,
+            excludeWindowList: [],
+            excludeWindowCount: 0,
+          }
+        )
+      }
+      
     } else {
       this.rtcEngine.startScreenCaptureByWindowId(
         sourceId,
@@ -209,7 +246,8 @@ export default class CameraAndScreenShare
   onPressStop = () => {
     this.setState({ isStart: false })
     const rtcEngine = this.getRtcEngine()
-    rtcEngine.stopPrimaryScreenCapture()
+    
+    rtcEngine.stopScreenCapture();
 
     const { channelId } = this.state
     rtcEngine.leaveChannelEx({ channelId, localUid: localUid1 })
@@ -246,7 +284,7 @@ export default class CameraAndScreenShare
   }
 
   renderRightBar = () => {
-    const { captureInfoList, cameraDevices, enableShare, enableCamera } =
+    const { captureInfoList, cameraDevices, enableShare } =
       this.state
     return (
       <div className={styles.rightBar}>
@@ -260,7 +298,7 @@ export default class CameraAndScreenShare
               dropId: obj,
               dropText: obj.sourceName || obj.sourceTitle,
             }))}
-            PopContent={this.renderPopup}
+            // PopContent={this.renderPopup}
             PopContentTitle='Preview'
             onPress={(res) => {
               const info = res.dropId

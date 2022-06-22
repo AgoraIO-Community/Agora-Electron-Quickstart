@@ -1,6 +1,10 @@
-import { app, BrowserWindow, systemPreferences } from 'electron'
+import { app, BrowserWindow, systemPreferences , ipcMain, desktopCapturer} from 'electron'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
+
+ipcMain.handle('DESKTOP_CAPTURER_GET_SOURCES', (event, opts) =>
+  desktopCapturer.getSources(opts)
+)
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 app.allowRendererProcessReuse = false
