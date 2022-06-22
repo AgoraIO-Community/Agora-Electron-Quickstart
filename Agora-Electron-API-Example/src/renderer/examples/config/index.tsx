@@ -1,6 +1,7 @@
 import {
   AudioProfileType,
   AudioScenarioType,
+  ChannelProfileType,
   ClientRoleType,
   FrameRate,
 } from 'electron-agora-rtc-ng'
@@ -25,6 +26,14 @@ export const AudioScenarioList = {
 export const RoleTypeMap = {
   Broadcaster: ClientRoleType.ClientRoleBroadcaster, //1
   Audience: ClientRoleType.ClientRoleAudience, //2
+}
+export const ChannelProfileTypeMap = {
+  Communication: ChannelProfileType.ChannelProfileCommunication,
+  LiveBroadcasting: ChannelProfileType.ChannelProfileLiveBroadcasting,
+  Game: ChannelProfileType.ChannelProfileGame,
+  CloudGaming: ChannelProfileType.ChannelProfileCloudGaming,
+  Communication1v1: ChannelProfileType.ChannelProfileCommunication1v1,
+  LiveBroadcasting2: ChannelProfileType.ChannelProfileLiveBroadcasting2,
 }
 export const ResolutionMap = {
   '120x120': { width: 120, height: 120 },
