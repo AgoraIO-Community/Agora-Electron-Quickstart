@@ -20,9 +20,9 @@ import VoiceChanger from './VoiceChanger/VoiceChanger'
 const advanceRoute = [
   { path: '/AudioMixing', component: AudioMixing, title: 'AudioMixing' },
   {
-    path: '/CameraAndScreenShare',
+    path: '/ScreenShare',
     component: CameraAndScreenShare,
-    title: 'CameraAndScreenShare',
+    title: 'ScreenShare',
   },
   {
     path: '/ChannelMediaRelay',
@@ -56,7 +56,7 @@ const advanceRoute = [
     title: 'MultipleChannel',
   },
   { path: '/RhythmPlayer', component: RhythmPlayer, title: 'RhythmPlayer' },
-  { path: '/ScreenShare', component: ScreenShare, title: 'ScreenShare' },
+  // { path: '/ScreenShare', component: ScreenShare, title: 'ScreenShare' },
   { path: '/SendMetaData', component: SendMetaData, title: 'SendMetaData' },
   { path: '/SetEncryption', component: SetEncryption, title: 'SetEncryption' },
   {

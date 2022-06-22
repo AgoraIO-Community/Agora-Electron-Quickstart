@@ -1,13 +1,7 @@
-let localAppId = ''
-try {
-  localAppId = require('./appID').default
-  console.log('appID', localAppId)
-} catch (error) {}
-
 const config = {
   enableSDKLogging: true,
   enableSDKDebugLogging: false,
-  appID: localAppId,
+  appID: 'aab8b8f5a8cd4469a63042fcfafe7063',
   token: '',
   defaultChannelId: 'testdcg',
   pluginPath: '',
