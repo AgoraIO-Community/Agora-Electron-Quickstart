@@ -184,6 +184,9 @@ export default class ScreenShare extends Component<{}, State, any> {
       windowFocus: false,
       excludeWindowList: excludeList,
       excludeWindowCount: excludeList.length,
+      enableHighLight: true,
+      highLightWidth: 2,
+      highLightColor: 0xFF0000,
     };
     console.log('CaptureParam', captureParam);
     if (type === 'screen') {
