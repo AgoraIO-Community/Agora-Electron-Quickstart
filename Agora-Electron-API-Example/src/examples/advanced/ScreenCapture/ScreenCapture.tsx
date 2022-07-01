@@ -63,7 +63,7 @@ export default class ScreenShare extends Component<{}, State, any> {
     console.log('getScreenCaptureSources', list);
 
     const imageListPromise = list.map((item) =>
-      readImage(item.iconImage ? item.thumbImage.buffer : new Uint8Array([]))
+      readImage(item.thumbImage ? item.thumbImage.buffer : new Uint8Array([]))
     );
     const imageList = await Promise.all(imageListPromise);
 
