@@ -15,6 +15,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "agora-electron-sdk": "latest"
+    "agora-electron-sdk": "3.4.2-build.706"
   }
 }
