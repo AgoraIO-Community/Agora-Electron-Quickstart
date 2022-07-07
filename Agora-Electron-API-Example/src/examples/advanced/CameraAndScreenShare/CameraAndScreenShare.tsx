@@ -67,16 +67,13 @@ export default class CameraAndScreenShare extends Component<{}, State, any> {
   }
 
   getScreenInfoList = async () => {
-    let myResolve: any;
-    const promise = new Promise((resolve, reject) => {
-      myResolve = resolve;
-    });
-    this.getRtcEngine().getScreenDisplaysInfo((list) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore:next-line
-      myResolve(list);
-    });
-    const list = (await promise) as { image: Uint8Array; displayId: number }[];
+    // let myResolve: any;
+    // const promise = new Promise((resolve, reject) => {
+    //   myResolve = resolve;
+    // });
+    const list = this.getRtcEngine().getScreenDisplaysInfo();
+    // const list = (await promise) as { image: Uint8Array; displayId: number }[];
+
     const imageListPromise = list.map((item) => readImage(item.image));
     const imageList = await Promise.all(imageListPromise);
     const screenInfoList = list.map(({ displayId }, index) => ({
