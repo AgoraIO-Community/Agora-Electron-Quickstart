@@ -258,6 +258,9 @@ export default class CameraAndScreenShare extends Component<{}, State, any> {
       windowFocus: false,
       excludeWindowList: excludeList,
       excludeWindowCount: excludeList.length,
+      enableHighLight: true,
+      highLightWidth: 2,
+      highLightColor: 0xFFFF0000,
     };
     console.log('CaptureParam', captureParam);
     if (type === 'screen') {
