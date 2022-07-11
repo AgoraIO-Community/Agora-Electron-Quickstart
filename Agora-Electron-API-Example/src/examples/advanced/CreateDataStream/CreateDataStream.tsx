@@ -128,6 +128,9 @@ export default class CreateDataStream extends Component<State> {
   };
 
   pressSendMsg = (msg: string) => {
+    if (!msg) {
+      console.error('msg should not be empty!');
+    }
     // create the data stream
     // Each user can create up to five data streams during the lifecycle of the agoraKit
     this.rtcEngine?.sendStreamMessage(this.getStreamId(), msg);
