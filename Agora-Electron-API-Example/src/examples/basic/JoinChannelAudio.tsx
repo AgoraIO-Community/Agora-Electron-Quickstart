@@ -202,30 +202,11 @@ export default class JoinChannelAudio extends Component<State> {
             rtcEngine.enableAudio();
             rtcEngine.setClientRole(1);
 
-            let res = this.rtcEngine?.joinChannelEx(
+            this.rtcEngine?.joinChannel(
               '',
-              {
-                localUid: Number(`${new Date().getTime()}`.slice(7)),
-                channelId,
-              },
-              {
-                publishCameraTrack: false,
-                publishAudioTrack: true,
-                publishScreenTrack: false,
-                publishCustomAudioTrack: false,
-                publishCustomVideoTrack: false,
-                publishEncodedVideoTrack: false,
-                publishMediaPlayerAudioTrack: false,
-                publishMediaPlayerVideoTrack: false,
-                autoSubscribeAudio: true,
-                autoSubscribeVideo: true,
-                clientRoleType: 1,
-                publishSecondaryCameraTrack: false,
-                publishMediaPlayerId: 0,
-                enableAudioRecordingOrPlayout: true,
-                defaultVideoStreamType: 0,
-                channelProfile: 1,
-              }
+              channelId,
+              '',
+              Number(`${new Date().getTime()}`.slice(7))
             );
           }}
           onPressLeave={() => {
