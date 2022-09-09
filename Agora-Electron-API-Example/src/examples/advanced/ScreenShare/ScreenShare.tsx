@@ -42,68 +42,69 @@ export default class ScreenShare extends Component<{}, State, any> {
     this.getRtcEngine().release();
   }
 
+  // getScreenInfoListold = async () => {
+  //   const list = this.getRtcEngine().getScreenDisplaysInfo();
+  //   const imageListPromise = list.map((item) => readImage(item.image));
+  //   const imageList = await Promise.all(imageListPromise);
+  //   const screenInfoList = list.map(({ displayId }, index) => ({
+  //     name: `Display ${index + 1}`,
+  //     image: imageList[index],
+  //     displayId,
+  //   }));
+  //   console.log('screenInfoList\n', screenInfoList);
+  //   this.setState({ screenInfoList });
+  // };
+
   getScreenInfoList = async () => {
     let list = this.getRtcEngine().getScreenCaptureSources(
       { width: 400, height: 400 },
       { width: 400, height: 400 },
       true
-    ).filter(obj => obj.type === 1);
-    console.log('getScreenCaptureSources\n', list);
-    Promise.all(list.map(item => readImage(item.thumbImage.buffer))).then(
-      imageList => {
-        console.log('imageList\n', imageList);
-        let displayList = list.map((item, index) => {
-          return {
-            ownerName: item.sourceTitle,
-            name: item.sourceName,
-            displayId: { x: 0, y: 0, width: 400, height: 400, id: item.sourceId },
-            image: imageList[index],
-          };
-        });
-        this.setState({
-          screenInfoList: displayList,
-        });
-      }
-    );
+   ).filter(obj => obj.type === 1);
+   console.log('getScreenCaptureSources\n', list);
+   Promise.all(list.map(item => readImage(item.thumbImage.buffer))).then(
+    imageList => {
+      console.log('imageList\n', imageList);
+      let displayList = list.map((item, index) => {
+        return {
+          ownerName: '',
+          name: `Display ${index + 1}`,
+          displayId: {x: 0, y: 0, width:400, height:400, id: item.sourceId},//item.sourceId,
+          image: imageList[index],
+        };
+      });
+      this.setState({
+        screenInfoList: displayList,
+      });
+    }
+  );
   };
 
   getWindowInfoList = async () => {
+  
     let list = this.getRtcEngine().getScreenCaptureSources(
       { width: 400, height: 400 },
       { width: 400, height: 400 },
-      true
-    ).filter(obj => obj.type === 0);
-    console.log('getScreenCaptureSources\n', list);
+      false
+    );
     Promise.all(list.map(item => readImage(item.thumbImage.buffer))).then(
       imageList => {
-        console.log('imageList\n', imageList);
-        let windowList = list.map((item, index) => {
+        let windowInfoList = list.map((item, index) => {
+          console.log(item.sourceTitle, item, item.sourceId);
           return {
-            ownerName: item.sourceTitle,
-            name: item.sourceName,
+            ownerName: item.sourceName,
+            name: item.sourceTitle,
             windowId: item.sourceId,
             image: imageList[index],
           };
         });
+
         this.setState({
-          windowInfoList: windowList,
+          windowInfoList,
         });
       }
-    );
+    ); 
 
-    const imageListPromise = list.map((item) => readImage(item.image));
-    const imageList = await Promise.all(imageListPromise);
-
-    const windowInfoList = list.map(({ ownerName, name, windowId }, index) => ({
-      ownerName,
-      image: imageList[index],
-      windowId,
-      name:
-        name.length < 20
-          ? name
-          : name.replace(/\s+/g, '').substr(0, 20) + '...',
-    }));
-    this.setState({ windowInfoList });
   };
 
   getRtcEngine() {
@@ -128,7 +129,8 @@ export default class ScreenShare extends Component<{}, State, any> {
   subscribeEvents = (rtcEngine: AgoraRtcEngine) => {
     rtcEngine.on('joinedChannel', (connection, elapsed) => {
       console.log(
-        `onJoinChannel channel: ${connection.channelId}  uid: ${connection.localUid
+        `onJoinChannel channel: ${connection.channelId}  uid: ${
+          connection.localUid
         }  version: ${JSON.stringify(rtcEngine.getVersion())})`
       );
 
@@ -140,7 +142,7 @@ export default class ScreenShare extends Component<{}, State, any> {
     rtcEngine.on('userJoined', (uid, elapsed) => {
       console.log(`userJoined ---- ${uid}`);
     });
-    rtcEngine.on('userOffline', (uid, reason) => { });
+    rtcEngine.on('userOffline', (uid, reason) => {});
 
     rtcEngine.on('error', (err) => {
       console.error(err);
@@ -184,13 +186,13 @@ export default class ScreenShare extends Component<{}, State, any> {
         );
         console.log('startScreenCaptureByScreen');
       }
-
+      
     } else {
       const info = this.state.windowInfoList.find((obj) => {
         if (obj.windowId === screenSymbol) return obj;
       });
-      console.log('startScreenCaptureByWindow', info);
-
+      console.log('startScreenCaptureByWindow',info);
+      
       const res = rtcEngine.startScreenCaptureByWindow(
         screenSymbol,
         {
@@ -231,7 +233,8 @@ export default class ScreenShare extends Component<{}, State, any> {
         }
         resolve(true);
         console.log(
-          `onJoinChannel channel: ${connection.channelId}  uid: ${connection.localUid
+          `onJoinChannel channel: ${connection.channelId}  uid: ${
+            connection.localUid
           }  version: ${JSON.stringify(rtcEngine.getVersion())})`
         );
       });
