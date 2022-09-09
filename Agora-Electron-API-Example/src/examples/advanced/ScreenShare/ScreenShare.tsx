@@ -153,39 +153,24 @@ export default class ScreenShare extends Component<{}, State, any> {
     const rtcEngine = this.getRtcEngine();
     console.log(`start sharing display ${JSON.stringify(screenSymbol)}`);
     const excludeList = new Array<number>();
-
+    console.log({type, screenSymbol});
     if (type === 'screen') {
-      try {
-        rtcEngine.startScreenCaptureByDisplayId(
-          screenSymbol.id,
-          { x: 0, y: 0, width: 0, height: 0 },
-          {
+ 
+        rtcEngine.startPrimaryScreenCapture({
+          isCaptureWindow: false,
+          displayId: screenSymbol.id,
+          screenRect: { x: 0, y: 0, width: 0, height: 0 },
+          windowId: 1,
+          params: {
             width: 480,
             height: 360,
             bitrate: 1000,
             frameRate: 15,
-            captureMouseCursor: false,
-            windowFocus: false,
-            excludeWindowList: [],
+          },
+          regionRect:  { x: 0, y: 0, width: 0, height: 0 }
           }
         );
-        console.log('startScreenCaptureByDisplayId');
-      } catch (error) {
-        rtcEngine.startScreenCaptureByScreen(
-          screenSymbol,
-          { x: 0, y: 0, width: 0, height: 0 },
-          {
-            width: 480,
-            height: 360,
-            bitrate: 1000,
-            frameRate: 15,
-            captureMouseCursor: false,
-            windowFocus: false,
-            excludeWindowList: [],
-          }
-        );
-        console.log('startScreenCaptureByScreen');
-      }
+        console.log('startPrimaryScreenCapture');
       
     } else {
       const info = this.state.windowInfoList.find((obj) => {
