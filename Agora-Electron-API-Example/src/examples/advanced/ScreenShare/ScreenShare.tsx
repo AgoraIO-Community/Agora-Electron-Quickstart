@@ -78,35 +78,25 @@ export default class ScreenShare extends Component<{}, State, any> {
   };
 
   getWindowInfoList = async () => {
-    let myResolve: any;
-    const promise = new Promise((resolve, reject) => {
-      myResolve = resolve;
+    let list = this.getRtcEngine().getScreenCaptureSources(
+      { width: 400, height: 400 },
+      { width: 400, height: 400 },
+      false
+    );
+    return Promise.all(
+      list.map((item) => readImage(item.thumbImage.buffer))
+    ).then((imageList) => {
+      let windowInfoList = list.map((item, index) => {
+        return {
+          ownerName: item.sourceName,
+          name: item.sourceTitle,
+          windowId: item.sourceId,
+          image: imageList[index],
+        };
+      });
+      this.setState({ windowInfoList });
+      return windowInfoList;
     });
-    this.getRtcEngine().getScreenWindowsInfo((list) => {
-      myResolve(list);
-    });
-    const list = (await promise) as {
-      ownerName: string;
-      name: string;
-      windowId: number;
-      image: Uint8Array;
-    }[];
-    const imageListPromise = list.map((item) => readImage(item.image));
-    const imageList = await Promise.all(imageListPromise);
-
-    const windowInfoList = list.map(({ ownerName, name, windowId }, index) => ({
-      ownerName,
-      image: imageList[index],
-      windowId,
-      name:
-        name.length < 20
-          ? name === ''
-            ? 'no name'
-            : name
-          : name.replace(/\s+/g, '').substr(0, 20) + '...',
-    }));
-    this.setState({ windowInfoList });
-    return windowInfoList;
   };
 
   getRtcEngine() {
