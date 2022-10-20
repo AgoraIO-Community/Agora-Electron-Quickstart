@@ -156,40 +156,43 @@ export default class JoinChannelAudio extends Component<State> {
             title="Audio Scenario"
           />
           <DropDownButton
-            title="Microphone"
+            title="Audio Recording Device"
             options={audioDevices.map((obj) => {
               const { deviceid, devicename } = obj;
               return { dropId: deviceid, dropText: devicename, ...obj };
             })}
             onPress={(res) => {
+              this.rtcEngine?.enableLoopbackRecording(false, null);
               this.rtcEngine?.setAudioRecordingDevice(res.dropId);
-              // this.rtcEngine?.enableLoopbackRecording(true, res.dropText);
+            }}
+          />
+          <DropDownButton
+            title="Loopback Recording Device"
+            options={audioDevices.map((obj) => {
+              const { deviceid, devicename } = obj;
+              return { dropId: deviceid, dropText: devicename, ...obj };
+            })}
+            onPress={(res) => {
+              this.rtcEngine?.enableLoopbackRecording(true, res.dropText);
             }}
           />
           <SliderBar
             max={100}
-            title="Device Recording Volume"
+            title="adjustRecordingSignalVolume"
             onChange={(value) => {
               this.rtcEngine?.adjustRecordingSignalVolume(value);
             }}
           />
           <SliderBar
             max={100}
-            title="SDK Recording Volume"
+            title="adjustLoopbackRecordingVolume"
             onChange={(value) => {
               this.rtcEngine?.adjustLoopbackRecordingVolume(value);
             }}
           />
           <SliderBar
             max={100}
-            title="Device Playout Volume"
-            onChange={(value) => {
-              this.rtcEngine?.adjustAudioMixingPlayoutVolume(value);
-            }}
-          />
-          <SliderBar
-            max={100}
-            title="SDK Playout Volume SDK"
+            title="adjustPlaybackSignalVolume"
             onChange={(value) => {
               this.rtcEngine?.adjustPlaybackSignalVolume(value);
             }}
