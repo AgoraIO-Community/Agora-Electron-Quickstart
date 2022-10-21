@@ -125,7 +125,7 @@ export default class JoinChannelAudio extends Component<State> {
 
   setAudioProfile = () => {
     const { audioProfile, audioScenario } = this.state;
-    this.rtcEngine?.setAudioProfile(audioProfile);
+    this.rtcEngine?.setAudioProfile(audioProfile, audioScenario);
   };
 
   renderItem = ({ isMyself, uid }) => {
