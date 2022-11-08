@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "cross-env": "^6.0.3",
-    "css-loader": "^0.25.0",
+    "css-loader": "^6.7.1",
     "electron": "5.0.8",
     "electron-builder": "^21.2.0",
     "electron-reload": "^1.0.2",
@@ -40,7 +40,7 @@
     "vue-loader": "^14.2.4",
     "vue-template-compiler": "^2.6.11",
     "webpack": "^4.1.1",
-    "webpack-cli": "^3.1.1",
+    "webpack-cli": "^3.3.12",
     "rimraf": "^3.0.0",
     "wait-on": "^3.3.0"
   }
