@@ -173,6 +173,7 @@
     "@babel/plugin-proposal-json-strings": "^7.12.1",
     "@babel/plugin-proposal-logical-assignment-operators": "^7.12.1",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.12.1",
+    "@babel/plugin-proposal-numeric-separator": "^7.12.1",
     "@babel/plugin-proposal-optional-chaining": "^7.12.7",
     "@babel/plugin-proposal-pipeline-operator": "^7.12.1",
     "@babel/plugin-proposal-throw-expressions": "^7.12.1",
@@ -258,6 +259,9 @@
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.4.0",
     "yarn-deduplicate": "^3.1.0"
+  },
+  "resolutions":{
+    "cheerio": "<1.0.0"
   },
   "dependencies": {
     "antd": "^4.15.2",
