@@ -46,25 +46,35 @@ export default class ScreenShare extends Component<{}, State, any> {
   }
 
   getScreenInfoList = async () => {
-    let myResolve: any;
-    const promise = new Promise((resolve, reject) => {
-      myResolve = resolve;
-    });
-    this.getRtcEngine().getScreenDisplaysInfo((list) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore:next-line
-      myResolve(list);
-    });
-    const list = (await promise) as { image: Uint8Array; displayId: number }[];
-    const imageListPromise = list.map((item) => readImage(item.image));
-    const imageList = await Promise.all(imageListPromise);
-    const screenInfoList = list.map(({ displayId }, index) => ({
-      name: `Display ${index + 1}`,
-      image: imageList[index],
-      displayId,
-    }));
-
-    this.setState({ screenInfoList });
+    let list = this.getRtcEngine()
+      .getScreenCaptureSources(
+        { width: 400, height: 400 },
+        { width: 400, height: 400 },
+        true
+      )
+      .filter((obj) => obj.type === 1);
+    Promise.all(list.map((item) => readImage(item.thumbImage.buffer))).then(
+      (imageList) => {
+        console.log('imageList\n', imageList);
+        let displayList = list.map((item, index) => {
+          return {
+            ownerName: '',
+            name: `Display ${index + 1}`,
+            displayId: {
+              x: 0,
+              y: 0,
+              width: 400,
+              height: 400,
+              id: item.sourceId,
+            }, //item.sourceId,
+            image: imageList[index],
+          };
+        });
+        this.setState({
+          screenInfoList: displayList,
+        });
+      }
+    );
   };
 
   getWindowInfoList = async () => {
@@ -186,7 +196,7 @@ export default class ScreenShare extends Component<{}, State, any> {
       excludeWindowCount: excludeList.length,
       enableHighLight: true,
       highLightWidth: 2,
-      highLightColor: 0xFFFF0000,
+      highLightColor: 0xffff0000,
     };
     console.log('CaptureParam', captureParam);
     if (type === 'screen') {
