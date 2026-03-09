@@ -227,6 +227,7 @@
     "eslint-config-airbnb-typescript": "^12.0.0",
     "eslint-config-erb": "^2.0.0",
     "eslint-config-prettier": "^6.11.0",
+    "@babel/plugin-proposal-numeric-separator": "^7.18.6",
     "eslint-import-resolver-webpack": "^0.13.0",
     "eslint-plugin-compat": "^3.8.0",
     "eslint-plugin-import": "^2.22.0",
@@ -274,6 +275,12 @@
     "node": ">=10.x",
     "npm": ">=6.x",
     "yarn": ">=1.21.3"
+  },
+  "resolutions": {
+    "chokidar": "^3.5.3",
+    "expect": "^29.7.0",
+    "@rushstack/package-deps-hash": "^3.2.0",
+    "just-task": "^1.7.2"
   },
   "collective": {
     "url": "https://opencollective.com/electron-react-boilerplate-594"

@@ -109,8 +109,12 @@ export default class CreateDataStream extends Component<State> {
       console.error(err);
     });
     rtcEngine.on('streamMessage', (uid, streamId, msg, len) => {
+      const msgStr =
+        typeof TextDecoder !== 'undefined'
+          ? new TextDecoder().decode(msg)
+          : String.fromCharCode.apply(null, msg as unknown as number[]);
       this.setState({
-        msgs: [...this.state.msgs, `from:${uid} message:${msg}`],
+        msgs: [...this.state.msgs, `from:${uid} message:${msgStr}`],
       });
       console.log('received message: ', uid, streamId, msg);
     });

@@ -15,6 +15,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "agora-electron-sdk": "^3.0.0"
+    "agora-electron-sdk": "3.6.1-rc.10-build.914"
+  },
+  "resolutions": {
+    "chokidar": "^3.5.3",
+    "expect": "^29.7.0",
+    "@rushstack/package-deps-hash": "^3.2.0",
+    "just-task": "^1.7.2"
   }
 }

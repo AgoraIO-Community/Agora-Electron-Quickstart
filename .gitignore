@@ -11,6 +11,5 @@ local_settings.js
 appID.*
 *.log
 *.log*
-*.lock
 electronDemo*
 .vs/
